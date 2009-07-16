@@ -1,0 +1,1 @@
+ajax says {{$message}}
