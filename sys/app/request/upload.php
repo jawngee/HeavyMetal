@@ -3,9 +3,7 @@
  * Wraps a $_FILE upload
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Uploads
- * @package       system.app
- * @subpackage    request
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -39,6 +37,10 @@
 
 /**
  * Represents an uploaded file.
+ * 
+ * @package		application
+ * @subpackage	request
+ * @link          http://wiki.getheavy.info/index.php/Uploads
  */
 class Upload
 {

@@ -3,9 +3,7 @@
  * Ajax View
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Ajax_Views
- * @package       system.app.http
- * @subpackage    view
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -41,6 +39,10 @@ uses('system.app.view');
 
 /**
  * Ajax View
+ * 
+ * @package       application
+ * @subpackage    view
+ * @link          http://wiki.getheavy.info/index.php/Ajax_Views
  */
  class AjaxView extends View
  {

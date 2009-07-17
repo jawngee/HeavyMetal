@@ -3,9 +3,7 @@
  * Attribute Reader - A class for reading metadata from PHP classes
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Attributes,_Metadata_and_Annotations
- * @package       system
- * @subpackage    app
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -40,6 +38,12 @@
 uses('system.app.dynamic_object');
 uses('system.app.cache');
 
+/**
+ * 
+ * @package		application
+ * @subpackage	core
+ * @link          http://wiki.getheavy.info/index.php/Attributes,_Metadata_and_Annotations
+ */
 class AttributeReader extends DynamicObject
 {
 	/**

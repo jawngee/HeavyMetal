@@ -3,9 +3,7 @@
  * APC cache, performs caching used shared memory.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Cache
- * @package       system.app
- * @subpackage    caches
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -39,6 +37,10 @@
 	
 /**
  * APC cache, performs caching used shared memory.
+ * 
+ * @link          http://wiki.getheavy.info/index.php/Cache
+ * @package		application
+ * @subpackage	cache
  */
 class APCCache extends Cache
 {

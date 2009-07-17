@@ -3,9 +3,7 @@
  * Base Controller
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Controllers
- * @package       system
- * @subpackage    app
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -43,6 +41,10 @@ uses('sys.app.attribute_reader');
 
 /**
  * Abstract controller class inherited by all application controllers.
+ * 
+ * @package		application
+ * @subpackage	controller
+ * @link          http://wiki.getheavy.info/index.php/Controllers
  */
  abstract class Controller
  {

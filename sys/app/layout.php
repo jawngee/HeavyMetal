@@ -3,9 +3,7 @@
  * Layout for rendering the layout page with a controller.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Layouts
- * @package       system
- * @subpackage    app
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -41,6 +39,10 @@ uses('sys.app.view');
 
 /**
  * Layout for rendering the layout page with a controller.
+ * 
+ * @package		application
+ * @subpackage	view
+ * @link          http://wiki.getheavy.info/index.php/Layouts
  */
  class Layout extends View
  {

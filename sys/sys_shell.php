@@ -3,7 +3,7 @@
  * System functionality for shell
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @package       system
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -40,7 +40,7 @@
  * Safely gets arguments from the environment trying a couple of different methods.
  * Taken from Pear:GetOpt by Andrei Zmievski <andrei@php.net>
  * 
- * @return 
+ * @return array The parsed arguments
  */
 function get_args()
 {

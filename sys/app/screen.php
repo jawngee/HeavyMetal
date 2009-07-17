@@ -3,9 +3,7 @@
  * Abstract base class for controller screens.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Screens
- * @package       system
- * @subpackage    app
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -42,6 +40,10 @@ uses('system.app.attribute_reader');
 /**
  * Abstract base class for screens for controllers.  Screens are invoked before
  * and after a method on a controller is called.
+ * 
+ * @package		application
+ * @subpackage	controller
+ * @link          http://wiki.getheavy.info/index.php/Screens
  */
 abstract class Screen
 {

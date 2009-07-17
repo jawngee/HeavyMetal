@@ -3,9 +3,7 @@
  * Wraps request variables.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Input
- * @package       system.app
- * @subpackage    request
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -42,11 +40,18 @@ uses('sys.app.request.upload');
 
 /**
  * Thrown if a requested value isn't found.
+ * 
+ * @package		application
+ * @subpackage	request
  */
 class ValueNotFoundException extends Exception {}
 
 /**
  * Input filter class
+ * 
+ * @package		application
+ * @subpackage	request
+ * @link          http://wiki.getheavy.info/index.php/Input
  */
 final class Input extends DynamicObject
 {

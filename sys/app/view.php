@@ -3,9 +3,7 @@
  * View
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Views
- * @package       system
- * @subpackage    app
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -42,6 +40,10 @@ uses('system.app.layout');
 
 /**
  * View
+ * 
+ * @package		application
+ * @subpackage	view
+ * @link          http://wiki.getheavy.info/index.php/Views
  */
  class View
  {

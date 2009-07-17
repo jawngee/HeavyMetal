@@ -3,8 +3,7 @@
  * Core exceptions
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @package       system
- * @subpackage	  core
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -37,8 +36,11 @@
  */
  
  
- /**
+/**
  * Represents an error response.
+ * 
+ * @package		application
+ * @subpackage	core
  */
 abstract class ErrorResponseException extends Exception 
 {
@@ -51,6 +53,9 @@ abstract class ErrorResponseException extends Exception
 
 /**
  * 404 Not Found exception
+ * 
+ * @package		application
+ * @subpackage	core
  */
 class NotFoundException extends ErrorResponseException
 {
@@ -59,6 +64,9 @@ class NotFoundException extends ErrorResponseException
 
 /**
  * 400 Bad Request exception
+ * 
+ * @package		application
+ * @subpackage	core
  */
 class BadRequestException extends ErrorResponseException
 {
@@ -67,6 +75,9 @@ class BadRequestException extends ErrorResponseException
 
 /**
  * 400 Bad Request exception
+ * 
+ * @package		application
+ * @subpackage	core
  */
 class InvalidParametersException extends ErrorResponseException
 {
@@ -76,6 +87,9 @@ class InvalidParametersException extends ErrorResponseException
 
 /**
  * 410 Gone exception
+ * 
+ * @package		application
+ * @subpackage	core
  */
 class GoneException extends ErrorResponseException
 {
@@ -85,6 +99,9 @@ class GoneException extends ErrorResponseException
 
 /**
  * 500 Internal Server Error exception
+ * 
+ * @package		application
+ * @subpackage	core
  */
 class InternalServerErrorException extends ErrorResponseException
 {
@@ -93,6 +110,9 @@ class InternalServerErrorException extends ErrorResponseException
 
 /**
  * Custom error response.
+ * 
+ * @package		application
+ * @subpackage	core
  */
 class CustomErrorResponseException extends ErrorResponseException
 {

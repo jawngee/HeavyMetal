@@ -3,9 +3,7 @@
  * A "buffered" view.  Useful for rendering a view repeatedly as it only reads the file from disk once.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Views
- * @package       system
- * @subpackage    app
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -37,6 +35,13 @@
  * http://www.opensource.org/licenses/bsd-license.php
  */
 
+/**
+ * A "buffered" view.  Useful for rendering a view repeatedly as it only reads the file from disk once.
+ * 
+ * @package		application
+ * @subpackage	view
+ * @link          http://wiki.getheavy.info/index.php/Views
+ */
 class Template
 {
 	private $view_contents=null;

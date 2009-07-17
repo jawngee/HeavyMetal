@@ -3,9 +3,7 @@
  * Null cache, performs request level caching only.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Cache
- * @package       system.app
- * @subpackage    caches
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -39,6 +37,10 @@
 	
 /**
  * Null cache, performs only request level caching.
+ * 
+ * @package		application
+ * @link          http://wiki.getheavy.info/index.php/Cache
+ * @subpackage	cache
  */
 class NullCache extends Cache
 {

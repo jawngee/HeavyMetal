@@ -3,9 +3,7 @@
  * The main request dispatcher.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Dispatcher
- * @package       system
- * @subpackage    app
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -44,26 +42,42 @@ uses('sys.app.attribute_reader');
 
 /**
  * Base Dispatcher Exception
+ * 
+ * @package		application
+ * @subpackage	dispatcher
  */
 class DispatcherException extends Exception {}
 
 /**
  * Controller not found exception
+ * 
+ * @package		application
+ * @subpackage	dispatcher
  */
 class ControllerNotFoundException extends DispatcherException {}
 
 /**
  * Controller method not found exception
+ * 
+ * @package		application
+ * @subpackage	dispatcher
  */
 class ControllerMethodNotFoundException extends DispatcherException {}
 
 /**
  * Ignored method called exception
+ * 
+ * @package		application
+ * @subpackage	dispatcher
  */
 class IgnoredMethodCalledException extends DispatcherException {}
 
 /**
  * Responsible for dispatching requests to controllers and rendering views.
+ * 
+ * @package		application
+ * @subpackage	dispatcher
+ * @link          http://wiki.getheavy.info/index.php/Dispatcher
  */
 abstract class Dispatcher
 {
@@ -238,28 +252,32 @@ abstract class Dispatcher
 		$this->action = 'index';
 		
 		// Does the requested controller exist in the root folder?
-		if (file_exists($this->controller_root  . '/' . $segments[0] . EXT))
+		if (count($segments)>0)
 		{
-			$this->controller = $segments[0];
-			$segments = array_slice($segments, 1);
-
-			if (count($segments) >= 1)
+			if (file_exists($this->controller_root  . '/' . $segments[0] . EXT))
 			{
-				$this->action = str_replace('-','_',$segments[0]);
+				$this->controller = $segments[0];
 				$segments = array_slice($segments, 1);
+	
+				if (count($segments) >= 1)
+				{
+					$this->action = str_replace('-','_',$segments[0]);
+					$segments = array_slice($segments, 1);
+				}
+			}
+			// Is the controller in a sub-folder?
+			else if (is_dir($this->controller_root . $segments[0]))
+				$this->recurse_segment($segments);
+			else
+				$this->action = str_replace('-','_',$segments[0]);
+		
+			if ($this->action=='index') 
+			{
+				$this->action=str_replace('-','_',$segments[0]);
+				$segments=array_slice($segments,1);
 			}
 		}
-		// Is the controller in a sub-folder?
-		else if (is_dir($this->controller_root . $segments[0]))
-			$this->recurse_segment($segments);
-		else
-			$this->action = str_replace('-','_',$segments[0]);
 		
-		if (($this->action=='index') && (count($segments)>0))
-		{
-			$this->action=str_replace('-','_',$segments[0]);
-			$segments=array_slice($segments,1);
-		}
 		
 		$this->segments=$segments;
 	}	
@@ -282,6 +300,9 @@ abstract class Dispatcher
 	{
 		$data = array(); // any data to return to the view from the controller
 		
+		if (!file_exists($this->controller_root.$this->controller_path.$this->controller.EXT))
+			throw new ControllerNotFoundException("Could not find a suitable controller.");
+			
 		require_once($this->controller_root.$this->controller_path.$this->controller.EXT);
 		$classname=$this->controller.'Controller';
 		
@@ -319,7 +340,10 @@ abstract class Dispatcher
 			
 		// call the method and pass the segments (add returned data to any initially returned by screens)
 		$data = call_user_func_array(array(&$class, $action), $this->segments);
-		$data=array_merge($screen_data,$data);
+		if (is_array($data))
+			$data=array_merge($screen_data,$data);
+		else
+			$data=$screen_data;
 		
 		// Call the after screens
 		Screen::Run('after',$class,$meta,$data);

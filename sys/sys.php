@@ -6,7 +6,7 @@
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
  * @link          http://wiki.getheavy.info/index.php/Sys,_Namespaces_and_Includes
- * @package       system
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.

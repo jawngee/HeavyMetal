@@ -5,9 +5,7 @@ uses('system.app.config');
  * Abstract cache class and cache factory.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Cache
- * @package       system
- * @subpackage    app
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -37,6 +35,13 @@ uses('system.app.config');
  * The BSD license may be found here:
  * 
  * http://www.opensource.org/licenses/bsd-license.php
+ */
+
+/**
+ * 
+ * @package		application
+ * @subpackage	cache
+ * @link          http://wiki.getheavy.info/index.php/Cache
  */
 abstract class Cache
 {

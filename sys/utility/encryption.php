@@ -3,9 +3,7 @@
  * Provides two-way keyed encoding using XOR Hashing and Mcrypt
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Encryption
- * @package       system
- * @subpackage    utility
+ * @package       application
  * 
  * Original code: Rick Ellis
  * http://codeigniter.com/user_guide/license.html
@@ -46,6 +44,10 @@ uses('sys.app.config');
 
 /**
  * Provides two-way keyed encoding using XOR Hashing and Mcrypt
+ * 
+ * @package		application
+ * @subpackage	utility
+ * @link          http://wiki.getheavy.info/index.php/Encryption
  */
 class Encryption
 {

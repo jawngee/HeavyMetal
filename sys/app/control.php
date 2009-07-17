@@ -3,9 +3,7 @@
  * Base class for view controls.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Controls
- * @package       system
- * @subpackage    app
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -44,6 +42,10 @@ uses('system.app.session');
 
 /**
  * Control is the base class for all ui controls.
+ * 
+ * @package		application
+ * @subpackage	view
+ * @link          http://wiki.getheavy.info/index.php/Controls
  */
  abstract class Control
  {

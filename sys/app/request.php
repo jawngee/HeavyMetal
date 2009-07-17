@@ -1,11 +1,9 @@
 <?
 /**
- * Base Controller
+ * Abstract representation of a request.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Requests
- * @package       system
- * @subpackage    app
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -43,6 +41,10 @@ uses('sys.app.request.query');
 
 /**
  * Represents the request.
+ * 
+ * @package		application
+ * @subpackage	request
+ * @link          http://wiki.getheavy.info/index.php/Requests
  */
  class Request
  {

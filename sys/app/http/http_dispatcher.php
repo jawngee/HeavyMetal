@@ -3,9 +3,7 @@
  * The main request dispatcher.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Dispatcher
- * @package       system.app
- * @subpackage    http
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -43,6 +41,10 @@ uses('system.app.http.http_request');
 
 /**
  * HTTP Dispatcher
+ * 
+ * @package		application
+ * @subpackage	dispatcher
+ * @link          http://wiki.getheavy.info/index.php/Dispatcher
  */
 class HTTPDispatcher extends Dispatcher
 {
@@ -172,7 +174,6 @@ class HTTPDispatcher extends Dispatcher
 		{	
 			uses($usesview);
 			$view=new $viewclass($this->view_root,$view_name.'.'.$req_type,$data['controller']);
-			
 			return $view->render($data);
 		}		
 	}

@@ -4,9 +4,7 @@
  * a keyed array.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Dynamic_Object
- * @package       system
- * @subpackage    app
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -36,6 +34,16 @@
  * The BSD license may be found here:
  * 
  * http://www.opensource.org/licenses/bsd-license.php
+ */
+
+/**
+ * 
+ * An object that allows dynamic assignment of properties and can be treated as
+ * a keyed array.
+ * 
+ * @package		application
+ * @subpackage	core
+ * @link          http://wiki.getheavy.info/index.php/Dynamic_Object
  */
 class DynamicObject implements ArrayAccess, Iterator, Countable
 {

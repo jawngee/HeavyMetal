@@ -3,9 +3,7 @@
  * HTTP Request
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Requests
- * @package       system.app
- * @subpackage    http
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -37,7 +35,13 @@
  * http://www.opensource.org/licenses/bsd-license.php
  */
 
-
+/**
+ * Represents an HTTP Request
+ *  
+ * @package		application
+ * @subpackage	request
+ * @link          http://wiki.getheavy.info/index.php/Requests
+ */
 class HTTPRequest extends Request
 {
 	/**

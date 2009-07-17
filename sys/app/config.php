@@ -3,9 +3,7 @@
  * Configuration
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Configuration_and_Environments
- * @package       system
- * @subpackage    app
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -39,16 +37,25 @@
 	
 /**
  * Thrown if there are configuration exceptions
+ * 
+ * @package		application
+ * @subpackage	config
  */
 class ConfigException extends Exception {}
 
 /**
  * Thrown if there are configuration exceptions
+ * 
+ * @package		application
+ * @subpackage	config
  */
 class ConfigMissingException extends ConfigException {}
 
 /**
  * Thrown if there are configuration exceptions
+ * 
+ * @package		application
+ * @subpackage	config
  */
 class ConfigInvalidFormatException extends ConfigException {}
 
@@ -59,6 +66,10 @@ class ConfigInvalidFormatException extends ConfigException {}
  * <code>
  * $config=Config::Get('nameofconfig');
  * </code>
+ * 
+ * @package		application
+ * @subpackage	config
+ * @link          http://wiki.getheavy.info/index.php/Configuration_and_Environments
  */
  class Config implements ArrayAccess, Iterator, Countable
  {

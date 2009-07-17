@@ -4,9 +4,7 @@
  * for such things as pagination, etc.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/URI
- * @package       system.app
- * @subpackage    request
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -41,6 +39,13 @@
 
 uses('sys.app.request.query');
 
+/**
+ * 
+ * 
+ * @package		application
+ * @subpackage	request
+ * @link          http://wiki.getheavy.info/index.php/URI
+ */
 class URI
 {
 	/**

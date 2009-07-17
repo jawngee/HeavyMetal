@@ -38,7 +38,7 @@ include '../sys/sys.php';
 // init the framework
 init();
 
-uses('sys.app.dispatcher');
+uses('sys.app.http.http_dispatcher');
 uses('sys.app.config');
 
 // load the environment
@@ -48,7 +48,8 @@ Config::LoadEnvironment();
 ob_start();
 
 // dispatch the request
-Dispatcher::Dispatch();
+$dispatcher=new HTTPDispatcher();
+print $dispatcher->dispatch();
 
 // flush the buffer
 ob_flush();

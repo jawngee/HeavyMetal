@@ -3,9 +3,7 @@
  * Session
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/Session
- * @package       system
- * @subpackage    app
+ * @package       application
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -47,6 +45,9 @@ uses('sys.utility.encryption');
  * Session in HeavyMetal is stored as secure cookie to ensure horizontal
  * scalability.  
  * 
+ * @package		application
+ * @subpackage	session
+ * @link          http://wiki.getheavy.info/index.php/Session
  */
 class Session
 {

@@ -3,7 +3,7 @@
  * HTTP utility functions
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @package       system
+ * @package       application
  * @subpackage	  core
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.

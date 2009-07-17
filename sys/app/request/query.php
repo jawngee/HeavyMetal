@@ -3,9 +3,7 @@
  * Provides a wrapper around the query string, to allow controls to manipulate it.
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @link          http://wiki.getheavy.info/index.php/URI
- * @package       system.app
- * @subpackage    request
+ * @package       application
  * 
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
  * All rights reserved.
@@ -37,6 +35,12 @@
  * http://www.opensource.org/licenses/bsd-license.php
  */
 
+/**
+ * 
+ * @package		application
+ * @subpackage	request
+ * @link          http://wiki.getheavy.info/index.php/URI
+ */
 class Query
 {
  	private $items=array();

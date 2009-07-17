@@ -3,7 +3,7 @@
  * Utility functions
  * 
  * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
- * @package       system
+ * @package       application
  * @subpackage	  core
  *
  * Copyright (c) 2009, Jon Gilkison and Massify LLC.
@@ -38,7 +38,7 @@
 
 
  /**
-  * Print's an object using <pre> tags and escaping entities for display in an html page.
+  * Print's an object using pre tags and escaping entities for display in an html page.
   * Used for quick debugging.
   * 
   * @param mixed $data The data to print.
