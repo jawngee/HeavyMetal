@@ -81,19 +81,26 @@ class HTTPDispatcher extends Dispatcher
 	 */
 	public function transform(&$data, $req_type=null)
 	{
-		$usesview="system.app.view";
-		$viewclass='View';
+		// fetch the view conf
+		$viewconf=Config::Get('view');
 		
+		$default_engine=$viewconf->default;
+		
+		// set the default extension
+		$extension=EXT;
+		
+		// if request type hasn't been specified
+		// run it through the map to see if we get a hit.
 		if ($req_type==null)
 		{
-			$req_type='html';
+			// default
+			$req_type=$default_engine;
 			
 			try
 			{
-				$clients=Config::Get('clients');
-				foreach($clients as $client)
+				foreach($viewconf->map as $item)
 				{
-					switch($client->test)
+					switch($item->test)
 					{
 						case 'server':
 							$array=&$_SERVER;
@@ -109,33 +116,19 @@ class HTTPDispatcher extends Dispatcher
 							break;
 					}
 					
-					if (isset($array[$client->key]))
+					if (isset($array[$item->key]))
 					{
-						if ($client->matches)
+						if ($item->matches)
 						{
-							if (preg_match("#{$client->matches}#",$array[$client->key]))
+							if (preg_match("#{$item->matches}#",$array[$item->key]))
 							{
-								$req_type=$client->type;
-								
-								if ($client->uses)
-									$usesview=$client->uses;
-								
-								if ($client->class)
-									$viewclass=$client->class;
-									
+								$req_type=$item->type;
 								break;
 							}
 						}
 						else
 						{
-							$req_type=$client->type;
-							
-							if ($client->uses)
-								$usesview=$client->uses;
-								
-							if ($client->class)
-								$viewclass=$client->class;
-								
+							$req_type=$item->type;
 							break;
 						}
 					}
@@ -155,25 +148,36 @@ class HTTPDispatcher extends Dispatcher
 			$view_name=$this->view;
 		else
 			$view_name=strtolower($this->controller_path.$this->controller.'/'.$this->action);
+
+		$conf=$viewconf->engines->{$req_type};
+		if (!$conf)
+			$conf=$viewconf->engines->{$default_engine};
+		if (!$conf)
+			throw new Exception("Your view.conf file is invalid.  Missing default engine.");
 			
-		$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.EXT);
+		if ($conf->extension)
+			$extension=$conf->extension;
+			
+		$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
 		
-		if ((!$view_found) && ($req_type!='html') && (file_exists($this->view_root.$view_name.'.html'.EXT)))
+		// if we didn't find the view for the request type, try the default one
+		if ((!$view_found) && ($req_type!=$viewconf->default) && (file_exists($this->view_root.$view_name.'.'.$viewconf->default.EXT)))
 		{
-			$req_type='html';
+			$req_type=$viewconf->default;
+			$extension=EXT;
 			$view_found=true;
 		}
 			
-		if (($view_found==false) && ($req_type!='ajax'))
-		{
-			trigger_error("Unable to find view '$view_name'.",E_USER_WARNING);
+		if ($view_found==false)
 			return '';
-		}
 							
 		if ($view_found)
-		{	
-			uses($usesview);
-			$view=new $viewclass($this->view_root,$view_name.'.'.$req_type,$data['controller']);
+		{		
+			$viewclass=$conf->class;
+			
+			uses($conf->uses);
+			$view=new $viewclass($view_name.'.'.$req_type,$data['controller'],$this->view_root);
+			
 			return $view->render($data);
 		}		
 	}

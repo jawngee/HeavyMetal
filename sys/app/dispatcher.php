@@ -195,20 +195,29 @@ abstract class Dispatcher
 	 */
 	protected function parse_path()
 	{
+		if (!$this->path)
+			$this->path='/';
+			
 		// If using routes ...
 		if ($this->use_routes)
 			try
 			{
 				$routes=Config::Get('routes');
 				$route=(isset($routes->items['default'])) ? $routes->items['default'] : '';
-			
-				if ($route)
-					foreach($route->items as $key => $val)
+				$found=false;
+				if ($route->routes)
+					foreach($route->routes->items as $key => $val)
+					{
 						if (preg_match('#^'.$key.'$#', $this->path))
 						{
 							$this->path=preg_replace('#^'.$key.'$#',$val,$this->path);
+							$found=true;
 							break;
 						}
+					}
+				
+				if (($route->required==TRUE) && (!$found))
+					throw new NotFoundException();
 			}
 			catch(ConfigException $ex)
 			{
@@ -259,7 +268,7 @@ abstract class Dispatcher
 				$this->controller = $segments[0];
 				$segments = array_slice($segments, 1);
 	
-				if (count($segments) >= 1)
+				if (count($segments) > 0)
 				{
 					$this->action = str_replace('-','_',$segments[0]);
 					$segments = array_slice($segments, 1);
@@ -271,7 +280,7 @@ abstract class Dispatcher
 			else
 				$this->action = str_replace('-','_',$segments[0]);
 		
-			if ($this->action=='index') 
+			if ((count($segments)>0) && ($this->action=='index')) 
 			{
 				$this->action=str_replace('-','_',$segments[0]);
 				$segments=array_slice($segments,1);
@@ -304,7 +313,7 @@ abstract class Dispatcher
 			throw new ControllerNotFoundException("Could not find a suitable controller.");
 			
 		require_once($this->controller_root.$this->controller_path.$this->controller.EXT);
-		$classname=$this->controller.'Controller';
+		$classname=str_replace('/','',$this->controller_path).$this->controller.'Controller';
 		
 		if (!class_exists($classname))
 			throw new ControllerNotFoundException("'$classname' can not be found in '".$this->controller."'.");
@@ -316,6 +325,7 @@ abstract class Dispatcher
 		if (!$found_action)
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
 			
+		
 		$root = implode('/', array_diff($this->path_array, $this->segments));
 		$class=new $classname(new Request($request->method,$root,$this->segments));
 
@@ -336,17 +346,18 @@ abstract class Dispatcher
 			
 		// Call the before screens	
 		$screen_data=array();
-		Screen::Run('before',$class,$meta,$screen_data);
+		$method_args=$this->segments;
+		Screen::Run('before',$class,$meta,$screen_data,$method_args);
 			
 		// call the method and pass the segments (add returned data to any initially returned by screens)
-		$data = call_user_func_array(array(&$class, $action), $this->segments);
+		$data = call_user_func_array(array(&$class, $action), $method_args);
 		if (is_array($data))
 			$data=array_merge($screen_data,$data);
 		else
 			$data=$screen_data;
 		
 		// Call the after screens
-		Screen::Run('after',$class,$meta,$data);
+		Screen::Run('after',$class,$meta,$data,$method_args);
 				
 		$class->session->save();
 		

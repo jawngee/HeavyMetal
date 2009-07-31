@@ -81,10 +81,11 @@ class DynamicObject implements ArrayAccess, Iterator, Countable
 	 * @param unknown_type $name
 	 * @return unknown
 	 */
-	public function __get($name)
+	public function &__get($name)
 	{
+		$null=null;
 		if (!isset($this->props[$name]))
-			return null;
+			return $null;
 			
 		return $this->props[$name];
 	}

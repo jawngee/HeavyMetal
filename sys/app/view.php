@@ -47,34 +47,63 @@ uses('system.app.layout');
  */
  class View
  {
+ 	/**
+ 	 * Layout this view is rendered into
+ 	 * @var Layout
+ 	 */
  	public $layout=null;
  	
- 	private $view=null;
+ 	/**
+ 	 * The name of the view
+ 	 * @var string
+ 	 */
+ 	private $view_name=null;
  	
+ 	/**
+ 	 * The data associated with the view.
+ 	 * @var array
+ 	 */
  	public $data=array();
  	
+ 	/**
+ 	 * The controller associated with this view
+ 	 * @var Controller
+ 	 */
  	public $controller=null;
  	
+ 	/**
+ 	 * The base directory that views are stored in.
+ 	 * @var string
+ 	 */
  	protected $base_path='';
  	
-	// holds a list of the control classes
+	/**
+	 * List of control classes.
+	 * @var array
+	 */
 	private $control_classes=array();
 	
+	/**
+	 * Extracted content
+	 * @var array
+	 */
 	private $_extracted_content=array();
  	
  	/** regex that extracts the attributes */
  	const REGEX_ATTRIBUTE = '#([a-zA-Z_0-9]+)[=]+(?:\'|")([^\'"]*)(?:\'|")+#';		
- 	
+
  	/**
  	 * Constructor
  	 * 
- 	 * @param string $view The view to use for this layout
+ 	 * @param string $view_name The view's name
+ 	 * @param Controller $controller The controller associated with the view
+ 	 * @param string $root The base path to look for views
  	 */
- 	public function __construct($root,$view,$controller=null)
+ 	public function __construct($view_name,$controller=null,$root=null)
  	{
  		$this->controller=$controller;
-	    $this->view=$view;
-	    $this->base_path=$root;
+	    $this->view_name=$view_name;
+	    $this->base_path=($root) ? $root : PATH_APP.'view/';
  	}
  	
  	/**
@@ -127,7 +156,7 @@ uses('system.app.layout');
  				uses("app.layout.$layout");
 	 			if (class_exists(str_replace('_','',$layout).'Layout'))
 	 			{
-	 				$view_type=array_pop(explode('.',$this->view));
+	 				$view_type=array_pop(explode('.',$this->view_name));
 	 				
 	 				$layoutclass= str_replace('_','',$layout).'Layout';
 	 				$this->layout=new $layoutclass($title,$description,"$layout.$view_type");
@@ -181,7 +210,7 @@ uses('system.app.layout');
 
 			if ($view!=null)
 			{
-				$v=new View(PATH_APP.'view/',$view);
+				$v=new View($view,$this->controller,PATH_APP.'view/');
 				
 				$result=$v->render($this->data,true);
 				
@@ -469,10 +498,10 @@ uses('system.app.layout');
 					continue;
 				}
 				else
-					trace($this->view,"Class '$class' does not exist.");
+					trace($this->view_name,"Class '$class' does not exist.");
 	 		}
 			else
-				trace($this->view,"Class '".$controls[1][0]."' does not exist.");
+				trace($this->view_name,"Class '".$controls[1][0]."' does not exist.");
 
 			// unknown tag, so just remove it.
 			$rendered=str_replace($controls[0][0],'',$rendered);
@@ -513,7 +542,7 @@ uses('system.app.layout');
  		
  		$this->data['layout']=$this;
  		
- 		$result=get_view($this->base_path.$this->view);
+ 		$result=get_view($this->base_path.$this->view_name);
  		
  		$this->parse_includes($result);
  		$this->parse_nestedcontrols_cdata($result);

@@ -57,7 +57,7 @@ abstract class Screen
 	 * @param AttributeReader $method_meta The method metadata
 	 * @param Array $data Array of data that the screen(s) can add to.
 	 */
-	public static function Run($which,$controller,$method_meta,&$data)
+	public static function Run($which,$controller,$method_meta,&$data,&$args)
 	{
 		$c=$controller->metadata->{$which};
 		$m=$method_meta->{$which};
@@ -80,7 +80,7 @@ abstract class Screen
 				self::$_screens[$name]=$s;
 			}
 			
-			$s->{$which}($controller, $screen, $data);
+			$s->{$which}($controller, $screen, $data,$args);
 		}
 	}
 	
@@ -91,7 +91,7 @@ abstract class Screen
 	 * @param AttributeReader $method_meta The method metadata
 	 * @param Array $data Array of data that the screen(s) can add to.
 	 */
-	public function before($controller,$metadata,&$data) {  }
+	public function before($controller,$metadata,&$data,&$args) {  }
 	
 	/**
 	 * Called before a controller's method is called.

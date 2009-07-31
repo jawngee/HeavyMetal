@@ -76,7 +76,7 @@ uses('sys.app.view');
  	 */
  	public function __construct($title,$description,$view)
  	{
- 		parent::__construct(PATH_APP.'layout/',$view);
+ 		parent::__construct($view,null,PATH_APP.'layout/');
  		
  		$this->title=$title;
  		$this->description=$description;

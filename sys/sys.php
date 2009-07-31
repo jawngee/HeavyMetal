@@ -191,3 +191,23 @@ function uses($namespace)
 	}
 }
 
+/**
+ * Creates a class from a namespaced class name, eg system.app.dynamic_object
+ * @param $namespaced_class
+ * @return unknown_type
+ */
+function create_class($namespaced_class)
+{
+	$args=func_get_args();
+	array_shift($args);
+	
+	uses($namespaced_class);
+	$parts=explode('.',$namespaced_class);
+	$classname=str_replace("_","",array_pop($parts));
+	
+	if (!class_exists($classname))
+		throw new Exception("Cannot create $classname");
+		
+	$reflectionObj = new ReflectionClass($classname); 
+	return $reflectionObj->newInstanceArgs($args); 
+}

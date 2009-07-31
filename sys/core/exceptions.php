@@ -119,3 +119,15 @@ class CustomErrorResponseException extends ErrorResponseException
 	public function error_code() { return $this->getCode().' '.$this->getMessage(); }
 }
 
+/**
+ * Not allowed error response.
+ * 
+ * @package		application
+ * @subpackage	core
+ */
+class NotAllowedException extends ErrorResponseException
+{
+	public function error_code() { return '405 Method Not Allowed'; }
+}
+
+
