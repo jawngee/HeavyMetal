@@ -56,10 +56,8 @@ class HTTPRequest extends Request
 		parent::__construct($root,$segments);
 		
 		// sets the request method.  By setting X-Ajax-Real-Method header, you can override since some XMLHTTPRequest don't allow PUT, DELETE or other custom verbs.
-		if (isset($_REQUEST['real_method']))
-			$reqmethod=$_REQUEST['real_method'];
-		else if (isset($_SERVER['HTTP_X_AJAX_REAL_METHOD']))
-			$reqmethod=$_SERVER['HTTP_X_AJAX_REAL_METHOD'] ;
+		if (isset($_SERVER['HTTP_REAL_METHOD']))
+			$reqmethod=$_SERVER['HTTP_REAL_METHOD'] ;
 		else if (isset($_SERVER['REQUEST_METHOD']))
 			$reqmethod=$_SERVER['REQUEST_METHOD'];
 		else

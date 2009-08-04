@@ -498,10 +498,10 @@ uses('system.app.layout');
 					continue;
 				}
 				else
-					trace($this->view_name,"Class '$class' does not exist.");
+					throw new Exception("{$this->view_name}: Class '$class' does not exist.");
 	 		}
 			else
-				trace($this->view_name,"Class '".$controls[1][0]."' does not exist.");
+				throw new Exception("{$this->view_name}: Class '{$controls[1][0]}' does not exist.");
 
 			// unknown tag, so just remove it.
 			$rendered=str_replace($controls[0][0],'',$rendered);

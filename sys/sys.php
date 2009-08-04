@@ -163,7 +163,7 @@ function uses($namespace)
 			break;
 		case 'screen':
 			$path=PATH_APP.'screen/';
-			$altpath=PATH_SYS.'app.screen/';
+			$altpath=PATH_SYS.'app/screen/';
 			break;
 	}
 	

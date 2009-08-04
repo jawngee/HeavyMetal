@@ -210,6 +210,8 @@ abstract class Dispatcher
 					{
 						if (preg_match('#^'.$key.'$#', $this->path))
 						{
+							$matches=array();
+							preg_match('#^'.$key.'$#', $this->path,$matches);
 							$this->path=preg_replace('#^'.$key.'$#',$val,$this->path);
 							$found=true;
 							break;
@@ -323,14 +325,17 @@ abstract class Dispatcher
 		$found_action=find_methods($classname, $request->method."_".$this->action, $this->action, $request->method."_index", 'index');
 
 		if (!$found_action)
+		{
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
+		}
 			
 		
 		$root = implode('/', array_diff($this->path_array, $this->segments));
 		$class=new $classname(new Request($request->method,$root,$this->segments));
 
 		$action=$found_action;
-				
+
+		
 		if ($found_action=='index' || $found_action == $request->method.'_index') // Then ParseSegments wrongly stripped the first parameter thinking it was the method
 		{
 		   if($this->action!='index')

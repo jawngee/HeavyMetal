@@ -144,6 +144,7 @@ class HTTPDispatcher extends Dispatcher
 			}
 		}
 		
+		
 		if ($this->view)
 			$view_name=$this->view;
 		else
