@@ -73,9 +73,21 @@ class HTTPDispatcher extends Dispatcher
 	 */
 	public function build_request()
 	{
-		return new HTTPRequest($this->controller_root,$this->segments);
+		return new HTTPRequest($this,$this->controller_root,$this->segments);
 	}
 
+
+	/**
+	 * (non-PHPdoc)
+	 * @see sys/app/Dispatcher#new_instance($path, $controller_root, $view_root, $use_routes, $force_routes)
+	 */
+	public function new_instance($path=null,$controller_root=null,$view_root=null,$use_routes=true,$force_routes=false)
+	{
+		$controller_root=($controller_root) ? $controller_root : $this->controller_root;
+		$view_root=($view_root) ? $view_root : $this->view_root;
+		return new HTTPDispatcher($path,$controller_root,$view_root,$use_routes,$force_routes);
+	}
+		
 	/**
 	 * @see sys/app/Dispatcher#transform($data, $req_type)
 	 */

@@ -144,3 +144,15 @@ function ascend_path($path,$levels)
 	return implode(array_slice($dir,0,count($dir)-$levels),'/');
 }
 
+
+/** 
+ * Strips non alpha numeric characters from a string, including spaces
+ * 
+ * @param string $string The string to process.
+ * @return string description
+ */
+function clean_string($string)
+{
+	return strtolower(preg_replace("/[^a-zA-Z0-9]/", "", $string));
+}
+

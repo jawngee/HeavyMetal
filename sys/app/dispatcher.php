@@ -303,6 +303,17 @@ abstract class Dispatcher
 	abstract function build_request();
 	
 	/**
+	 * Returns a new instance of a dispatcher
+	 * 
+	 * @param string $path The URI to dispatch
+	 * @param string $controller_root The root path to where the application's controllers are
+	 * @param string $view_root The root path to where the application's views are
+	 * @param bool $use_routes Controls if routes are used.
+	 * @param bool $force_routes If true, only URI's that match a route are callable.
+	 */
+	abstract function new_instance($path=null,$controller_root=null,$view_root=null,$use_routes=true,$force_routes=false);
+	
+	/**
 	 * Executes a controller, returning the data
 	 *
 	 * @return array The data from the executed controller.
@@ -322,8 +333,14 @@ abstract class Dispatcher
 			
 		$request=$this->build_request();
 			
-		$found_action=find_methods($classname, $request->method."_".$this->action, $this->action, $request->method."_index", 'index');
+		$found_action=find_methods($classname, $request->method."_".$this->action, $this->action);
 
+		if (!$found_action)
+		{
+			$found_action=find_methods($classname, $request->method."_index", 'index');
+   		   array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
+		}
+		
 		if (!$found_action)
 		{
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
@@ -334,14 +351,6 @@ abstract class Dispatcher
 		$class=new $classname(new Request($request->method,$root,$this->segments));
 
 		$action=$found_action;
-
-		
-		if ($found_action=='index' || $found_action == $request->method.'_index') // Then ParseSegments wrongly stripped the first parameter thinking it was the method
-		{
-		   if($this->action!='index')
-   			   array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on. 
-		}
-				
 		$this->action=$action;
 		
 		if ((isset ($class->ignored)) && (in_array($action, $class->ignored)))

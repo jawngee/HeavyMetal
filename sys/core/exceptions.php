@@ -130,4 +130,15 @@ class NotAllowedException extends ErrorResponseException
 	public function error_code() { return '405 Method Not Allowed'; }
 }
 
+/**
+ * Not allowed error response.
+ * 
+ * @package		application
+ * @subpackage	core
+ */
+class UnauthorizedException extends ErrorResponseException
+{
+	public function error_code() { return '401 Unauthorized'; }
+}
+
 

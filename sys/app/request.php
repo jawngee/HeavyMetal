@@ -34,10 +34,12 @@
  * 
  * http://www.opensource.org/licenses/bsd-license.php
  */
-
+uses('sys.app.dispatcher');
 uses('sys.app.request.input');
 uses('sys.app.request.uri');
 uses('sys.app.request.query');
+
+
 
 /**
  * Represents the request.
@@ -48,6 +50,12 @@ uses('sys.app.request.query');
  */
  class Request
  {
+ 	/**
+ 	 * Instance of dispatcher that is dispatching the current request
+ 	 * @var Dispatcher
+ 	 */
+ 	public $dispatcher=null;
+ 	
   	/**
  	 * Contains post-path uri segments and query values
   	 * 
@@ -84,8 +92,10 @@ uses('sys.app.request.query');
 	 * @param string $root The root uri path
 	 * @param array $segments The uri segments following the root path
 	 */
- 	public function __construct($root,&$segments)
+ 	public function __construct($dispatcher,$root,&$segments)
  	{
+ 		$this->dispatcher=$dispatcher;
+ 		
  		$this->method='GET';
  		
  		$this->uri=new URI($root,$segments);
@@ -114,9 +124,36 @@ uses('sys.app.request.query');
  	 * 
  	 * @param string $where Where to redirect to.
  	 */
- 	public function reroute($where,&$data=null)
+ 	public function reroute($where)
  	{
- 		Dispatcher::Dispatch($where,$data);
+ 		
+ 		$this->dispatcher->new_instance($where,null,null,true,false)->dispatch();
  		die;
  	}
+
+  	/**
+ 	 * Calls another controller at it's URI and returns it's data.  The alternative is
+ 	 * create an instance of the specific controller yourself and call it's methods, but
+ 	 * this way insures any unique screens get called.
+ 	 * 
+ 	 * @param string $where Where to call
+ 	 * @returns array
+ 	 */
+ 	public function call($where)
+ 	{
+ 		
+ 		return $this->dispatcher->new_instance($where,null,null,true,false)->call();
+ 	}
+ 	
+   	/**
+ 	 * Calls another controller at it's URI and returns it's rendered output.
+ 	 * 
+ 	 * @param string $where Where to call
+ 	 * @returns string The rendered output
+ 	 */
+ 	public function render($where)
+ 	{
+ 		
+ 		return $this->dispatcher->new_instance($where,null,null,true,false)->dispatch();
+ 	} 	
  }

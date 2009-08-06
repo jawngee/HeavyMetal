@@ -54,9 +54,7 @@ uses('sys.app.attribute_reader');
    	 * @var array
    	 */
   	public $ignored=array(
-  		'setup',
-  		'reroute',
-  		'slingback'
+  		'setup'
   	);
  	
  	/**

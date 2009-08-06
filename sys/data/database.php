@@ -70,7 +70,7 @@ abstract class Database
 			$conf=Config::Get('db');
 			if (isset($conf->items[$name]))
 			{
-				$dsn=$conf->items[$name];
+				$dsn=$conf->items[$name]->dsn;
 				
 				$matches=array();
 				if (preg_match_all('#([a-z]*)://(.*)#',$dsn,$matches))

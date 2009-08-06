@@ -33,7 +33,7 @@
 */
 
 uses('system.data.database');
-uses('system.data.driver.pgsql.pgsql_result');
+uses('system.data.database.pgsql.pgsql_result');
 uses("system.app.dynamic_object");
 
 

@@ -92,7 +92,9 @@ class Session
 	{
 		if (self::$_instance==null)
 		{
-			$config=Config::Get('session');
+			$aconfig=Config::Get('session');
+			
+			$config=$aconfig->{$session};
 			
 			if ($config->class)
 			{
@@ -166,18 +168,16 @@ class Session
 		
 		if ($ticket==false)
 			return;
-
+			
 		$encrypter=new Encryption();
 		$cookie=$encrypter->decode($ticket);
-
 		list($content,$time,$ip,$ua,$md5)=explode("|@@!@@|",$cookie);
-		
 		$ipaddy=(isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '';
 		$useragent=(isset($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT'] : '';
-		
+
 		if (
 				(!$content) ||
-				($time>time()) ||
+				($time<time()) ||
 				($ip!=$ipaddy) ||
 				($ua!=$useragent) ||
 				(md5(implode('|@@!@@|',array($content,$time,$ip,$ua)).$this->salt)!=$md5)

@@ -45,7 +45,9 @@
  */
 function get_view($view)
 {
-    $contents=preg_replace("|{{([^}]*)}}|m",'<?=$1?>',file_get_contents($view.EXT));
+	$contents=file_get_contents($view.EXT);
+	$contents=preg_replace('#<\s*php\s*\:loop\s*for\s*=\s*"\s*([^\'\"]*)\s*"\s*as\s*=\s*"\s*(.*)\s*"\s*>\s*(.*)\s*<\s*\/\s*php\s*:\s*loop\s*>#','<? foreach($1 as $2):?>$3<?endforeach;?>',$contents);
+    $contents=preg_replace("|{{([^}]*)}}|m",'<?=$1?>',$contents);
     return $contents;
 }
 
