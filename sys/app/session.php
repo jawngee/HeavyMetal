@@ -37,7 +37,7 @@
 
 
 uses('sys.app.config');
-uses('sys.utility.encryption');
+uses('sys.util.encryption');
 
 /**
  * Session container.
@@ -144,9 +144,8 @@ class Session
 	public function build_session()
 	{
 		$ipaddy=(isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '';
-		$useragent=(isset($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT'] : '';
 		
-		$ticket=implode('|@@!@@|',array(serialize($this->data),(time()+$this->duration),$ipaddy,$useragent));
+		$ticket=implode('|@@!@@|',array(serialize($this->data),(time()+$this->duration),$ipaddy));
 		$ticket.="|@@!@@|".md5($ticket.$this->salt);
 
 		$encrypter=new Encryption();
@@ -171,19 +170,13 @@ class Session
 			
 		$encrypter=new Encryption();
 		$cookie=$encrypter->decode($ticket);
-		list($content,$time,$ip,$ua,$md5)=explode("|@@!@@|",$cookie);
+		list($content,$time,$ip,$md5)=explode("|@@!@@|",$cookie);
 		$ipaddy=(isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '';
-		$useragent=(isset($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT'] : '';
-
-		if (
-				(!$content) ||
-				($time<time()) ||
-				($ip!=$ipaddy) ||
-				($ua!=$useragent) ||
-				(md5(implode('|@@!@@|',array($content,$time,$ip,$ua)).$this->salt)!=$md5)
-		) return;
 		
-		if ($content)
+		$newmd5=md5(implode('|@@!@@|',array($content,$time,$ip)).$this->salt);
+
+		
+		if (($content) && ($time>time()) &&	($ip==$ipaddy) && ($newmd5==$md5)) 
 			$this->data=unserialize($content);
 	}
 	
