@@ -37,7 +37,7 @@
 
 
 uses('sys.app.config');
-uses('sys.util.encryption');
+uses('sys.utility.encryption');
 
 /**
  * Session container.
