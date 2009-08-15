@@ -143,8 +143,12 @@ class Session
 	 */
 	public function build_session()
 	{
-		$ipaddy=(isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '';
-		
+		// for development
+		if (defined('ORIGIN_IP_ADDRESS'))
+			$ipaddy=ORIGIN_IP_ADDRESS;
+		else
+			$ipaddy=(isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '';
+
 		$ticket=implode('|@@!@@|',array(serialize($this->data),(time()+$this->duration),$ipaddy));
 		$ticket.="|@@!@@|".md5($ticket.$this->salt);
 
@@ -159,7 +163,7 @@ class Session
 	 * 
 	 * @param bool $remember_login Should the user's login info be remembered for auto-login?
 	 */
-	public function load_session($ticket=null)
+	public function load_session($ticket=null,$origin_ip=null)
 	{
 		// get the ticket cookie
 		if ($ticket==null)
@@ -171,10 +175,17 @@ class Session
 		$encrypter=new Encryption();
 		$cookie=$encrypter->decode($ticket);
 		list($content,$time,$ip,$md5)=explode("|@@!@@|",$cookie);
-		$ipaddy=(isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '';
 		
-		$newmd5=md5(implode('|@@!@@|',array($content,$time,$ip)).$this->salt);
+		if ($origin_ip)
+			$ipaddy=$origin_ip;
+		else if (defined('ORIGIN_IP_ADDRESS'))
+			$ipaddy=ORIGIN_IP_ADDRESS;
+		else
+			$ipaddy=(isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '';
+			
+		$newmd5=md5(implode('|@@!@@|',array($content,$time,$ipaddy)).$this->salt);
 
+		
 		
 		if (($content) && ($time>time()) &&	($ip==$ipaddy) && ($newmd5==$md5)) 
 			$this->data=unserialize($content);
