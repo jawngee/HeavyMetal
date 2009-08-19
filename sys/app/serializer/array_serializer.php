@@ -54,9 +54,10 @@ abstract class ArraySerializer extends Serializer
 		$node_conf=($node_conf) ? $node_conf : $this->node_conf;
 		$ele=array();
 		
-		foreach($node_conf->attributes->items as $a)
-			if ($object->{$a->name})
-				$ele[$a->name]=$object->{$a->name};
+		if ($node_conf->attributes)
+    		foreach($node_conf->attributes->items as $a)
+	    		if ($object->{$a->name})
+		    		$ele[$a->name]=$object->{$a->name};
 
 		if ($node_conf->content)
 			foreach($node_conf->content->items as $child)
@@ -117,12 +118,15 @@ abstract class ArraySerializer extends Serializer
 	private function deserialize_element($node,$ele,$conf)
 	{
 		$m=create_class($conf->class);
-		
-		foreach($conf->attributes->items as $a)
+
+		if ($conf->attributes)
 		{
-			$an=$a->name;
-			if (isset($ele[$an]))
-				$m->{$an}=$ele[$an];
+    		foreach($conf->attributes->items as $a)
+    		{
+    			$an=$a->name;
+    			if (isset($ele[$an]))
+    				$m->{$an}=$ele[$an];
+    		}
 		}
 		
 		foreach($conf->content->items as $child)

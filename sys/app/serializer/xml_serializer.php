@@ -41,9 +41,10 @@ class XMLSerializer extends Serializer
 		
 		$element="<{$root}";
 		$attr='';
-		foreach($node_conf->attributes->items as $a)
-			if ($object->{$a->name})
-				$attr.=" {$a->name}='".$object->{$a->name}."'";
+		if ($node_conf->attributes)
+    		foreach($node_conf->attributes->items as $a)
+    			if ($object->{$a->name})
+    				$attr.=" {$a->name}='".$object->{$a->name}."'";
 		$element.=$attr;
 
 		
@@ -106,12 +107,15 @@ class XMLSerializer extends Serializer
 	{
 		$m=create_class($conf->class);
 		
-		foreach($conf->attributes->items as $a)
-		{
-			$an=$a->name;
-			if ($ele[$an])
-				$m->{$an}=(String)$ele[$an];
-		}
+		$node_conf=($conf) ? $conf : $this->node_conf;
+		
+		if ($node_conf->attributes)
+    		foreach($conf->attributes->items as $a)
+    		{
+    			$an=$a->name;
+    			if ($ele[$an])
+    				$m->{$an}=(String)$ele[$an];
+    		}
 		
 		if ($conf->content)
 			foreach($conf->content->items as $child)

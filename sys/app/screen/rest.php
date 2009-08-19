@@ -8,10 +8,11 @@ class RestScreen extends Screen
 		$body=@file_get_contents('php://input');
 		if (!$body)
 			throw new BadRequestException();
-
+			
 		$site=null;
 		
-		switch($_SERVER['CONTENT_TYPE'])
+		$ctype=array_shift(explode(';',$_SERVER['CONTENT_TYPE']));
+		switch($ctype)
 		{
 			case 'application/xml':
 			case 'text/xml':
