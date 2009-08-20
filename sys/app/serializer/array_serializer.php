@@ -134,10 +134,12 @@ abstract class ArraySerializer extends Serializer
 				switch($child->type)
 				{
 					case 'html':
-						$m->{$child->name}=html_entity_decode($ele[$child->name]);
+					    if (isset($ele[$child->name]))
+						    $m->{$child->name}=html_entity_decode($ele[$child->name]);
 						break;
 					case 'string':
-						$m->{$child->name}=$ele[$child->name];
+					    if (isset($ele[$child->name]))
+					        $m->{$child->name}=$ele[$child->name];
 						break;
 					case 'array':
 						$cc=self::GetNodeConf($child->contains);
@@ -169,7 +171,6 @@ abstract class ArraySerializer extends Serializer
 						break;
 				}
 		}
-		
 		return $m;
 	}
 

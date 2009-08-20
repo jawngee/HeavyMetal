@@ -54,6 +54,9 @@ class Template
 	 */
 	public function __construct($view)
 	{
+		
+		$view=PATH_APP.'view/'.$view.EXT;
+		
 		if (!file_exists($view))
 			throw new Exception("View file '$view' does not exist.");
 
