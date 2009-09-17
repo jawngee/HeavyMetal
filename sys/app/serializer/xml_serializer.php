@@ -44,7 +44,7 @@ class XMLSerializer extends Serializer
 		if ($node_conf->attributes)
     		foreach($node_conf->attributes->items as $a)
     			if ($object->{$a->name})
-    				$attr.=" {$a->name}='".$object->{$a->name}."'";
+    				$attr.=" {$a->name}='".htmlentities($object->{$a->name})."'";
 		$element.=$attr;
 
 		
@@ -114,7 +114,7 @@ class XMLSerializer extends Serializer
     		{
     			$an=$a->name;
     			if ($ele[$an])
-    				$m->{$an}=(String)$ele[$an];
+    				$m->{$an}=(String)html_entity_decode($ele[$an]);
     		}
 		
 		if ($conf->content)

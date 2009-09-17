@@ -129,48 +129,50 @@ abstract class ArraySerializer extends Serializer
     		}
 		}
 		
-		foreach($conf->content->items as $child)
-		{
-				switch($child->type)
-				{
-					case 'html':
-					    if (isset($ele[$child->name]))
-						    $m->{$child->name}=html_entity_decode($ele[$child->name]);
-						break;
-					case 'string':
-					    if (isset($ele[$child->name]))
-					        $m->{$child->name}=$ele[$child->name];
-						break;
-					case 'array':
-						$cc=self::GetNodeConf($child->contains);
-						
-						if (!$m->{$child->name})
-							$m->{$child->name}=array();
-							
-						foreach($ele[$child->name] as $childele)
-						{
-							$parsed=$this->deserialize_element($child->contains,$childele,$cc);
-							$m->{$child->name}[]=$parsed;
-						}
-
-						break;
-					case 'hash':
-						$cc=self::GetNodeConf($child->contains);
-						if (!$m->{$child->name})
-							$m->{$child->name}=array();
-							
-						foreach($ele[$child->name] as $key=>$childele)
-						{
-							$parsed=$this->deserialize_element($child->contains,$childele,$cc);
-							$m->{$child->name}[$parsed->{$child->key}]=$parsed;
-						}
-						break;
-					default:
-						$cc=self::GetNodeConf($child->type);
-						$m->{$child->name}=$this->deserialize_element($child->name,$ele[$child->name],$cc);
-						break;
-				}
-		}
+		if($conf->content)
+    		foreach($conf->content->items as $child)
+    		{
+    				switch($child->type)
+    				{
+    					case 'html':
+    					    if (isset($ele[$child->name]))
+    						    $m->{$child->name}=html_entity_decode($ele[$child->name]);
+    						break;
+    					case 'string':
+    					    if (isset($ele[$child->name]))
+    					        $m->{$child->name}=$ele[$child->name];
+    						break;
+    					case 'array':
+    						$cc=self::GetNodeConf($child->contains);
+    						
+    						if (!$m->{$child->name})
+    							$m->{$child->name}=array();
+    							
+    						foreach($ele[$child->name] as $childele)
+    						{
+    							$parsed=$this->deserialize_element($child->contains,$childele,$cc);
+    							$m->{$child->name}[]=$parsed;
+    						}
+    
+    						break;
+    					case 'hash':
+    						$cc=self::GetNodeConf($child->contains);
+    						if (!$m->{$child->name})
+    							$m->{$child->name}=array();
+    							
+    						foreach($ele[$child->name] as $key=>$childele)
+    						{
+    							$parsed=$this->deserialize_element($child->contains,$childele,$cc);
+    							$m->{$child->name}[$parsed->{$child->key}]=$parsed;
+    						}
+    						break;
+    					default:
+    						$cc=self::GetNodeConf($child->type);
+    						$m->{$child->name}=$this->deserialize_element($child->name,$ele[$child->name],$cc);
+    						break;
+    				}
+    		}
+    		
 		return $m;
 	}
 
