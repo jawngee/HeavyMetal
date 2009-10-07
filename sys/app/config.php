@@ -105,9 +105,10 @@ class ConfigInvalidFormatException extends ConfigException {}
  		$this->filename=$filename;
  		$this->items=$config;
  		
-		foreach($config as $key => $item)
-			if (is_array($item))
-				$this->items[$key]=new Config($item);
+ 		if(is_array($config))
+    		foreach($config as $key => $item)
+    			if (is_array($item))
+    				$this->items[$key]=new Config($item);
  	}
  	
  	/**
@@ -179,7 +180,7 @@ class ConfigInvalidFormatException extends ConfigException {}
 			else
 				throw new ConfigMissingException("Missing Config File '$what'.");
 			
-			if (!is_array($data))
+			if (!is_array($data) && ($data!=null))
 				throw new ConfigInvalidFormatException("Invalid Config Format '$what'.");
 			
 			$conf=new Config($data,$filename,$format);

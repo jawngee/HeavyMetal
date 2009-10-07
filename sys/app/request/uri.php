@@ -70,7 +70,7 @@ class URI
  	 */
  	public $query=null;
  	
- 	public function __construct($root, $segments)
+ 	public function __construct($root=null, $segments=null)
  	{
  		if (($root==null) && ($segments==null))
  		{
