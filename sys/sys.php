@@ -211,3 +211,60 @@ function create_class($namespaced_class)
 	$reflectionObj = new ReflectionClass($classname); 
 	return $reflectionObj->newInstanceArgs($args); 
 }
+
+/**
+ * Creates a signature for an array of keyed values
+ * 
+ * @param array $parameters A keyed array of parameters
+ * @param string $secret The API key or secret to sign the request
+ * @param string $time Optional, the time as a GMT string
+ * @return array An array containing the time used to sign the request, and the signature.
+ */
+function sign($parameters,$secret, $time=null)
+{
+	// For comparing signatures, the time will be passed in as an argument to the function
+	// if it isn't, than we're signing something new and need to generate it.
+	if (!$time)
+		$time=gmdate("Y-m-d\TH:i:s.\\0\\0\\0\\Z", time());
+	
+	// sort the parameters by name
+	uksort($parameters, 'strcmp');
+	
+	// concatenate the parameters into a query string
+	$query='';
+	foreach($parameters as $key => $value)
+		$query.="$key=$value&";
+	
+	// append the secret/api key and time
+	$query.="secret=$secret&time=$time";
+	
+	// return an array containing the time that was used to sign it
+	// and then return the signature, which is the concatenated parameters
+	// hashed with the secret/api key using HMAC sha256.
+	return array(
+		'time' => $time,
+		'signature' => base64_encode(hash_hmac('sha256', $query, $secret, true))
+	);
+}
+
+/**
+ * Returns a file's extension
+ */
+function get_extension($filename)
+{
+	$parts=explode('.',$filename);
+	return strtolower(array_pop($parts));
+}
+
+/**
+ * Returns the filename portion of a full filename
+ *
+ * @param string $filename
+ */
+function get_filename($filename)
+{
+	$parts=explode('/',$filename);
+	$filename=array_pop($parts);
+	$name_parts=explode('.',$filename);
+	return array_shift($name_parts);
+}
