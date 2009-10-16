@@ -581,5 +581,42 @@ class Model implements ArrayAccess
 	{
 	}
 
+
+	/*
+	 * @desc - generate something unique
+	 * 
+	 * @value string - the value to check
+	 * @field string - the field to use
+	 * @subset array - the other fields
+	 */
+	function unique_value($value, $field='unique_title', $subset=null, $space_replace="", $separator="")
+	{
+		
+		$converted=clean_string($value);
+		$filter=new Filter($this);
+		$filter->{$field}->starts_with($converted);
+		$filter->select=$field;
+		
+		if($subset!=null)
+			foreach($subset as $sub)
+				$filter->{$sub}->equals($this->{$sub});
+				
+		$similar=$filter->get_rows();
+		
+		
+		if(is_array($similar) && count($similar)>0)
+		{		
+			foreach($similar as $same)
+				$chopped[]=(int)str_replace(array($converted,$space_replace,$separator), "", $same[$field]);
+		
+			//make count a number
+			$count=max($chopped);
+			$converted.=$separator.(++$count);
+		}
+		
+		return $converted;
+	}
+	
+
 	
 }
