@@ -361,13 +361,6 @@ class Model implements ArrayAccess
    		if ($this->readonly)
    			throw new ModelException('This is a read-only model, you cannot save, update or delete.');
  		
-   		if($validate_model) // So it turns out that there are cases when we need to save 'invalid' data (loading Celtx data i.e.)
-   		{
-   			$result=$this->validate();
-   			if (is_array($result))
-   				return $result;
-   		}
-   			
  		$this->pre_save();
 
    		$fields=array();
@@ -395,7 +388,15 @@ class Model implements ArrayAccess
    		    // CRUD:  pre_create hook
    			$this->pre_create($fields);
    			
-   		    $result=true;
+   			// validation moved here in case pre-create is needed to render a valid model
+   			if($validate_model) // So it turns out that there are cases when we need to save 'invalid' data (loading Celtx data i.e.)
+   			{
+   				$result=$this->validate();
+   				if (is_array($result))
+   					return $result;
+   			}
+   			
+   			$result=true;
    			$result = $this->primary_key_value=$this->do_insert($fields);
  			
    			if ($result)
@@ -412,6 +413,15 @@ class Model implements ArrayAccess
    		{
    		    // CRUD:  pre_update hook
    			$this->pre_update($fields);
+
+   			// validation moved here in case pre-update is needed to render a valid model
+   			if($validate_model) // So it turns out that there are cases when we need to save 'invalid' data (loading Celtx data i.e.)
+   			{
+   				$result=$this->validate();
+   				if (is_array($result))
+   					return $result;
+   			}
+   			
    			
    		    $result=$this->do_update($fields);
  			
