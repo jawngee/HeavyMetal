@@ -269,6 +269,18 @@ class Model implements ArrayAccess
    	}
 
 
+   	/**
+   	 * This method just decorates the model with transient fields used only in this request.
+   	 * Transient fields aren't expected to be stored... so they aren't set to dirty
+   	 * 
+   	 * @param mixed $prop_name the name of the property being added
+   	 * @param mixed $prop_value the value of the property being added
+   	 */
+   	function add($prop_name, $prop_value)
+   	{
+   		$this->fields[$prop_name]=new Field($prop_name,Field::TEXT,0,'',false,$prop_value, Field::COMPARE_EQUALS, true/*transient*/);
+   	}
+
    	/***
    	* Recursive validation method
    	*/
@@ -321,7 +333,7 @@ class Model implements ArrayAccess
    	 * The pre_create and pre_update methods have the option to modify the field array that gets persisted
    	 * The post_update methods receives field data so they can check what was updated.
    	 */
-    protected function pre_create(&$fields)
+    protected function pre_create(&$new_fields)
    	{
    	}
    	
@@ -337,11 +349,11 @@ class Model implements ArrayAccess
    	{
    	}
     
-   	protected function pre_update(&$fields)
+   	protected function pre_update(&$new_fields)
    	{
    	}
    	
-   	protected function post_update($fields)
+   	protected function post_update($old_fields)
    	{
    	}
    	
@@ -349,7 +361,7 @@ class Model implements ArrayAccess
 	{
 	}
 	
-	protected function post_delete($fields)
+	protected function post_delete($old_fields)
 	{
 	} 
    	
@@ -462,6 +474,22 @@ class Model implements ArrayAccess
     	return $this->db->delete($this->table_name,$this->primary_key,$this->primary_key_value);
     }
     
+	protected function non_transient($fields)
+	{
+		$non_transients = array();
+
+		foreach($fields as $key => $value)
+		{
+			if ($this->fields[$key]->transient==false)
+			{
+				$non_transients[$key] = $value;
+			}
+		}
+
+		return $non_transients;
+	}
+    
+    
 	
 	/**
 	* called to delete the object from the DB
@@ -473,6 +501,8 @@ class Model implements ArrayAccess
 
 		if (($this->model_state==Model::STATE_VALID) || ($this->model_state==Model::STATE_DIRTY))
 		{
+			$old_fields = $this->fields;
+			
 			// CRUD:  pre_delete hook
 			$this->pre_delete();
 			
@@ -483,7 +513,7 @@ class Model implements ArrayAccess
 				$this->model_state=Model::STATE_DELETED;
 				
 	 			// CRUD:  post_delete hook
-	 			$this->post_delete($this->fields);
+	 			$this->post_delete($old_fields);
 
 			}
 		}
@@ -532,7 +562,7 @@ class Model implements ArrayAccess
                     case Field::OBJECT:
                         break;
                     default:
-   			   			$this->__set($name,$input->{$form_name});
+   			   			$this->__set($name,$input->get_string($form_name));
    						break;
    				}
    		   	}
@@ -603,7 +633,7 @@ class Model implements ArrayAccess
 	{
 		
 		$converted=clean_string($value);
-		$filter=new Filter($this);
+		$filter=new Filter($this, get_class($this));
 		$filter->{$field}->starts_with($converted);
 		$filter->select=$field;
 		

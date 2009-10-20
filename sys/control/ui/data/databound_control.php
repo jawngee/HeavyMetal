@@ -115,7 +115,12 @@ abstract class DataboundControl extends Control
 	{
 		parent::init();
 		
-		$this->uri=new URI();
+		if ($this->uri)  // allows override for pagination links
+			$this->uri = new URI($this->uri);
+		else if (isset($this->controller->uri))
+			$this->uri = $this->controller->uri;
+		else
+		        $this->uri=new URI();
 
 		if ($this->allowpaging)
 		{		
@@ -127,7 +132,7 @@ abstract class DataboundControl extends Control
 	    }
 	    else
 	    {
-	    	$this->total_count = 'unused';  // defeats the get_count called in Channel
+	    	$this->total_count = $this->count;  // defeats the get_count called in Channel
 	    }
 
 	}
@@ -394,6 +399,13 @@ abstract class DataboundControl extends Control
 		else
 		{
 			$rows=$this->datasource;
+			if (is_array($rows))
+			{
+				if(isset($rows['total_count']))
+					$this->total_count = $rows['total_count'];
+
+				$this->count = (isset($rows['count'])) ? $rows['count'] : count($rows); 
+			}
 		}
 			
 		return $rows;

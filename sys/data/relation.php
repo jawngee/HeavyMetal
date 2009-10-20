@@ -100,7 +100,11 @@ class Relation
         {
             if (isset($this->parent->fields[$this->field]))
             {
-                $field=$this->parent->fields[$this->field]->escape_value();
+		if ($this->field == $this->parent->primary_key)
+		      $field=$this->parent->primary_key_value;
+		else
+                      $field=$this->parent->db->escape_value($this->field->type,$this->field->value);
+            
                 if (($field==null) || ($field=='') || ($field=="''"))
                     return null;
                     

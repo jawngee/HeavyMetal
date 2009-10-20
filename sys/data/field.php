@@ -68,6 +68,7 @@ class Field
 	public $comparison=Field::COMPARE_EQUALS;	/** Defaults comparison to use */
 	public $dirty=false;						/** Has this field been changed? */
 	public $db_type='';							/** Database type */
+	public $transient=false;                    /** Doesn't need to be stored? */
 	
 	/**
 	* Constructor
@@ -77,8 +78,10 @@ class Field
 	* @param int $length length/size of the field
 	* @param bool $notnull if the field can contain null values (TRUE) or not (FALSE)
 	* @param object $value value of the field
+	* @param const $comparison (Not sure if this is used -- probably should be a comparison function pointer to handle sorting)
+	* @param boolean $transient true if the field should NOT be persisted to the database (default false).  Used by Model->add()
 	*/
-	public function __construct($name,$type=Field::TEXT,$length=0,$description='',$notnull=false,$value=null, $comparison=Field::COMPARE_EQUALS)
+	public function __construct($name,$type=Field::TEXT,$length=0,$description='',$notnull=false,$value=null, $comparison=Field::COMPARE_EQUALS, $transient=false)
 	{
 		$this->name=$name;
 		$this->type=$type;
@@ -87,10 +90,46 @@ class Field
 		$this->value=$value;
 		$this->description=$description;
 		$this->comparison=$comparison;
+		$this->transient=$transient;
 		
 		// we can't know if array types have been changed,
 		// so they are always dirty.
 		if ($this->type==Field::MULTI)
 			$this->dirty=true;
+	}
+	
+	
+	/**
+	 * compare -- used for sorting
+	 *
+	 * @param Field $field the field to compare this to
+	 * @param string $direction the direction of the sort needed
+	 *
+	 * @return:
+	 *   If $this == $field return 0
+	 *   If $this > $field return 1
+	 *   If $this < $field return -1
+	 */
+	public function compare($field, $direction='ASC')
+	{
+		$reverser = ($direction=='DESC')?-1:1;
+		
+		// use $this field type to drive the comparison
+		// NUMBER STRING TIMESTAMP BOOLEAN
+		switch($field->type)
+		{
+			case STRING:
+			case TEXT:
+				return strcmp($this->value, $field->value)*$reverser;
+			case NUMBER:
+			case TIMESTAMP:
+			case BOOLEAN:
+			default:
+				if ($this->value == $field->value) {
+        			return 0;
+    			}
+    			return ($this->value < $field->value) ? -1*$reverser : 1*$reverser;
+		}
+		
 	}
 }

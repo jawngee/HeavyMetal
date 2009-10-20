@@ -51,6 +51,7 @@ abstract class Database
 	const FEATURE_OFFSETLIMIT		=	4;
 	const FEATURE_ORDERBY			=	5;
 	const FEATURE_BULKDELETE		=	6;
+	const FEATURE_TABLE_ALIAS       =   7;
 	
 	/** List of initialized databases */
 	private static $_databases=array();
@@ -211,7 +212,7 @@ abstract class Database
 	 * @param mixed $value The value to escape
 	 * @return string The escaped value
 	 */
-	abstract function escape_value($type,$value=null);
+	abstract function escape_value($type,$value);
 
 	/**
 	 * Parses a database array type into a php array

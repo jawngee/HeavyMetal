@@ -39,7 +39,7 @@ uses('system.data.order');
  */
 class OrderBy
 {
-	private $orders=array();	/** List of sort orders */	
+	public $orders=array();	/** List of sort orders */	
 	private $model=null;		/** Reference to the filter's model */
 	private $filter=null;		/** Reference to filter object */
 	/**
@@ -73,6 +73,31 @@ class OrderBy
    		return $result;
    	}
    	
+   	
+   	/**
+   	 * Used by MemoryFilter to perform ordering based upon the Field type/comparison method.
+   	 * Filter (which queries a database), delegates this comparison to the database.
+   	 * SOLRFilter (which queries SOLR), delegates this comparison to SOLR.
+   	 */
+	function compare($object_a, $object_b)
+	{
+		foreach($this->orders as $order)
+		{
+			$comparison = 
+				$object_a->fields[$order->field]->compare(
+								$object_b->fields[$order->field],
+								$order->direction
+				);
+
+			// if they're equal, keep checking, otherwise return with result
+			if ($comparison) 
+				return $comparison;
+		}
+		
+		// Got here b/c object_a and object_b were equal along all fields compared
+		return 0;
+	}
+
    	/**
    	 * Returns rows randomly
    	 */
@@ -103,9 +128,14 @@ class OrderBy
    			if ($order->computed)
  				$result.=$order->field.(($order->is_not_null)?' is not null ':'')." $order->direction,";
    			else
- 				$result.=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->model->table_name.'.' : '')."$order->field ".(($order->is_not_null)?' is not null ':'')." $order->direction,";
+ 				$result.=$order->filter->table_alias.".$order->field ".(($order->is_not_null)?' is not null ':'')." $order->direction,";
    			
    		return rtrim($result,',');	
+   	}
+	
+   	function orderings()
+   	{
+   		return count($this->orders);
    	}
 	
 }

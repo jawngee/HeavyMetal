@@ -68,7 +68,7 @@ uses('system.app.session');
  	public $session=null;
  	
  	/** URI **/
- 	protected $uri=null;
+ 	public $uri=null;
  	
  	/** Stores the attributes passed in from the view */
  	public $attributes=array();

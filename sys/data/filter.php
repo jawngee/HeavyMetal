@@ -43,10 +43,12 @@ uses('system.data.join');
 class Filter
 {
 	private $joins=array();			/** List of joins */
-	private $fields=array();		/** List of filtered fields */
+	protected $fields=array();		/** List of filtered fields */
 
 	public  $model=null;			/** Reference to the Model being filtered */
 	public $class=null;
+	
+	public $table_alias=null;
 	
 	public $select='*';
 
@@ -61,6 +63,8 @@ class Filter
 	
 	public $distinct=false;			/** should this filter return distinct values? */
 	
+	public $filter_description_tokens=null;
+	
 	private $grouplevel=0;
 	
 	/**
@@ -73,6 +77,8 @@ class Filter
 		$this->model = $model;
 		$this->class=$class;
 		$this->order_by=new OrderBy($this,$model);
+		
+		$this->generate_table_alias();
 	}
 	
 	public static function Model($model)
@@ -193,11 +199,17 @@ class Filter
 	   		$fields=explode(',',$this->select);
 	   		foreach($fields as $field)
  			{
-	   			$field_name=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->model->table_name.'.' : '').trim($field);
-	   			// handle selects from functions returning rows
- 	   			if (strstr($this->model->table_name,'('))
                     $field_name = trim($field);
 	   			
+                // When to prefix with the table alias
+ 				if ($this->table_alias && ($field_name=='*' ||                                 // e.g. profiles11.* 
+ 				    isset($this->model->fields[$field_name]) ||         // e.g. profiles11.display_name (field in the model)
+ 				    $field_name==$this->model->primary_key ||           // e.g. profiles11.id  (model primary key)
+ 				    preg_match("/^[a-z0-9_]+\s+as /i", $field_name)) )   // e.g. profiles11.created as profile_created
+ 			    {
+ 				    $field_name=$this->table_alias.'.'.$field_name;
+ 			    }
+ 			    
 	   			$result.=$field_name.', ';
 	   		}
 	   		$result=trim($result,', ');
@@ -207,6 +219,8 @@ class Filter
    			return $result;
    		
    		$result.=', ';
+   		
+   		
    		foreach($this->joins as $join)
    		{
 			$join_select=$join->filter->build_select();
@@ -272,10 +286,13 @@ class Filter
    		
    		foreach($this->joins as $join)
    		{
+			$join_on = ($join->model->db->supports(Database::FEATURE_TABLE_ALIAS)) ? 
+				$join->model->table_name.' '.$join->filter->table_alias :
+				$join->model->table_name;
                 
-   			$result.=strtoupper($join->kind).' JOIN '.$join->model->table_name.' ON '.
-   			         $this->trim_fcn_name($join->model->table_name).'.'.$join->foreign_column.'='.
-   			         $this->trim_fcn_name($this->model->table_name).'.'.$join->column.' ';
+   			$result.=strtoupper($join->kind).' JOIN '.$join_on.' ON '.
+   			         $join->filter->table_alias.'.'.$join->foreign_column.'='.
+   			         $this->table_alias.'.'.$join->column.' ';
    			
    			if ($join->filter_in_join)
    			{
@@ -290,24 +307,10 @@ class Filter
    		return $result;
    	}
    	
-   	/**
-   	 * Converts table names like permissions.my_permissions('1234556') to my_permissions for joins
-   	 * 
-   	 * @param $table_name
-   	 * @return trimmed table_name
-   	 */
-   	function trim_fcn_name($table_name)
+   	
+   	function show_query()
    	{
-   		// handles joins on functions returning rows
-   		$paren_pos = strpos($table_name,'(');
-   		
-        if ($paren_pos > 0) {
-        	$table_token_pos = strpos($table_name,'.') + 1;
-        	
-        	$table_name = substr($table_name, $table_token_pos, $paren_pos - $table_token_pos );
-        }
-        
-        return $table_name;
+   		return $this->to_sql();
    	}
    	
    	/**
@@ -327,7 +330,11 @@ class Filter
    			else
    				$result="SELECT ";
 
-   			$result.="$select FROM ".$this->model->table_name." ";
+			$from = ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS)) ? 
+				$this->model->table_name.' '.$this->table_alias :
+				$this->model->table_name;	
+   				
+   			$result.=$select." FROM ".$from." ";
    		}
    		
    		if (count($this->joins)>0)
@@ -352,18 +359,20 @@ class Filter
 				$result.=" LIMIT $this->limit ";
    		}
 
-
-   		// TODO: FIND OUT WHY THIS IS FUCKED UP. (should be fixed with pdm_permissions merge)
-   		//$result=preg_replace('#AND\s*AND#','AND',$result);
-   		
 		return $result;
    	}
    	
    	/**
    	 * Builds the filter and executes the sql
    	 */
-   	function execute($select=null)
+   	function execute($select=null,$offset=null,$limit=null)
    	{
+   		if ($offset)
+   			$this->offset=$offset;
+   			
+   		if ($limit)
+   			$this->limit=$limit;
+   			
    		return $this->model->db->execute($this->to_sql($select),null,null);
    	}
    	
@@ -380,7 +389,11 @@ class Filter
    		if (!$this->model->db->supports(Database::FEATURE_BULKDELETE))
    			return false;
    			
-   		$result="DELETE FROM ".$this->model->table_name." ";
+		$from = ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS)) ? 
+			$this->model->table_name.' '.$this->table_alias :
+			$this->model->table_name;	
+   			
+   		$result="DELETE FROM ".$from;
    		
    		if (count($this->fields)>0)
    		{
@@ -450,7 +463,7 @@ class Filter
    							$this->{$vars[$i]}->equals($this->unpack($vals[$i]));
    							break;
    						case '!=':
-   							$this->{$vars[$i]}->not_equal($this->unpack($vals[$i]));
+   							$this->{$vars[$i]}->not_equal($this->unpack($vals[$i]),true /*include nulls*/);
    							break;
    						case '<=':
    							$this->{$vars[$i]}->less_equal($this->unpack($vals[$i]));
@@ -498,6 +511,8 @@ class Filter
    					}
    				}
    			}
+   		
+   			return $vars;
    		}
    	}
    	
@@ -506,11 +521,11 @@ class Filter
    	 *
    	 * @return array Array of found models
    	 */
-   	function find()
+   	function find($offset=null,$limit=null)
    	{
    		$result=array();
    		
-   		$rows=$this->execute($this->build_select()); 
+   		$rows=$this->execute($this->build_select(),$offset,$limit); 
 		$class=$this->class;
    		foreach($rows as $row)
    		{
@@ -519,6 +534,36 @@ class Filter
    		}
    		
    		return $result;
+   	}
+   	
+   	function stash($cache_key=null, $cache_expiry=0)
+   	{
+   		uses_system('data/memory_filter');
+
+   		// CHECK CACHE?
+   		if ($cache_key && $cache_expiry > 0)
+		{
+			$cache=CacheMoney::GetCache('stash');
+			$result  = $cache->get($cache_key);
+						
+			if ($result)
+			{
+				$data_items =  unserialize($result);
+				return new MemoryFilter($data_items, $this->model, $this->class);
+			}
+		}
+   		
+		// Do the lookup
+   		$data_items = $this->get_rows();
+		
+   		// CACHE THE RESULT?
+   		if ($cache_key && $cache_expiry > 0)
+   		{
+			$cache=CacheMoney::GetCache('stash');
+			$cache->set($cache_key, serialize($data_items), $cache_expiry);
+   		}
+   		
+   		return new MemoryFilter($data_items, $this->model, $this->class);
    	}
    	
    	/**
@@ -569,7 +614,7 @@ class Filter
    	}
    	
    	/**
-   	 * Fetches the result as an array, versus an ADODBRecordSet
+   	 * Fetches the result as an array versus a DatabaseResult
    	 *
    	 * @param string $select
    	 * @return array
@@ -589,6 +634,38 @@ class Filter
    	}
 
    	/**
+   	 * Executes the sql returning a single dimensional array of the specified result field
+   	 */
+   	function get_array($field)
+   	{
+   		$arr = array();
+
+   		foreach($this->execute($field) as $row)
+   			$arr[] = $row[$field];
+   			
+   		return $arr;
+   	}
+   	
+   	
+   	/**
+   	 * Executes the sql returning an associative array of the $key => $value specified.
+   	 */
+	function get_map($key=null, $value=null)
+	{
+	   if ($key && $value)
+	   {
+	       $arr = array();
+	       foreach($this->execute($key.','.$value) as $row)
+	           $arr[$row[$key]] = $row[$value];
+	   
+	       return $arr;
+	   }
+	   
+	   return null;
+	}
+   	
+
+   	/**
    	 * Builds the filter and executes the sql, returning the total count of items.
    	 */
    	function get_count($field=null, $distinct=false)
@@ -596,7 +673,11 @@ class Filter
    		if(!$field)
    		   $field = $this->model->primary_key;
 
-   		 return $this->model->db->count($field,$this->model->table_name,$this->to_sql(FALSE,false,false),$distinct);
+ 		$table_alias = ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS)) ? 
+				$this->table_alias :
+				null;	
+
+   		 return $this->model->db->count($field,$this->model->table_name,$this->to_sql(FALSE,false,false),$distinct,$table_alias);
    	}
    	
    	/**
@@ -714,6 +795,44 @@ class Filter
    			}
    	}
 
+
+	/**
+	 * Generates a somewhat-readable table_alias to use in SQL joins
+	 * (too bad the code isn't readable!)
+	 * 
+	 * @return unknown_type
+	 */
+	private function generate_table_alias()
+	{
+              $mdl_parts = split('\.',$this->model->table_name);
+
+              $tablename = $mdl_parts[1];
+        
+        
+              if ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS))
+              {
+	        $tbl_parts = split('_',$tablename);
+	        $readable = $tbl_parts[0];
+	        
+	        if (count($tbl_parts) > 1)
+	        {
+	            $readable .= '_';
+	        
+	            for($i=1; $i<count($tbl_parts); $i++)
+	                $readable .= $tbl_parts[$i][0];
+	        }
+	        
+	        $uniq = (isset($_REQUEST['TAKE_A_NUMBER']) && 
+	        		 count($_REQUEST['TAKE_A_NUMBER'])>0) ? array_pop($_REQUEST['TAKE_A_NUMBER']) : rand(0,9999);
+	        $this->table_alias = $readable . $uniq;	
+
+              }
+              else
+              {
+        	// not supported, so we'll just use tablename, e.g.  "select profiles.gender from ... "
+        	$this->table_alias = $tablename;
+              }
+	}
 }
    	
 function filter($model)

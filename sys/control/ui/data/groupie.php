@@ -35,10 +35,15 @@ class GroupieControl extends DataboundControl
     public $current=null;
     public $current_index=0;
 
+    public $render_item_as_view=false;
+    
 	
 	public function get_template($item_template)
 	{
-		return new Template($item_template);
+		if ($this->render_item_as_view)
+			return new View($this->parent, $item_template);
+		else
+		        return new Template($item_template);		
 	}
 	/**
 	 * Builds the control
@@ -50,18 +55,22 @@ class GroupieControl extends DataboundControl
 		$rows=$this->get_data();
 		$this->count=0;
 		$config=Config::Get($this->config_template);
+		$out=null;
 		
 		if($this->section)
 		  $config=$config->{$this->section};
 
 		if ($this->container_template!=null) {
-			$view=new Template($this->container_template); //View($this->parent,$this->container_template); // shitloads faster to use Template
+			$view=$this->get_template($this->container_template);
 
-			$out = $this->build_item($config, $rows);
+			if ($rows && count($rows)>0)
+			        $out = $this->build_item($config, $rows);
 			
 			$result=$view->render(array('total_count' => $this->total_count, 'count' => $this->count, 'control' => $this, 'content' => $out['content'], 'item_count_total' => $out['count']));
 		} else {
-			$out = $this->build_item($config, $rows);
+			if ($rows && count($rows)>0)
+			        $out = $this->build_item($config, $rows);
+
 			$result=$out['content'];
 		}
 		return $result;
@@ -208,7 +217,7 @@ class GroupieControl extends DataboundControl
 		
 		// process the container if present, passing in all rendered content
 		if ($groupie->container_template!=null) {
-			$view=new Template($groupie->container_template); //View($this->parent,$groupie->container_template);  // shitloads faster to use Template
+			$view=$this->get_template($groupie->container_template); //View($this->parent,$groupie->container_template);  // shitloads faster to use Template
 			$rendered=$view->render(array('current_index' => $this->current_index, 'total_count' => $this->total_count, 'count' => $this->count, 'control' => $this, 'content' => $rendered, 'item_count' => $item_count, 'item_count_total' => $item_count_total, 'items' => $rows_current, 'config' => $groupie));
 		}
 		
@@ -230,7 +239,6 @@ class GroupieControl extends DataboundControl
 				$row = $row->to_array();
 				
 			$intersect=array_intersect_assoc($props,$row);
-//			vomit($props);
 			if ($intersect==$props) {
 				$result[] =& $rows[$i];
 			}

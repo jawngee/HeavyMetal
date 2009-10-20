@@ -45,7 +45,7 @@ class FilterField
 
 	public $and=true;
 	
-	private $model=null;
+	protected $model=null;
 	
 	/**
 	 * Constructor
@@ -64,8 +64,11 @@ class FilterField
 	 * Equals
 	 *
 	 * @param mixed $value The value to use for comparison
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
+	 * @param mixed $op defaults to '=' but allows the caller to substitute 'ILIKE' for case-insensitive matching (should probably be refactored)
+	 * @param boolean $caseconv enables the field and value to be wrapped in a case conversion function (postgres: 'upper' or 'lower') to speed up querying columns with upper/lowercase indexes
 	 */
-	function equals($value, $include_null=false)
+	function equals($value, $include_null=false, $op='=', $caseconv=null)
 	{
 		if (is_array($value))
 		{
@@ -76,12 +79,12 @@ class FilterField
 
 				$this->value="(";
 				foreach($value as $val)
-					$this->value.="$val = ANY(".(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name.") AND ";
+					$this->value.="$val = ANY(".$this->filter->table_alias.".".$this->field->name.") AND ";
 				$this->value=rtrim($this->value,'AND ').")";
 			}
 			else
 			{
-				$val=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IN (";
+				$val=$this->filter->table_alias.".".$this->field->name." IN (";
 				foreach($value as $item)
 				{
 					$val.=$this->model->db->escape_value($this->field->type,$item).',';
@@ -93,11 +96,15 @@ class FilterField
 		else
 		{
 			$value=$this->model->db->escape_value($this->field->type,$value);
-			$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name."=$value";
+
+			$value=$this->wrap($value,$caseconv);
+			$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+		
+			$this->value=$field." $op $value";
 		}
 		
 		if ($include_null)
-            $this->value="(".$this->value." OR ".(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IS NULL)";
+                        $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 		
 		return $this->filter;
 	}
@@ -106,14 +113,15 @@ class FilterField
 	 * Equals
 	 *
 	 * @param mixed $value The value to use for comparison
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
 	 */
 	function not_equal($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name."<>$value";
+		$this->value=$this->filter->table_alias.".".$this->field->name."<>$value";
 
 		if ($include_null)
-            $this->value="(".$this->value." OR ".(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IS NULL)";
+                   $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 
 		return $this->filter;
 	}
@@ -130,7 +138,7 @@ class FilterField
 		{
 			$this->value="(";
 			foreach($values as $value)
-				$this->value.="$value = ANY(".(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name.") OR ";
+				$this->value.="$value = ANY(".$this->filter->table_alias.".".$this->field->name.") OR ";
 			$this->value=rtrim($this->value,'OR ').")";
 		}
 		else
@@ -138,7 +146,7 @@ class FilterField
 			$this->value='(';
 
 			foreach($values as $value)
-				$this->value.=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name."=".$this->model->db->escape_value($this->field->type,$value)." OR ";
+				$this->value.=$this->filter->table_alias.".".$this->field->name."=".$this->model->db->escape_value($this->field->type,$value)." OR ";
 
 			$this->value=rtrim($this->value,' OR ').')';
 		}
@@ -150,21 +158,37 @@ class FilterField
 	 * Determines if a value is in a set
 	 *
 	 * @param mixed $values The values to use for comparison (array or another filter)
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
+	 * @param boolean $caseconv enables the field and value to be wrapped in a case conversion function (postgres: 'upper' or 'lower') to speed up querying columns with upper/lowercase indexes
 	 */
-	function is_in($values, $include_null=false)
+	function is_in($values, $include_null=false, $caseconv=null)
 	{
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IN (";
+		$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+		
+		$this->value="$field IN (";
+
 
 		if ($values instanceof Filter)
+		{
 			$this->value.=$values->to_sql();
+		}
 		else
+		{
 			foreach($values as $value)
-				$this->value.=$this->model->db->escape_value($this->field->type,$value).',';
+			{
+				$value=$this->model->db->escape_value($this->field->type,$value);
+				$value=$this->wrap($value,$caseconv);
+				$this->value.=$value.',';
+			}
+
+		}
 
 		$this->value=rtrim($this->value,',').')';
 		
+		
+		
 		if ($include_null)
-            $this->value="(".$this->value." OR ".(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IS NULL)";
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 
 		return $this->filter;
 	}
@@ -173,10 +197,11 @@ class FilterField
 	 * Determines if a value is NOT in a set
 	 *
 	 * @param mixed $values The values to use for comparison
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
 	 */
 	function is_not_in($values, $include_null=false)
 	{
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." NOT IN (";
+		$this->value=$this->filter->table_alias.".".$this->field->name." NOT IN (";
 
 		if ($values instanceof Filter)
 			$this->value.=$values->to_sql();
@@ -187,7 +212,7 @@ class FilterField
 		$this->value=rtrim($this->value,',').')';
 		
 		if ($include_null)
-			$this->value="(".$this->value." OR ".(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IS NULL)";
+			$this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 
 		return $this->filter;
 	}
@@ -196,13 +221,14 @@ class FilterField
 	 * Starts with
 	 *
 	 * @param mixed $value The value to use for comparison
-     * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+         * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+	 * @param boolean $caseconv enables the field and value to be wrapped in a case conversion function (postgres: 'upper' or 'lower') to speed up querying columns with upper/lowercase indexes
 	 */
 	function starts_with($value, $op='ILIKE', $caseconv=null)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value.'%');
 		$value=$this->wrap($value,$caseconv);
-		$field=$this->wrap((($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name,$caseconv);
+		$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
 		
 		$this->value=$field." $op $value";
 
@@ -213,13 +239,14 @@ class FilterField
 	 * Contains
 	 *
 	 * @param mixed $value The value to use for comparison
-     * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+         * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+	 * @param boolean $caseconv enables the field and value to be wrapped in a case conversion function (postgres: 'upper' or 'lower') to speed up querying columns with upper/lowercase indexes
 	 */
 	function contains($value, $op='ILIKE', $caseconv=null)
 	{
 		$value=$this->model->db->escape_value($this->field->type,'%'.$value.'%');
 		$value=$this->wrap($value,$caseconv);
-		$field=$this->wrap((($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name,$caseconv);
+		$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
 		
 		$this->value=$field." $op $value";
 
@@ -230,7 +257,8 @@ class FilterField
 	 * Contains
 	 *
 	 * @param mixed $value The value to use for comparison
-     * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+         * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+      	 * @param boolean $caseconv enables the field and value to be wrapped in a case conversion function (postgres: 'upper' or 'lower') to speed up querying columns with upper/lowercase indexes
 	 */
 	function contains_any($values, $op='ILIKE', $caseconv=null)
 	{
@@ -240,7 +268,7 @@ class FilterField
 		{
 			$value=$this->model->db->escape_value($this->field->type,'%'.$value.'%');
 			$value=$this->wrap($value,$caseconv);
-			$field=$this->wrap((($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name,$caseconv);
+			$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
 			
 			$result.="(".$field." $op $value) OR";
 		}
@@ -254,7 +282,8 @@ class FilterField
 	 * Contains
 	 *
 	 * @param mixed $value The value to use for comparison
-     * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+         * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+       	 * @param boolean $caseconv enables the field and value to be wrapped in a case conversion function (postgres: 'upper' or 'lower') to speed up querying columns with upper/lowercase indexes
 	 */
 	function contains_all($values, $op='ILIKE', $caseconv=null)
 	{
@@ -264,7 +293,7 @@ class FilterField
 		{
 			$value=$this->model->db->escape_value($this->field->type,'%'.$value.'%');
 	        $value=$this->wrap($value,$caseconv);
-	        $field=$this->wrap((($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name,$caseconv);
+	        $field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
 
 			$result.="(".$field." $op $value) AND";
 		}
@@ -279,12 +308,14 @@ class FilterField
 	 * Ends with
 	 *
 	 * @param mixed $value The value to use for comparison
+         * @param mixed $op Used to swap ILIKE for LIKE or ~ if indexes require it.
+       	 * @param boolean $caseconv enables the field and value to be wrapped in a case conversion function (postgres: 'upper' or 'lower') to speed up querying columns with upper/lowercase indexes
 	 */
 	function ends_with($value, $op='ILIKE', $caseconv=null)
 	{
 		$value=$this->model->db->escape_value($this->field->type,'%'.$value);
 	    $value=$this->wrap($value,$caseconv);
-	    $field=$this->wrap((($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name,$caseconv);
+	    $field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
 	 
 		$this->value=$field." $op $value";
 
@@ -295,11 +326,15 @@ class FilterField
 	 * Greater than or equal to
 	 *
 	 * @param mixed $value The value to use for comparison
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
 	 */
-	function greater_equal($value)
+	function greater_equal($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." >= $value";
+		$this->value=$this->filter->table_alias.".".$this->field->name." >= $value";
+		
+        if ($include_null)
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 
 		return $this->filter;
 	}
@@ -308,11 +343,15 @@ class FilterField
 	 * Less than or equal to
 	 *
 	 * @param mixed $value The value to use for comparison
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
 	 */
-	function less_equal($value)
+	function less_equal($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." <= $value";
+		$this->value=$this->filter->table_alias.".".$this->field->name." <= $value";
+		
+        if ($include_null)
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 
 		return $this->filter;
 	}
@@ -321,11 +360,15 @@ class FilterField
 	 * Greater than
 	 *
 	 * @param mixed $value The value to use for comparison
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
 	 */
-	function greater($value)
+	function greater($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." > $value";
+		$this->value=$this->filter->table_alias.".".$this->field->name." > $value";
+		
+        if ($include_null)
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 
 		return $this->filter;
 	}
@@ -340,7 +383,7 @@ class FilterField
 	{
 		$min=$this->model->db->escape_value($this->field->type,$min);
 		$max=$this->model->db->escape_value($this->field->type,$max);
-		$this->value='('.(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." >= $min AND ".(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." <= $max)";
+		$this->value='('.$this->filter->table_alias.".".$this->field->name." >= $min AND ".$this->filter->table_alias.".".$this->field->name." <= $max)";
 
 		return $this->filter;
 	}
@@ -350,11 +393,15 @@ class FilterField
 	 * Less than
 	 *
 	 * @param mixed $value The value to use for comparison
+	 * @param boolean $include_null if true appends the condition 'OR <field> IS NULL'
 	 */
-	function less($value)
+	function less($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." < $value";
+		$this->value=$this->filter->table_alias.".".$this->field->name." < $value";
+        
+        if ($include_null)
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
 
 		return $this->filter;
 	}
@@ -364,7 +411,7 @@ class FilterField
 	 */
 	function not_null()
 	{
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IS NOT NULL";
+		$this->value=$this->filter->table_alias.".".$this->field->name." IS NOT NULL";
 
 		return $this->filter;
 	}
@@ -374,7 +421,7 @@ class FilterField
 	 */
 	function is_null()
 	{
-		$this->value=(($this->model->db->supports(Database::FEATURE_PREFIX_COLUMNS)) ? $this->filter->model->table_name.'.' : '').$this->field->name." IS NULL";
+		$this->value=$this->filter->table_alias.".".$this->field->name." IS NULL";
 
 		return $this->filter;
 	}

@@ -71,17 +71,20 @@ class RepeaterControl extends DataboundControl
 				$template=new Template(implode("/", $item_segments));
 			}
 
-			foreach($this->rows as $row)
+			foreach($this->rows as $key => $row)
 			{
-				$id = ($row instanceof Model) ? $row->id: $row['id'];
-				if (!array_key_exists($id,$this->similar_ids))
-				{
-					$rendered.=$template->render(array('item' => $row, 'control' => $this, 'count' => $this->count, 'total_count'=>$this->total_count));
-				}
+				if (is_numeric($key)) // With SOLR, some meta info gets added to the rows which repeater should ignore
+			        {
+				      $id = ($row instanceof Model) ? $row->id: $row['id'];
+				      if (!array_key_exists($id,$this->similar_ids))
+				      {
+				           $rendered.=$template->render(array('item' => $row, 'control' => $this, 'count' => $this->count, 'total_count'=>$this->total_count));
+				      }
 				
-				$this->current=&$row;
-				$this->current_index=$this->count++;
-			}
+				      $this->current=&$row;
+				      $this->current_index=$this->count++;
+			        }
+		        }
 		}
 
 		if ($this->container_template!=null)

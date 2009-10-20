@@ -166,7 +166,6 @@ class PGSQLDatabase extends Database
     		
     	if ($limit)
     		$query.=" LIMIT $limit";
-    		
     	$res=pg_query($this->connection,$query);
     	
     	if (!$res)
@@ -264,11 +263,8 @@ class PGSQLDatabase extends Database
 	 * @param mixed $value The value to escape
 	 * @return string The escaped value
 	 */
-	public function escape_value($type,$value=null)
+	public function escape_value($type,$value)
 	{
-		if ($value==null)
-			$value=$this->value;
-		
    		$value=str_replace("'","''",$value);
 		
 		switch($type)
