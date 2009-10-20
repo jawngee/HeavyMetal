@@ -35,6 +35,7 @@ class CloudUploadControl extends Control
     public $allowed_filesize=300;
     public $success_link='';
     public $success_title='';
+    public $config_file='upload';
     
     public $fields=array();
 	
@@ -42,7 +43,7 @@ class CloudUploadControl extends Control
 	{
 		parent::init();
 		
-		$conf=Config::Get('upload');
+		$conf=Config::Get($this->config_file);
 		$this->conf=$conf->{$this->type};
 		
 		$this->app_id=($conf->app_id) ? $conf->app_id : $this->app_id;
