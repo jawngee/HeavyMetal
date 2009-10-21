@@ -165,6 +165,10 @@ function uses($namespace)
 			$path=PATH_APP.'screen/';
 			$altpath=PATH_SYS.'app/screen/';
 			break;
+		case 'helper':
+			$path=PATH_APP.'helper/';
+			$altpath=PATH_SYS.'app/helper/';
+			break;
 	}
 	
 	

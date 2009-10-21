@@ -154,6 +154,11 @@ abstract class Dispatcher
 		$this->force_routes=$force_routes;
 		
 		$this->parse_path();
+		
+		// preload helpers
+		$conf=Config::Get('helpers');
+      	foreach($conf->auto->items as $helper)
+            uses("helper.$helper");
 	}
 	
 	/**

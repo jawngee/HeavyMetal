@@ -1,0 +1,418 @@
+<?
+/**
+ *
+ * Copyright (c) 2009, Jon Gilkison and Massify LLC.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice,
+ *   this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This is a modified BSD license (the third clause has been removed).
+ * The BSD license may be found here:
+ * 
+ * http://www.opensource.org/licenses/bsd-license.php
+ *
+ *
+ * Controller implements search behavior generically.  Typically you will only need to 
+ * set up a configuration file, create a couple of views and be up and running.
+ * 
+ * You must specify metadata when creating subclasses of this controller.  
+ * 
+ * NOTE: If you override any of these methods, YOU MUST reintroduce the screens as metadata is not
+ * inherited from parent classes.
+ */
+
+class GenericSearchController extends Controller
+{
+	/*
+	 * Context for the config file
+	 *
+	 * @var Stirng
+	 */
+	protected $context='search';
+
+	/**
+	 * The application specific metadata
+	 *
+	 * @var AttributeReader
+	 */
+	public $appmeta=null;
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param string $root The root uri path
+	 * @param array $segments The uri segments following the root path
+	 * @param bool $from_controller
+	 */
+	public function __construct($root,$segments,$from_controller=null,$query=null)
+ 	{
+ 		parent::__construct($root,$segments,$from_controller,$query);
+ 		$filename=PATH_CONFIG.$this->context."/".$this->metadata->app.".conf";
+
+ 		if (file_exists($filename))
+ 		{
+ 			$yaml=file_get_contents($filename);
+ 			$this->appmeta=new AttributeReader(syck_load($yaml));
+ 		}
+ 		else 
+ 			throw new Exception("No app metadata specified.");
+ 	}
+ 		
+ 	
+ 	/**
+ 	 * Loads a model from the config.
+ 	 *
+ 	 * @param string $smodel The model path, ie. profiles/profile
+ 	 * @param mixed $id The id of the model.
+ 	 * @return Model Instantiated model.
+ 	 */
+	protected function get_model($smodel,$id=null)
+	{
+ 		uses("model.$smodel");
+		
+ 		$class=str_replace('_','',array_pop(explode('.',$smodel)));
+ 		return new $class($id);
+	}
+	
+	protected function init_filter()
+	{
+		if ($this->appmeta->init_filter)
+			return $this->appmeta->init_filter." & ";
+			
+		return "";
+	}
+	
+	protected function get_filter($initial_filter_string=null)
+	{
+		
+		$smodel=$this->appmeta->search_model;
+ 		
+ 		uses("model.$smodel");
+ 		
+ 		$class=str_replace('_','',array_pop(explode('.',$smodel)));
+ 		$instance=new $class();
+ 		
+		$filter = new Filter($instance,$class);
+		
+		if ($initial_filter_string)
+			$filter->parse($initial_filter_string);
+		else if ($this->init_filter())
+			$filter->parse($this->init_filter());
+			
+		return $filter;
+	}
+	
+	protected function get_attributes()
+	{
+		return $this->appmeta->filter->attributes;
+	}
+ 	
+	public function search_tokens()
+	{
+		$tokens = array();
+		
+		if ($this->get->q)
+			$tokens[] = $this->get->q;
+			
+		if ($this->get->location)
+			$tokens[] = $this->get->location;
+		
+		foreach($this->appmeta->filter->attributes as $field=>$section)
+		{
+			$value=$this->get->get_string($field);
+			
+			if($section->description && $value)
+			{
+				if (!is_array($value))
+					$value = array($value);
+					
+				foreach($value as $val)
+				{
+					$token = null;
+					
+					if($section->description_prepend)
+						$token .= $section->description_prepend . ' ';
+						
+					$token .= $val;
+					
+					if($section->description_append)
+						$token .= ' ' . $section->description_append;
+				
+					if (!empty($token))
+						$tokens[] = $token;
+				}
+			}
+		}
+		
+		return $tokens;
+	}
+	
+ 	/**
+	 * Display the search page.
+	 * 
+	 * [[
+	 * 
+	 * view: generic_search/index
+	 * ]]
+	 */
+    public function index($filter=null)
+ 	{
+ 		$filter = $this->build_filter($filter);
+		
+ 		$filter->limit=$this->get->limit | $this->appmeta->page_size;
+		$filter->offset=($this->get->search_pg * $filter->limit) | 0;
+		
+		// is this search a saved one?
+		if ($this->session->id)
+			$current_saved_id = filter('search/saved')
+				->profile_id->equals($this->session->id)
+				->path->equals(rtrim($this->uri->root,'/'))
+				->query->equals(urldecode(ltrim($this->uri->query->build(),'?')))
+				->get_one('id');
+				
+		$results = $filter->get_rows();
+
+		$count = ($results['total_count']) ? $results['total_count'] : $filter->get_count();
+
+		//Need to adjust offset if filters have changed and we were at the end of a longer paginated list of previous results
+		if ($filter->offset > $count)
+			$filter->offset = floor($count/$filter->limit)*$filter->limit;
+
+		return array(
+			'form' => $this->appmeta->form->attributes,
+			'filters' => $this->appmeta->filter->attributes,
+		    'current_saved_id' => $current_saved_id,
+			'sorts' => $this->appmeta->sort->attributes,
+			'page_size' => $filter->limit,
+ 			'count' => $count,
+			'filter_description_tokens' => $this->search_tokens(),
+			'results'=> $results
+ 		);
+ 	}
+ 	
+
+ 	public function build_filter_field($filter, $key, $section)
+ 	{
+ 		// Add to the description string
+ 		if ($this->get->exists($key) && ($section->description) )
+ 		{
+			$description = null;
+			
+			if ($section->description_before)
+				$description .= $description_before;
+				
+			$description .= $this->get->{$key};
+			
+			if ($section->description_after)
+				$description .= $description_after;
+				
+ 			$filter_description_tokens[$key] = $description;
+ 		}
+
+ 		
+ 		switch($section->type)
+ 		{
+ 			case "radio":
+ 			case "multi":
+ 				foreach($section->options->attributes as $name=>$option)
+                     {
+                         if ($this->get->{$key}==$name){
+                             $filterstr.=$option->filter.'&';
+                             }
+                     }
+                     break;
+ 			case "lookup_checkbox":
+                    $sf=$section->filter;
+ 		        if ($this->get->exists($key))
+                    {
+                        if ($section->join_model && $section->join_column && $section->join_foreign_column)
+                        {
+                            $join_filter = filter($section->join_model);
+                        if($section->case_insensitive)   
+                            $join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls, 'lower');
+						else
+							$join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls);
+                        $join_filter->select='';
+                            $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER');                          
+                        }
+                        else
+                        {
+                        if($section->case_insensitive)    
+                        	$filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls, 'lower');
+                        else
+                        	$filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls);
+                        }
+                    }
+ 				break;
+                case "lookup":
+ 			case "lookup_select":
+ 				$sf=$section->filter;
+ 				if ($this->get->exists($key))
+ 				{
+ 					if ($section->join_model && $section->join_column && $section->join_foreign_column)
+ 					{
+                        $join_filter = filter($section->join_model);
+                        
+                        if ($section->case_insensitive)
+	                        $join_filter->{$sf}->equals(($this->get->get_string($key)), $section->allow_nulls, 'LIKE', 'lower');
+                        else
+	                        $join_filter->{$sf}->equals(($this->get->get_string($key)));
+	                    $join_filter->select='';
+                        $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER'); 							
+ 					}
+ 					else
+ 					{
+						if ($section->case_insensitive)
+ 							$filter->{$sf}->equals(array($this->get->get_string($key)), $section->allow_nulls, 'LIKE', 'lower');
+ 						else
+ 							$filter->{$sf}->equals(array($this->get->get_string($key)), $section->allow_nulls);
+ 					}
+ 				}
+ 			    break;
+ 			case "text":
+ 				$sf=$section->filter;
+ 				if ($this->get->exists($key))
+ 				{
+ 				    if ($section->join_model && $section->join_column && $section->join_foreign_column)
+                        {
+                            $join_filter = filter($section->join_model);
+                            $join_filter->{$sf}->contains(array($this->get->get_string($key)));
+                            $join_filter->select='';
+                            $filter->join($section->join_column, $join_filter, $section->join_foreign_column);                          
+                        }
+                        else
+                        {
+                            $filter->{$sf}->contains(array($this->get->get_string($key)));
+                        }
+ 				}
+ 			    break;
+ 			case "date":
+ 				$sf=$section->filter;
+ 				if ($this->get->exists($key))
+ 					$filter->{$sf}->greater_equal(date('m/d/Y',time()-($this->get->get_num($key) * 24 * 60 * 60)));
+ 				break;
+ 			case "location":
+ 				$sf=$section->filter;
+				$this->handle_location($filter, $section, $key);
+
+
+                break;
+
+ 		}
+ 	
+ 	}
+ 	
+ 	public function handle_location($filter, $section, $key)
+ 	{
+ 		$sf = $section->filter;
+ 		
+ 		$lat = $this->get->lat;
+ 		$long = $this->get->long;
+ 		
+ 		if (is_numeric($lat) && is_numeric($long))
+ 		{
+ 			uses_model('location/object_location');
+ 			$distance_filter = ObjectLocation::DistanceFilter($lat, $long, $this->get->get_string($key), 'mi');
+ 			$filter->join($sf, $distance_filter, 'object_id');
+ 		}
+ 		
+ 	}
+ 	
+ 	public function handle_text_query($filter)
+ 	{
+ 		if ($this->get->q)
+ 		{
+ 			foreach($this->appmeta->text_query->attributes as $val)
+ 			{
+ 				$filter_description_tokens[] = $this->get->q;
+ 				
+	 			$filter->or->{$val}->contains($this->get->q);
+ 			}	
+ 		} 		
+ 	}
+ 	
+ 	public function build_filter($filter=null)
+ 	{
+ 		$filter_description_tokens = array();
+ 		
+ 		if (!$filter)
+	        $filter=$this->get_filter($this->init_filter());
+	
+ 		$filter_attributes = $this->get_attributes();
+
+ 		// process the q parameter
+ 		$this->handle_text_query($filter);
+ 		
+ 		// process the rest
+ 		foreach($filter_attributes as $key=>$section)
+ 		{
+ 			$this->build_filter_field($filter, $key, $section);
+ 		}
+ 		
+		
+ 		$filterstr=trim($filterstr,'&');
+ 		
+ 		$filter->parse($filterstr);
+ 		
+ 		if ($this->get->exists('order_by'))
+ 		{
+ 			$sb=$this->get->order_by;
+ 			$od="desc";
+ 			if ($this->get->exists('direction'))
+ 				$od=strtolower($this->get->direction);
+
+ 			$filter->order_by->{$sb}->{$od};
+ 		}
+ 		else
+ 		{
+ 			// Are there any default sort criteria defined
+ 			$order_by = $this->appmeta->sort->order_by;
+ 			if ($order_by)
+ 			{
+ 				$options = $order_by->options;
+ 				if ($options)
+ 				{
+ 					$sorts = $options->attributes;
+ 					foreach($sorts as $key => $params)
+ 					{
+ 						if ($params->default)
+ 						{
+	 						$sb = $params->orby_by;
+	 						$od = ($params->direction)?strtolower($params->direction):'asc';
+	 						$filter->order_by->{$sb}->{$od};
+ 						}
+ 					}
+ 				}
+ 			}
+ 		}
+ 		
+ 		// add in description
+ 		$filter->filter_description_tokens = $filter_description_tokens;
+ 		
+		trace("controller",$filter->show_query());
+		trace("controller",$filterstr);
+
+        return $filter;
+ 	}
+
+ 	
+}

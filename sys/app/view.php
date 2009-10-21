@@ -320,6 +320,7 @@ uses('system.app.layout');
   		{
   		}
   		
+  		
 		// extract php control includes
 		$php_includes = "#<uses:(\w+)\stag=['\"]([^\"']*)['\"]\scontrol=['\"]([^\"']*)['\"]\s/>#";
 		
