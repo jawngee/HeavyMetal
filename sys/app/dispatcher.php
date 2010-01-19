@@ -157,8 +157,9 @@ abstract class Dispatcher
 		
 		// preload helpers
 		$conf=Config::Get('helpers');
-      	foreach($conf->auto->items as $helper)
-            uses("helper.$helper");
+		if ($conf->auto->items)
+      		foreach($conf->auto->items as $helper)
+            	uses("helper.$helper");
 	}
 	
 	/**
