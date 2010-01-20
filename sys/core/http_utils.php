@@ -2,11 +2,11 @@
 /**
  * HTTP utility functions
  * 
- * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
+ * @copyright     Copyright 2009-2012 Jon Gilkison and Trunk Archive Inc
  * @package       application
  * @subpackage	  core
  *
- * Copyright (c) 2009, Jon Gilkison and Massify LLC.
+ * Copyright (c) 2009, Jon Gilkison and Trunk Archive Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

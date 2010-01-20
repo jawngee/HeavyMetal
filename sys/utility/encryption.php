@@ -2,7 +2,7 @@
 /**
  * Provides two-way keyed encoding using XOR Hashing and Mcrypt
  * 
- * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
+ * @copyright     Copyright 2009-2012 Jon Gilkison and Trunk Archive Inc
  * @package       application
  * 
  * Original code: Rick Ellis
@@ -10,7 +10,7 @@
  * 
  * Modified to be more heavymetal-ish by Jon Gilkison.  Made mcrypt a requirement.
  *
- * Copyright (c) 2009, Jon Gilkison and Massify LLC.
+ * Copyright (c) 2009, Jon Gilkison and Trunk Archive Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

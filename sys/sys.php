@@ -4,11 +4,11 @@
  * 
  * http://wiki.github.com/jawngee/HeavyMetal/sys-and-uses
  * 
- * @copyright     Copyright 2009-2012 Jon Gilkison and Massify LLC
+ * @copyright     Copyright 2009-2012 Jon Gilkison and Trunk Archive Inc
  * @link          http://wiki.getheavy.info/index.php/Sys,_Namespaces_and_Includes
  * @package       application
  *
- * Copyright (c) 2009, Jon Gilkison and Massify LLC.
+ * Copyright (c) 2009, Jon Gilkison and Trunk Archive Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

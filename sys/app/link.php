@@ -6,7 +6,7 @@
  * @package		HeavyMetal
  * @category 	Application
  * @author     	Peter Dixon-Moses (pd@massifycorp.com)
- * @copyright  	2007 Massify LLC
+ * @copyright  	2007 Trunk Archive Inc
  */
 
 uses('sys.app.request.query');
