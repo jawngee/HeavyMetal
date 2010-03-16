@@ -38,9 +38,9 @@ uses("system.app.dynamic_object");
 
 
 /**
- * Driver for PGSQL
+ * Driver for MSSQL
  */
-class PGSQLDatabase extends Database
+class MSSQLDatabase extends Database
 {
     private $config=null;
     private $connection=null;

@@ -48,7 +48,7 @@ class SOLRSearchController extends GenericSearchController
 {
     protected function get_filter($initial_filter_string=null)
     {
-        uses_system('data/solr_filter');
+        uses('system.data.solr_filter');
         $smodel=$this->appmeta->search_model;
         
         uses("model.$smodel");
@@ -58,15 +58,23 @@ class SOLRSearchController extends GenericSearchController
         
         $filter = new SOLRFilter($instance,$class,false);
        
+        // Set query parser if specified
+        $query_parser = $this->appmeta->query_parser;
+        $filter->query_parser = $query_parser;
+
+        // Set result format if specified
+        $result_format = $this->appmeta->result_format;
+        $filter->result_format = $result_format;
+
+        // Load boost function if present
+        $boost_function = $this->appmeta->boost_function;
+        $filter->boost_function = $boost_function;
+
         // Load facet config if present
         $facet_configs = $this->appmeta->facets->attributes;
 		foreach ($facet_configs as $key => $value)
 	        $filter->facet->{$key} = $value;
             
-        // Load boost function if present
-        $boost_function = $this->appmeta->boost_function;
-        $filter->boost_function = $boost_function;
-
         if ($initial_filter_string)
             $vars = $filter->parse($initial_filter_string);
 
@@ -112,14 +120,22 @@ class SOLRSearchController extends GenericSearchController
  	
  	public function handle_text_query($filter)
  	{
+		if (isset($this->appmeta->text_query))
+		{
 
- 		foreach($this->appmeta->text_query->attributes as $val)
- 		{
- 			$filter_description_tokens[] = $this->get->q;
+ 			foreach($this->appmeta->text_query->attributes as $val)
+ 			{
+ 				$filter_description_tokens[] = $this->request->input->q;
  			
- 			$filter->{$val}->q_param = true;
- 			$filter->or->{$val}->contains($this->get->q);
- 		}	
+ 				$filter->{$val}->q_param = true;
+ 				$filter->or->{$val}->contains($this->request->input->q);
+ 			}
+		}
+		else
+		{
+			// set q_value in solr_filter directly
+			$filter->q_value = $this->request->input->q;
+		}	
 
  		if ($this->get->q)
  		{

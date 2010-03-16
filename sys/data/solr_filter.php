@@ -1,26 +1,22 @@
 <?
-uses_system('data/field');
-uses_system('data/filter');
-uses_system('data/solr_filter_field');
-uses_system('data/order_by');
-uses_system('data/facets');
-uses_system('data/highlights');
-uses_system('data/join');
+uses('system.data.field');
+uses('system.data.filter');
+uses('system.data.solr_filter_field');
+uses('system.data.order_by');
+uses('system.data.facets');
+uses('system.data.highlights');
+uses('system.data.join');
 
 /**
  * Model filter
  * 
- * @author		user
- * @date		Jun 16, 2007
- * @time		10:30:32 PM
- * @file		filter.php
- * @copyright  Copyright (c) 2007 massify.com, all rights reserved.
  */
 
 
 class SOLRFilter extends Filter
 {
 	protected $fields=array();		/** List of filtered fields */
+	public $q_value=null;
 
 	public  $model=null;			/** Reference to the Model being filtered */
 	public $class=null;
@@ -40,6 +36,8 @@ class SOLRFilter extends Filter
 	public $highlight=null;
 	
 	public $boost_function=null;
+
+	public $query_parser=null;
 
 
 	
@@ -175,7 +173,7 @@ class SOLRFilter extends Filter
    	{
    		$query = array();
 		$fq = array();
-		$q = array();
+		$q = array($this->q_value);
 		$loc = array();
 
 		// primary query string (deal with this optimization)
@@ -287,6 +285,10 @@ class SOLRFilter extends Filter
 			$query[] = 'hl.' . $key .'='. $value;
    		
 		
+		// specify query parser
+		if (!empty($this->query_parser))
+			$query[] = 'qt='.$this->query_parser;
+
 		// handle boost function
 		if (!empty($this->boost_function))
 			$query[] = 'bf='.$this->boost_function;
@@ -322,8 +324,13 @@ class SOLRFilter extends Filter
 
    		$response = file_get_contents($this->build_query());
 
-		eval("\$response_array = " . $response . ";");
-   			
+		if ($this->result_format == 'php')
+			eval("\$response_array = " . $response . ";");
+		else if ($this->result_format == 'phps')
+			$response_array = unserialize($response);
+		else 
+			throw new Exception ("HeavyMetal does not support SOLR result format: wt=".$this->response_type);
+
 		$result = array();
 		
 		$result = $response_array['response']['docs'];

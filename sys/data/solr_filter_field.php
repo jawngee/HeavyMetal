@@ -1,18 +1,12 @@
 <?
 
-uses_system('data/field');
-uses_system('data/filter');
-uses_system('data/filter_field');
-uses_system('data/solr_filter');
+uses('system.data.field');
+uses('system.data.filter');
+uses('system.data.filter_field');
+uses('system.data.solr_filter');
 
 /**
  * A filtered field
- *
- * @author		user
- * @date		Jun 16, 2007
- * @time		10:30:44 PM
- * @file		filter_field.php
- * @copyright  Copyright (c) 2007 massify.com, all rights reserved.
  */
 class SOLRFilterField extends FilterField
 {

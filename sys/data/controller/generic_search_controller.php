@@ -373,12 +373,12 @@ class GenericSearchController extends Controller
  		
  		$filter->parse($filterstr);
  		
- 		if ($this->get->exists('order_by'))
+ 		if ($this->request->input->exists('order_by'))
  		{
- 			$sb=$this->get->order_by;
+ 			$sb=$this->request->input->order_by;
  			$od="desc";
- 			if ($this->get->exists('direction'))
- 				$od=strtolower($this->get->direction);
+ 			if ($this->request->input->exists('direction'))
+ 				$od=strtolower($this->request->input->direction);
 
  			$filter->order_by->{$sb}->{$od};
  		}
