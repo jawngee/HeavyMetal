@@ -160,6 +160,7 @@ uses('system.app.layout');
 	 				
 	 				$layoutclass= str_replace('_','',$layout).'Layout';
 	 				$this->layout=new $layoutclass($title,$description,"$layout.$view_type");
+					$this->layout->controller = $this->controller;
 	 			}
 	 		}
  		}

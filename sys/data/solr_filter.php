@@ -322,6 +322,7 @@ class SOLRFilter extends Filter
    		if ($limit)
    			$this->limit=$limit;
 
+
    		$response = file_get_contents($this->build_query());
 
 		if ($this->result_format == 'php')

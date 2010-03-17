@@ -89,7 +89,7 @@ class RepeaterControl extends DataboundControl
 
 		if ($this->container_template!=null)
 		{
-			$view=new View($this->parent,$this->container_template);
+			$view=new View($this->container_template,$this->controller);
 			$result=$view->render(array('total_count'=>$this->total_count, 'count'=>$this->count, 'control' => $this, 'content' => $rendered));
 		}
 		else

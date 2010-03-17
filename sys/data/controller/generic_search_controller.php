@@ -123,7 +123,7 @@ class GenericSearchController extends Controller
 	
 	protected function get_attributes()
 	{
-		return $this->appmeta->filter->attributes;
+		return $this->appmeta->filter;
 	}
  	
 	public function search_tokens()
@@ -136,9 +136,9 @@ class GenericSearchController extends Controller
 		if ($this->get->location)
 			$tokens[] = $this->get->location;
 		
-		foreach($this->appmeta->filter->attributes as $field=>$section)
+		foreach($this->appmeta->filter as $field=>$section)
 		{
-			$value=$this->get->get_string($field);
+			$value=$this->request->input->{$field};
 			
 			if($section->description && $value)
 			{
@@ -198,10 +198,10 @@ class GenericSearchController extends Controller
 			$filter->offset = floor($count/$filter->limit)*$filter->limit;
 
 		return array(
-			'form' => $this->appmeta->form->attributes,
-			'filters' => $this->appmeta->filter->attributes,
+			'form' => $this->appmeta->form,
+			'filters' => $this->appmeta->filter,
 		    'current_saved_id' => $current_saved_id,
-			'sorts' => $this->appmeta->sort->attributes,
+			'sorts' => $this->appmeta->sort->order_by->options,
 			'page_size' => $filter->limit,
  			'count' => $count,
 			'filter_description_tokens' => $this->search_tokens(),
@@ -213,7 +213,7 @@ class GenericSearchController extends Controller
  	public function build_filter_field($filter, $key, $section)
  	{
  		// Add to the description string
- 		if ($this->get->exists($key) && ($section->description) )
+ 		if ($this->request->input->exists($key) && ($section->description) )
  		{
 			$description = null;
 			
@@ -233,7 +233,7 @@ class GenericSearchController extends Controller
  		{
  			case "radio":
  			case "multi":
- 				foreach($section->options->attributes as $name=>$option)
+ 				foreach($section->options as $name=>$option)
                      {
                          if ($this->get->{$key}==$name){
                              $filterstr.=$option->filter.'&';
@@ -266,25 +266,25 @@ class GenericSearchController extends Controller
                 case "lookup":
  			case "lookup_select":
  				$sf=$section->filter;
- 				if ($this->get->exists($key))
+ 				if ($this->request->input->exists($key))
  				{
  					if ($section->join_model && $section->join_column && $section->join_foreign_column)
  					{
                         $join_filter = filter($section->join_model);
                         
                         if ($section->case_insensitive)
-	                        $join_filter->{$sf}->equals(($this->get->get_string($key)), $section->allow_nulls, 'LIKE', 'lower');
+	                        $join_filter->{$sf}->equals($this->request->input->{$key}, $section->allow_nulls, 'LIKE', 'lower');
                         else
-	                        $join_filter->{$sf}->equals(($this->get->get_string($key)));
+	                        $join_filter->{$sf}->equals($this->request->input->{$key});
 	                    $join_filter->select='';
                         $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER'); 							
  					}
  					else
  					{
 						if ($section->case_insensitive)
- 							$filter->{$sf}->equals(array($this->get->get_string($key)), $section->allow_nulls, 'LIKE', 'lower');
+ 							$filter->{$sf}->equals($this->request->input->{$key}, $section->allow_nulls, 'LIKE', 'lower');
  						else
- 							$filter->{$sf}->equals(array($this->get->get_string($key)), $section->allow_nulls);
+ 							$filter->{$sf}->equals(array($this->request->input->{$key}), $section->allow_nulls);
  					}
  				}
  			    break;
@@ -295,13 +295,13 @@ class GenericSearchController extends Controller
  				    if ($section->join_model && $section->join_column && $section->join_foreign_column)
                         {
                             $join_filter = filter($section->join_model);
-                            $join_filter->{$sf}->contains(array($this->get->get_string($key)));
+                            $join_filter->{$sf}->contains(array($this->request->input->{$key}));
                             $join_filter->select='';
                             $filter->join($section->join_column, $join_filter, $section->join_foreign_column);                          
                         }
                         else
                         {
-                            $filter->{$sf}->contains(array($this->get->get_string($key)));
+                            $filter->{$sf}->contains(array($this->request->input->{$key}));
                         }
  				}
  			    break;
@@ -331,7 +331,7 @@ class GenericSearchController extends Controller
  		if (is_numeric($lat) && is_numeric($long))
  		{
  			uses_model('location/object_location');
- 			$distance_filter = ObjectLocation::DistanceFilter($lat, $long, $this->get->get_string($key), 'mi');
+ 			$distance_filter = ObjectLocation::DistanceFilter($lat, $long, $this->request->input->{$key}, 'mi');
  			$filter->join($sf, $distance_filter, 'object_id');
  		}
  		
@@ -341,7 +341,7 @@ class GenericSearchController extends Controller
  	{
  		if ($this->get->q)
  		{
- 			foreach($this->appmeta->text_query->attributes as $val)
+ 			foreach($this->appmeta->text_query as $val)
  			{
  				$filter_description_tokens[] = $this->get->q;
  				
@@ -391,7 +391,7 @@ class GenericSearchController extends Controller
  				$options = $order_by->options;
  				if ($options)
  				{
- 					$sorts = $options->attributes;
+ 					$sorts = $options;
  					foreach($sorts as $key => $params)
  					{
  						if ($params->default)
