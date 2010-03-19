@@ -9,7 +9,7 @@
  * @file		order_by.php
  * @copyright  Copyright (c) 2007 massify.com, all rights reserved.
  */
-uses('system.data.facet');
+uses('system.data.search.solr.facet');
 
 class Facets
 {

@@ -3,7 +3,7 @@
 uses('system.data.field');
 uses('system.data.filter');
 uses('system.data.filter_field');
-uses('system.data.solr_filter');
+uses('system.data.search.solr.solr_filter');
 
 /**
  * A filtered field

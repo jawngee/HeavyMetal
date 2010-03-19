@@ -31,9 +31,9 @@
 * http://www.opensource.org/licenses/bsd-license.php
 *
 */
-uses_system('data/field');
-uses_system('data/filter');
-uses_system('data/memory_filter_field');
+uses('system.data.field');
+uses('system.data.filter');
+uses('system.data.memory.memory_filter_field');
 
 /**
  * MemoryFilter - simple in-memory implementation of Filter (created with $filter->stash())

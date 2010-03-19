@@ -31,9 +31,9 @@
 * http://www.opensource.org/licenses/bsd-license.php
 *
 */
-uses_system('data/field');
-uses_system('data/filter');
-uses_system('data/memory_filter');
+uses('system.data.field');
+uses('system.data.filter');
+uses('system.data.memory.memory_filter');
 
 /**
  * A filtered field (used by MemoryFilter)

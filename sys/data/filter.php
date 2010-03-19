@@ -538,7 +538,7 @@ class Filter
    	
    	function stash($cache_key=null, $cache_expiry=0)
    	{
-   		uses_system('data/memory_filter');
+   		uses('system.data.memory.memory_filter');
 
    		// CHECK CACHE?
    		if ($cache_key && $cache_expiry > 0)

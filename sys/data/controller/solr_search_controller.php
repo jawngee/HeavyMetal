@@ -48,7 +48,7 @@ class SOLRSearchController extends GenericSearchController
 {
     protected function get_filter($initial_filter_string=null)
     {
-        uses('system.data.solr_filter');
+        uses('system.data.search.solr.solr_filter');
         $smodel=$this->appmeta->search_model;
         
         uses("model.$smodel");

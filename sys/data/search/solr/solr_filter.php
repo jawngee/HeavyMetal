@@ -1,11 +1,11 @@
 <?
 uses('system.data.field');
 uses('system.data.filter');
-uses('system.data.solr_filter_field');
 uses('system.data.order_by');
-uses('system.data.facets');
-uses('system.data.highlights');
 uses('system.data.join');
+uses('system.data.search.solr.solr_filter_field');
+uses('system.data.search.solr.facets');
+uses('system.data.search.solr.highlights');
 
 /**
  * Model filter
