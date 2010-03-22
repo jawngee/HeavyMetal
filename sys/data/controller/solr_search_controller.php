@@ -77,7 +77,8 @@ class SOLRSearchController extends GenericSearchController
             
         if ($initial_filter_string)
             $vars = $filter->parse($initial_filter_string);
-
+		else if ($this->init_filter())
+			$vars = $filter->parse($this->init_filter());
   
         return $filter;
     }

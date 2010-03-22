@@ -23,7 +23,7 @@ class SearchFilterControl extends Control
 	public $location_template='ctrl/searchfilter/location';
 	public $date_template='ctrl/searchfilter/date';
 	public $list_template='ctrl/searchfilter/list';
-	public $divider_template='ctrl/searchfilter/divider';
+	public $grouping_template='ctrl/searchfilter/grouping';
 	public $faceted_template='ctrl/searchfilter/faceted';
 	public $token_template='ctrl/searchfilter/token';
 	public $container_template='ctrl/searchfilter/container';
@@ -34,9 +34,28 @@ class SearchFilterControl extends Control
 	
 	public $use_filter=null;
 	
+	public $templates=array();
+	
  	public function init()
 	{
 		parent::init();
+		
+		$this->templates['order_by']=new Template($this->orderby_template);
+		$this->templates['radio']=new Template($this->radio_template);
+		$this->templates['multi']=new Template($this->multi_template);
+		$this->templates['lookup']=new Template($this->lookup_template); 
+  		$this->templates['lookup_select']=new Template($this->lookup_select_template);
+		$this->templates['lookup_checkbox']=new Template($this->lookup_checkbox_template);
+		$this->templates['range']=new Template($this->range_template);
+		$this->templates['text']=new Template($this->text_template);
+		$this->templates['location']=new Template($this->location_template);
+		$this->templates['date']=new Template($this->date_template);
+		$this->templates['list']=new Template($this->list_template);
+		$this->templates['grouping']=new Template($this->grouping_template);
+		$this->templates['faceted']=new Template($this->faceted_template);
+		$this->templates['token']=new Template($this->token_template);
+		
+		
 	}
 
 	function link($parameter,$value,$removevalues=null)
@@ -155,66 +174,10 @@ class SearchFilterControl extends Control
 		$result='';
 
 		$rendered='';
-	
-		
-		$templates['order_by']=new Template($this->orderby_template);
-		$templates['radio']=new Template($this->radio_template);
-		$templates['multi']=new Template($this->multi_template);
-		$templates['lookup']=new Template($this->lookup_template); 
-  		$templates['lookup_select']=new Template($this->lookup_select_template);
-		$templates['lookup_checkbox']=new Template($this->lookup_checkbox_template);
-		$templates['range']=new Template($this->range_template);
-		$templates['text']=new Template($this->text_template);
-		$templates['location']=new Template($this->location_template);
-		$templates['date']=new Template($this->date_template);
-		$templates['list']=new Template($this->list_template);
-		$templates['divider']=new Template($this->divider_template);
-		$templates['faceted']=new Template($this->faceted_template);
-		$templates['token']=new Template($this->token_template);
-		
-
 		
 		foreach($this->filters as $field => $section)
 		{
-			$value=$this->controller->request->input->{$field};
-
-			if(!$this->use_filter || $this->use_filter==$field)
-			{			
-				switch($section->type)
-				{
-					case 'radio':
-					case 'direction':
-						$rendered.=$templates['radio']->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
-						break;
-					case 'order_by':
-					case 'multi':
-					case 'range':
-					case 'text':
-					case 'list':
-					case 'location':
-					case 'date':
-						$rendered.=$templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
-						break;
-					case 'lookup':
-			        case 'lookup_select':
-					case 'lookup_checkbox':
-						if ($section->facet) {
-							$rows = $this->results['facet_counts'][$section->filter];
-						}
-						else
-							$rows=Channel::GetDatasource($section->datasource,null,null,$count='not needed');
-						$rendered.=$templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'items' => $rows, 'value' => $value));
-						break;
-					case 'faceted':	
-					case 'divider':
-						$rendered.=$templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value, 'facets' => $this->results['facet_counts']));
-						break;
-				}
-		    }
-		    else if ($this->use_filter && isset($templates[$this->use_filter]))
-		    { 
-		    	$rendered.=$templates[$this->use_filter]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
-		    }
+			$rendered .= $this->render_filter($field, $section);
 		}
 				
 		if (!empty($this->container_template))
@@ -229,5 +192,61 @@ class SearchFilterControl extends Control
 		}
 
 		return $result;
+	}
+	
+	
+	function render_filter($field, $section)
+	{
+		$rtn = null;
+		
+		$value=$this->controller->request->input->{$field};
+
+		if(!$this->use_filter || $this->use_filter==$field)
+		{			
+			switch($section->type)
+			{
+				case 'radio':
+				case 'direction':
+					$rtn.=$this->templates['radio']->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
+					break;
+				case 'order_by':
+				case 'multi':
+				case 'range':
+				case 'text':
+				case 'list':
+				case 'location':
+				case 'date':
+					$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
+					break;
+				case 'lookup':
+		        case 'lookup_select':
+				case 'lookup_checkbox':
+					if ($section->facet) {
+						$rows = $this->results['facet_counts'][$section->filter];
+					}
+					else
+						$rows=Channel::GetDatasource($section->datasource,null,null,$count='not needed');
+					$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'items' => $rows, 'value' => $value));
+					break;
+				case 'faceted':	
+				case 'grouping':
+				{	
+					$rendered_subfilters = ''; 
+					if ($section->filters) {
+						foreach($section->filters as $subfield => $subsection)
+							$rendered_subfilters .= $this->render_filter($subfield, $subsection);
+					}
+
+					$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value, 'facets' => $this->results['facet_counts'], 'rendered_subfilters' => $rendered_subfilters));
+					break;
+				}
+			}
+	    }
+	    else if ($this->use_filter && isset($this->templates[$this->use_filter]))
+	    { 
+	    	$rtn.=$this->templates[$this->use_filter]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
+	    }		
+	    
+	    return $rtn;
 	}
 }

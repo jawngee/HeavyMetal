@@ -103,7 +103,6 @@ class GenericSearchController extends Controller
 	
 	protected function get_filter($initial_filter_string=null)
 	{
-		
 		$smodel=$this->appmeta->search_model;
  		
  		uses("model.$smodel");
@@ -117,7 +116,7 @@ class GenericSearchController extends Controller
 			$filter->parse($initial_filter_string);
 		else if ($this->init_filter())
 			$filter->parse($this->init_filter());
-			
+
 		return $filter;
 	}
 	
@@ -365,6 +364,11 @@ class GenericSearchController extends Controller
  		// process the rest
  		foreach($filter_attributes as $key=>$section)
  		{
+			// Handle nested filters
+ 			if ($section->type == 'grouping')
+ 				foreach($section->filters as $subkey=>$subsection)
+ 					$this->build_filter_field($filter, $subkey, $subsection);
+ 			
  			$this->build_filter_field($filter, $key, $section);
  		}
  		
