@@ -45,7 +45,7 @@
 uses('system.data.controller.generic_search_controller');
 
 class SOLRSearchController extends GenericSearchController
-{
+{		
     protected function get_filter($initial_filter_string=null)
     {
         uses('system.data.search.solr.solr_filter');
@@ -70,6 +70,10 @@ class SOLRSearchController extends GenericSearchController
         $boost_function = $this->appmeta->boost_function;
         $filter->boost_function = $boost_function;
 
+        // Turn on clustering if requested
+        if ($this->appmeta->clustering)
+        	$filter->clustering = true;
+        
         // Load facet config if present
         $facet_configs = $this->appmeta->facets;
 		foreach ($facet_configs as $key => $value)

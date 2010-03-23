@@ -35,6 +35,8 @@ class SOLRFilter extends Filter
 	public $facet=null;
 	public $highlight=null;
 	
+	public $clustering=false;
+	
 	public $boost_function=null;
 
 	public $query_parser=null;
@@ -190,6 +192,7 @@ class SOLRFilter extends Filter
    			}
 			else
    			{	
+
    				// figure out if this field goes in the q parameter
 				$raw_value = trim($filter_field->value,'"');
 
@@ -236,7 +239,9 @@ class SOLRFilter extends Filter
 
 		if (count($sort) > 0)
 			$query[] = 'sort='.implode($sort, ',');
-			
+
+		if ($this->clustering)
+			$query[] = 'clustering=true';
 			
    		// handle faceting
    		if (!empty($this->facet->fields))
@@ -342,6 +347,17 @@ class SOLRFilter extends Filter
 		$result['total_count'] = $response_array['response']['numFound'];
 		$result['facet_counts'] = $response_array['facet_counts']['facet_fields'];
 
+		//  weave clusters in as a facet (replace cluster facet)
+		if ($response_array['clusters'])
+		{
+			$result['facet_counts']['cluster'] = array();
+			
+			foreach ($response_array['clusters'] as $cluster)
+				if ($cluster['labels'][0] != "Other Topics")
+					$result['facet_counts']['cluster'][$cluster['labels'][0]] = count($cluster['docs']);
+		}			
+				
+		
 		// overlay any highlit results into main result set
 		foreach ($response_array['highlighting'] as $id => $hi_fields)
 			for ($i=0; $i<$result_count; $i++)
