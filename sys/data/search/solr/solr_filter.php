@@ -1,26 +1,22 @@
 <?
-uses_system('data/field');
-uses_system('data/filter');
-uses_system('data/solr_filter_field');
-uses_system('data/order_by');
-uses_system('data/facets');
-uses_system('data/highlights');
-uses_system('data/join');
+uses('system.data.field');
+uses('system.data.filter');
+uses('system.data.order_by');
+uses('system.data.join');
+uses('system.data.search.solr.solr_filter_field');
+uses('system.data.search.solr.facets');
+uses('system.data.search.solr.highlights');
 
 /**
  * Model filter
  * 
- * @author		user
- * @date		Jun 16, 2007
- * @time		10:30:32 PM
- * @file		filter.php
- * @copyright  Copyright (c) 2007 massify.com, all rights reserved.
  */
 
 
 class SOLRFilter extends Filter
 {
 	protected $fields=array();		/** List of filtered fields */
+	public $q_value=null;
 
 	public  $model=null;			/** Reference to the Model being filtered */
 	public $class=null;
@@ -39,7 +35,11 @@ class SOLRFilter extends Filter
 	public $facet=null;
 	public $highlight=null;
 	
+	public $clustering=false;
+	
 	public $boost_function=null;
+
+	public $query_parser=null;
 
 
 	
@@ -175,7 +175,7 @@ class SOLRFilter extends Filter
    	{
    		$query = array();
 		$fq = array();
-		$q = array();
+		$q = array($this->q_value);
 		$loc = array();
 
 		// primary query string (deal with this optimization)
@@ -192,6 +192,7 @@ class SOLRFilter extends Filter
    			}
 			else
    			{	
+
    				// figure out if this field goes in the q parameter
 				$raw_value = trim($filter_field->value,'"');
 
@@ -238,7 +239,9 @@ class SOLRFilter extends Filter
 
 		if (count($sort) > 0)
 			$query[] = 'sort='.implode($sort, ',');
-			
+
+		if ($this->clustering)
+			$query[] = 'clustering=true';
 			
    		// handle faceting
    		if (!empty($this->facet->fields))
@@ -287,6 +290,10 @@ class SOLRFilter extends Filter
 			$query[] = 'hl.' . $key .'='. $value;
    		
 		
+		// specify query parser
+		if (!empty($this->query_parser))
+			$query[] = 'qt='.$this->query_parser;
+
 		// handle boost function
 		if (!empty($this->boost_function))
 			$query[] = 'bf='.$this->boost_function;
@@ -320,10 +327,16 @@ class SOLRFilter extends Filter
    		if ($limit)
    			$this->limit=$limit;
 
+//dump('solr_filter->execute(): ' . $this->build_query());   			
    		$response = file_get_contents($this->build_query());
 
-		eval("\$response_array = " . $response . ";");
-   			
+		if ($this->result_format == 'php')
+			eval("\$response_array = " . $response . ";");
+		else if ($this->result_format == 'phps')
+			$response_array = unserialize($response);
+		else 
+			throw new Exception ("HeavyMetal does not support SOLR result format: wt=".$this->response_type);
+
 		$result = array();
 		
 		$result = $response_array['response']['docs'];
@@ -334,6 +347,17 @@ class SOLRFilter extends Filter
 		$result['total_count'] = $response_array['response']['numFound'];
 		$result['facet_counts'] = $response_array['facet_counts']['facet_fields'];
 
+		//  weave clusters in as a facet (replace cluster facet)
+		if ($response_array['clusters'])
+		{
+			$result['facet_counts']['cluster'] = array();
+			
+			foreach ($response_array['clusters'] as $cluster)
+				if ($cluster['labels'][0] != "Other Topics")
+					$result['facet_counts']['cluster'][$cluster['labels'][0]] = count($cluster['docs']);
+		}			
+				
+		
 		// overlay any highlit results into main result set
 		foreach ($response_array['highlighting'] as $id => $hi_fields)
 			for ($i=0; $i<$result_count; $i++)

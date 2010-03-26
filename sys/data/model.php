@@ -116,8 +116,8 @@ class Model implements ArrayAccess
 	// If a db object has been passed in, assign it.
 	if (isset($db))
 		$this->db=$db;
-	else
-	$this->db=Database::Get($this->database);
+	else if (isset($this->database))
+		$this->db=Database::Get($this->database);
 
 	// give the class a chance to describe itself for special case
 	// or business rule setup

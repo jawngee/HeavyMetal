@@ -431,13 +431,13 @@ class Filter
    		// hack
    		$query=str_replace('&amp;','$amp;',$query);
    		$matches=array();
-   		if (preg_match_all('#([a-z0-9_-]*)\s*([!=<>]+|by|contains any|contains all|contains|starts with|ends with|within|not in|in|is not|is)\s*([^&|]*)(?:&|\|)*#',$query,$matches))
+   		if (preg_match_all('#([A-Za-z0-9_-]*)\s*([!=<>]+|by|contains any|contains all|contains|starts with|ends with|within|not in|in|is not|is)\s*([^&|]*)(?:&|\|)*#',$query,$matches))
    		{
    			$vars=$matches[1];
    			$operators=$matches[2];
    			$vals=$matches[3];
    			$varcount=count($vars);
-   			
+
    			for($i=0; $i<$varcount; $i++)
    			{
    				if (($vars[$i]=='order') && ($operators[$i]=='by'))
@@ -538,7 +538,7 @@ class Filter
    	
    	function stash($cache_key=null, $cache_expiry=0)
    	{
-   		uses_system('data/memory_filter');
+   		uses('system.data.memory.memory_filter');
 
    		// CHECK CACHE?
    		if ($cache_key && $cache_expiry > 0)

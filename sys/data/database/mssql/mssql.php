@@ -97,7 +97,7 @@ class MSSQLDatabase extends Database
     	// extract the keys and values so we can build a prepared statement.
 
     	/*
-		$keys=array_keys($fields);
+	$keys=array_keys($fields);
     	$vals=array_values($fields);
     	
     	$sql="insert into $table_name (".implode(',',$keys).") values (";
@@ -144,7 +144,7 @@ class MSSQLDatabase extends Database
 //    		throw new DatabaseException("Could not update $table_name for $key=$id");
 //    		
 //    	return true;
-
+    	
     	// TODO: Implement
     	throw new DatabaseException("Not implemented.");	
     }
