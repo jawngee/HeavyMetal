@@ -127,7 +127,6 @@ uses('system.app.layout');
 			$title='';
 			$description=null;
 			$layout=null;
-			
 			foreach($parsed_attr as $attr)
 				switch($attr[1])
 				{

@@ -12,7 +12,7 @@ uses('system.data.table_schema');
  * @file		schema.php
  * @copyright  Copyright (c) 2007 massify.com, all rights reserved.
  */
-class PGSQLTableSchema extends TableSchema
+class MSSQLTableSchema extends TableSchema
 {
 	private $db=null;
 	

@@ -239,7 +239,7 @@ class ConfigInvalidFormatException extends ConfigException {}
  				}
 
  			if (self::$environment_config->uses!=null)
- 				foreach(self::$environment_config->uses->items as $item)
+ 				foreach(self::$environment_config->uses->before->items as $item)
  					uses($item);
  					
  			if (self::$environment_config->config_map!=null)
@@ -249,6 +249,17 @@ class ConfigInvalidFormatException extends ConfigException {}
  		}
  	}
  	
+	/** 
+ 	 * Loads a specific environment, or the default one specified in the .conf
+ 	 * 
+ 	 * @param string $env The environment to load
+ 	 */
+ 	public static function ShutdownEnvironment()
+ 	{
+		if ((self::$environment_config->uses!=null) && (self::$environment_config->uses->after!=null))
+			foreach(self::$environment_config->uses->after->items as $item)
+				uses($item);
+ 	}
 
  
  	/**

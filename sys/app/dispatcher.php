@@ -388,7 +388,6 @@ abstract class Dispatcher
 
 		$data['controller']=&$class;
 		$data['session']=&$class->session;
-		
 		return $data;
 	}
 
@@ -409,6 +408,7 @@ abstract class Dispatcher
 	public function dispatch($req_type=null)
 	{
 		$data=$this->call();
+		
 		return $this->transform($data,$req_type);
 	}
 }

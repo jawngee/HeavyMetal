@@ -55,10 +55,13 @@ class Localization
         		}
         	}
 
-        	arsort($langs, SORT_NUMERIC);
+        	if (is_array($langs))
+        	{
+        		arsort($langs, SORT_NUMERIC);
         	
-        	foreach($langs as $lang=>$value)
-        		$thelangs[]=$lang;
+        		foreach($langs as $lang=>$value)
+        			$thelangs[]=$lang;
+        	}
 
 //        	$session->langs=$thelangs;
 //        	$session->save();

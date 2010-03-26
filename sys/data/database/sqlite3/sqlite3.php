@@ -33,14 +33,14 @@
 */
 
 uses('system.data.database');
-uses('system.data.database.mssql.mssql_result');
+uses('system.data.database.sqlite3.sqlite3_result');
 uses("system.app.dynamic_object");
 
 
 /**
- * Driver for Microsoft SQL Server
+ * Driver for SQLite
  */
-class MSSQLDatabase extends Database
+class SQLite3Database extends Database
 {
     private $config=null;
     private $connection=null;
@@ -52,28 +52,15 @@ class MSSQLDatabase extends Database
      */
     public function __construct($dsn)
     {
+    	
+    	//sqlite://path/to/database/file.db
 		$this->config=parse_url($dsn);
 		if (!$this->config)
 		    throw new DatabaseException("Invalid dsn '$dsn'.");
 		
-		
-		$database=trim($this->config['path'],'/');
-		
-		if (isset($this->config['host']))
-		    $host=$this->config['host'];
-		if (isset($this->config['user']))
-		    $user=$this->config['user'];
-		if (isset($this->config['port']))
-			$port=$this->config['port'];
-		if (isset($this->config['pass']))
-			$pass=$this->config['pass'];
-			
-		$this->connection=mssql_connect($host,$user,$pass);
+		$this->connection=sqlite_open(PATH_APP.'/data/'.$this->config['host']);
 		if (!$this->connection)
 			throw new DatabaseException("Invalid database settings.");
-			
-		if (!mssql_select_db($database,$this->connection))
-			throw new DatabaseException("Database does not exits");
     }
 
 
@@ -96,27 +83,21 @@ class MSSQLDatabase extends Database
     {
     	// extract the keys and values so we can build a prepared statement.
 
-    	/*
 		$keys=array_keys($fields);
     	$vals=array_values($fields);
     	
     	$sql="insert into $table_name (".implode(',',$keys).") values (";
     	for($i=1; $i<=count($vals); $i++)
-    		$sql.='$'.$i.',';
+    		$sql.="'".$vals[$i]."',";
     	$sql=trim($sql,',');
 
-   		$sql.=") returning $key";
+   		$sql.=");";
 
-    	$res=pg_query_params($this->connection,$sql,$vals);
-    	$row=pg_fetch_array($res);
-    	
-    	// return the id
-    	return $row[0];
-    	*/
-    	
-    	// TODO: Implement
-    	throw new DatabaseException("Not implemented.");
-    }
+    	$res=sqlite_query($this->connection,$sql);
+    	if (!$res)
+    		throw new DatabaseException(sqlite_last_error($this->connection));
+    		
+    	return sqlite_last_insert_rowid($this->connection);    }
 
     /**
      * Performs an update
@@ -129,24 +110,21 @@ class MSSQLDatabase extends Database
     public function update($table_name,$key,$id,$fields)
     {
     	// extract the keys and values so we can build a prepared statement.
-//    	$keys=array_keys($fields);
-//    	$vals=array_values($fields);
-//    	
-//    	$sql="update $table_name set ";
-//    	
-//    	for($i=1; $i<=count($keys); $i++)
-//    		$sql.=$keys[$i-1].'=$'.$i.',';
-//    	$sql=trim($sql,',');
-//
-//   		$sql.=" where $key=$id";
-//    	$res=pg_query_params($this->connection,$sql,$vals);
-//    	if (pg_affected_rows($res)<=0)
-//    		throw new DatabaseException("Could not update $table_name for $key=$id");
-//    		
-//    	return true;
+    	$keys=array_keys($fields);
+    	$vals=array_values($fields);
+    	
+    	$sql="update $table_name set ";
+    	
+    	for($i=1; $i<=count($keys); $i++)
+    		$sql.=$keys[$i-1]."='".$vals[$i]."',";
+    	$sql=trim($sql,',');
 
-    	// TODO: Implement
-    	throw new DatabaseException("Not implemented.");	
+   		$sql.=" where $key=$id";
+    	$res=sqlite_query($this->connection,$sql);
+    	if (sqlite_changes($this->connection)<=0)
+    		throw new DatabaseException(sqlite_last_error($this->connection));
+    		
+    	return true;
     }
 
     /**
@@ -158,8 +136,8 @@ class MSSQLDatabase extends Database
      */
     public function delete($table_name,$key,$id)
     {
-		$res=mssql_query("delete from $table_name where $key=$id",$this->connection);
-    	return (mssql_rows_affected($res)>0);
+		$res=sqlite_query($this->connection,"delete from $table_name where $key=$id");
+    	return (sqlite_changes($this->connection)>0);
     }
 
     /**
@@ -176,12 +154,12 @@ class MSSQLDatabase extends Database
     		
     	if ($limit)
     		$query.=" LIMIT $limit";
-    	$res=mssql_query($query,$this->connection);
+    	$res=sqlite_query($this->connection,$query);
     	
     	if (!$res)
-    		throw new DatabaseException(mssql_get_last_message($this->connection));
+    		throw new DatabaseException(sqlite_last_error($this->connection));
     	
-    	return new MSSQLResult($res);
+    	return new SQLite3Result($res);
     }
 
 	/**
@@ -210,8 +188,8 @@ class MSSQLDatabase extends Database
      */
     public function get_one($query)
     {
-    	$res=mssql_query($query,$this->connection);
-    	$row=mssql_fetch_array($res);
+    	$res=sqlite_query($this->connection,$query);
+    	$row=sqlite_fetch_array($res);
     	return $row[0];
     }
 
@@ -222,8 +200,8 @@ class MSSQLDatabase extends Database
      */
     public function get_row($query)
     {
-    	$res=mssql_query($this->connection,$query);
-    	return mssql_fetch_assoc($res);
+    	$res=sqlite_query($this->connection,$query);
+    	return sqlite_fetch_array($res,SQLITE_ASSOC);
     }
 
     /**
@@ -235,8 +213,8 @@ class MSSQLDatabase extends Database
      */
     public function fetch_row($table_name,$key,$id)
     {
-		$res=mssql_query($this->connection,"SELECT * FROM $table_name WHERE $key=$id");
-		return mssql_fetch_assoc($res);
+		$res=sqlite_query($this->connection,"SELECT * FROM $table_name WHERE $key=$id");
+		return sqlite_fetch_array($res,SQLITE_ASSOC);
     }
 
 
@@ -247,8 +225,8 @@ class MSSQLDatabase extends Database
      */
     public function get_rows($query)
     {
-    	$res=mssql_query($query,$this->connection);
-    	return mssql_fetch_array($res,MSSQL_NUM);
+    	$res=sqlite_query($this->connection,$query);
+    	return sqlite_fetch_all($res);
     }
 
     /**
@@ -346,7 +324,9 @@ class MSSQLDatabase extends Database
 	 */
 	public function schemas()
 	{
-		return $this->execute("SELECT nspname as schema FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname<>'information_schema'");
+//		return $this->execute("SELECT nspname as schema FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname<>'information_schema'");
+		throw new Exception("Not implemented.");
+		
 	}
 
 	/**
@@ -357,11 +337,12 @@ class MSSQLDatabase extends Database
 	 */
 	public function tables($schema)
 	{
-	  	$sql="select tablename from pg_tables where tablename not like 'pg\_%' "
-			."and tablename not in ('sql_features', 'sql_implementation_info', 'sql_languages', "
-	 		."'sql_packages', 'sql_sizing', 'sql_sizing_profiles') and schemaname='$schema';";
-	
-		return $this->execute($sql);
+//	  	$sql="select tablename from pg_tables where tablename not like 'pg\_%' "
+//			."and tablename not in ('sql_features', 'sql_implementation_info', 'sql_languages', "
+//	 		."'sql_packages', 'sql_sizing', 'sql_sizing_profiles') and schemaname='$schema';";
+//	
+//		return $this->execute($sql);
+		throw new Exception("Not implemented.");
 	}
 	
 	/**
@@ -374,9 +355,10 @@ class MSSQLDatabase extends Database
 	 */
 	public function table($schema,$tablename, $related=false, $restricted_to_schema=false)
 	{
-		uses('system.data.driver.database.pgsql_table_schema');
-		$fuck=new MSSQLTableSchema($this,$schema,$tablename,$related,$restricted_to_schema);
-		return $fuck;
+//		uses('system.data.driver.database.pgsql_table_schema');
+//		$fuck=new PGSQLTableSchema($this,$schema,$tablename,$related,$restricted_to_schema);
+//		return $fuck;
+		throw new Exception("Not implemented.");
 	}
 	
 }

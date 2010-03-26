@@ -37,7 +37,7 @@
 
 
 uses('system.app.dispatcher');
-uses('system.app.http.http_request');
+uses('system.app.shell.shell_request');
 
 /**
  * HTTP Dispatcher
@@ -46,7 +46,7 @@ uses('system.app.http.http_request');
  * @subpackage	dispatcher
  * @link          http://wiki.getheavy.info/index.php/Dispatcher
  */
-class HTTPDispatcher extends Dispatcher
+class ShellDispatcher extends Dispatcher
 {
 	/**
 	 * Constructor 
@@ -59,13 +59,17 @@ class HTTPDispatcher extends Dispatcher
 	 */
 	public function __construct($path=null,$controller_root=null,$view_root=null,$use_routes=true,$force_routes=false)
 	{
-		if ($path==null)
-		{
-			$path = (isset ($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : @ getenv('PATH_INFO');
-			$path = rtrim(strtolower($path), '/');
-		}
+		$args=parse_args();
+		$switches=parse_switches();
 		
+		$path=array_shift($args);
+
 		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
+		
+		$this->segments=$args;
+		
+		$this->controller_root=($controller_root) ? $controller_root : PATH_APP.'shell/controller/';
+		$this->view_root=($view_root) ? $view_root : PATH_APP.'shell/view/';
 	}
 
 	/**
@@ -73,7 +77,7 @@ class HTTPDispatcher extends Dispatcher
 	 */
 	public function build_request()
 	{
-		return new HTTPRequest($this,$this->controller_root,$this->segments);
+		return new ShellRequest($this,$this->controller_root,$this->segments);
 	}
 
 
@@ -85,7 +89,7 @@ class HTTPDispatcher extends Dispatcher
 	{
 		$controller_root=($controller_root) ? $controller_root : $this->controller_root;
 		$view_root=($view_root) ? $view_root : $this->view_root;
-		return new HTTPDispatcher($path,$controller_root,$view_root,$use_routes,$force_routes);
+		return new ShellDispatcher($path,$controller_root,$view_root,$use_routes,$force_routes);
 	}
 		
 	/**

@@ -35,7 +35,7 @@
 /**
  * Wraps a postgresql resultset for streaming through iterating
  */
-class MSSQLResult implements Iterator
+class SQLite3Result implements Iterator
 {
 	private $result=null;
 	
@@ -48,7 +48,7 @@ class MSSQLResult implements Iterator
 	public function __construct($result)
 	{
 		$this->result=$result;
-		$this->count=mssql_num_rows($result);
+		$this->count=sqlite_num_rows($result);
 	}
 	
 	/**
@@ -72,7 +72,7 @@ class MSSQLResult implements Iterator
 	 */
     public function next()
     {
-    	$this->last=mssql_fetch_assoc($this->result);
+    	$this->last=sqlite_fetch_array($this->result,SQLITE_ASSOC);
     	
     	if (!$this->last)
     		$this->cindex++;
@@ -85,8 +85,8 @@ class MSSQLResult implements Iterator
     public function rewind()
     {
     	$this->cindex=0;
-    	pg_result_seek($this->result,0);
-    	$this->last=mssql_fetch_assoc($this->result);
+    	sqlite_rewind($this->result);
+    	$this->last=sqlite_fetch_array($this->result,SQLITE_ASSOC);
     	return $this->last;
     }
 
@@ -100,7 +100,7 @@ class MSSQLResult implements Iterator
     
     public function to_array()
     {
-    	mssql_data_seek($this->result,0);
-    	return mssql_fetch_array($this->result,MSSQL_NUM);
+    	sqlite_rewind($this->result);
+    	return sqlite_fetch_all($this->result);
     }
 }
