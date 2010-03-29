@@ -235,9 +235,8 @@ abstract class Dispatcher
 		// explode it's segments
 		$path_array = explode('/', preg_replace('|/*(.+?)/*$|', '\\1', $this->path));
 		$segments = array();
-		
+
 		$this->path_array=$path_array;
-		
 		// If it's the root uri, this is easy fo sheezy.
 		if ($this->path == '/' || $this->path == '')
 		{
@@ -252,9 +251,9 @@ abstract class Dispatcher
 		{
 			// parse the segments out for security
 			foreach ($path_array as $val)
-			{ 
-				if (!preg_match('|^[a-z 0-9~%.:_-]+$|i', $val))
-					$val=preg_replace('|[^a-z 0-9~%.:_-]*|i','',$val);
+			{
+				if (!preg_match('|^[a-z 0-9~%.:_\-\+\(\);&]+$|i', $val))
+					$val=preg_replace('|[^a-z 0-9~%.:_\-\+\(\);&]*|i','',$val);
 
 				$val = trim($val);
 
@@ -352,7 +351,6 @@ abstract class Dispatcher
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
 		}
 			
-		
 		$root = implode('/', array_diff($this->path_array, $this->segments));
 		$class=new $classname(new Request($request->method,$root,$this->segments));
 

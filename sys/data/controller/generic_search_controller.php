@@ -93,6 +93,23 @@ class GenericSearchController extends Controller
  		return new $class($id);
 	}
 	
+	public function get_value($key=null)
+	{
+		if (!$key)
+			return null;
+
+		return $this->request->input->{$key};			
+	}
+	
+	/**
+	 * wrapper which allows subclasses to get away from the standard "?q=whatever" syntax
+	 * and implement something different (e.g. more restful)
+	 */
+	protected function get_text_query()
+	{
+		return $this->get_value('q');
+	}
+	
 	protected function init_filter()
 	{
 		if ($this->appmeta->init_filter)
@@ -137,7 +154,7 @@ class GenericSearchController extends Controller
 		
 		foreach($this->appmeta->filter as $field=>$section)
 		{
-			$value=$this->request->input->{$field};
+			$value=$this->get_value($field);
 			
 			if($section->description && $value)
 			{
@@ -177,17 +194,18 @@ class GenericSearchController extends Controller
  	{
  		$filter = $this->build_filter($filter);
 		
- 		$filter->limit=$this->get->limit | $this->appmeta->page_size;
-		$filter->offset=($this->get->search_pg * $filter->limit) | 0;
+ 		$filter->limit=$this->get_value('limit') | $this->appmeta->page_size;
+		$filter->offset=($this->get_value('pg') * $filter->limit) | 0;
 		
 		// is this search a saved one?
+/*
 		if ($this->session->id)
 			$current_saved_id = filter('search/saved')
 				->profile_id->equals($this->session->id)
 				->path->equals(rtrim($this->uri->root,'/'))
 				->query->equals(urldecode(ltrim($this->uri->query->build(),'?')))
 				->get_one('id');
-				
+*/				
 		$results = $filter->get_rows();
 
 		$count = ($results['total_count']) ? $results['total_count'] : $filter->get_count();
@@ -212,7 +230,7 @@ class GenericSearchController extends Controller
  	public function build_filter_field($filter, $key, $section)
  	{
  		// Add to the description string
- 		if ($this->request->input->exists($key) && ($section->description) )
+ 		if ($this->get_value($key) && ($section->description) )
  		{
 			$description = null;
 			
@@ -262,28 +280,28 @@ class GenericSearchController extends Controller
                         }
                     }
  				break;
-                case "lookup":
+            case "lookup":
  			case "lookup_select":
  				$sf=$section->filter;
- 				if ($this->request->input->exists($key))
+ 				if ($this->get_value($key))
  				{
  					if ($section->join_model && $section->join_column && $section->join_foreign_column)
  					{
                         $join_filter = filter($section->join_model);
                         
                         if ($section->case_insensitive)
-	                        $join_filter->{$sf}->equals($this->request->input->{$key}, $section->allow_nulls, 'LIKE', 'lower');
+	                        $join_filter->{$sf}->equals($this->get_value($key), $section->allow_nulls, 'LIKE', 'lower');
                         else
-	                        $join_filter->{$sf}->equals($this->request->input->{$key});
+	                        $join_filter->{$sf}->equals($this->get_value($key));
 	                    $join_filter->select='';
                         $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER'); 							
  					}
  					else
  					{
 						if ($section->case_insensitive)
- 							$filter->{$sf}->equals($this->request->input->{$key}, $section->allow_nulls, 'LIKE', 'lower');
+ 							$filter->{$sf}->equals($this->get_value($key), $section->allow_nulls, 'LIKE', 'lower');
  						else
- 							$filter->{$sf}->equals(array($this->request->input->{$key}), $section->allow_nulls);
+ 							$filter->{$sf}->equals(array($this->get_value($key)), $section->allow_nulls);
  					}
  				}
  			    break;
@@ -294,20 +312,20 @@ class GenericSearchController extends Controller
  				    if ($section->join_model && $section->join_column && $section->join_foreign_column)
                         {
                             $join_filter = filter($section->join_model);
-                            $join_filter->{$sf}->contains(array($this->request->input->{$key}));
+                            $join_filter->{$sf}->contains(array($this->get_value($key)));
                             $join_filter->select='';
                             $filter->join($section->join_column, $join_filter, $section->join_foreign_column);                          
                         }
                         else
                         {
-                            $filter->{$sf}->contains(array($this->request->input->{$key}));
+                            $filter->{$sf}->contains(array($this->get_value($key)));
                         }
  				}
  			    break;
  			case "date":
  				$sf=$section->filter;
  				if ($this->get->exists($key))
- 					$filter->{$sf}->greater_equal(date('m/d/Y',time()-($this->get->get_num($key) * 24 * 60 * 60)));
+ 					$filter->{$sf}->greater_equal(date('m/d/Y',time()-($this->get_value($key) * 24 * 60 * 60)));
  				break;
  			case "location":
  				$sf=$section->filter;
@@ -330,7 +348,7 @@ class GenericSearchController extends Controller
  		if (is_numeric($lat) && is_numeric($long))
  		{
  			uses_model('location/object_location');
- 			$distance_filter = ObjectLocation::DistanceFilter($lat, $long, $this->request->input->{$key}, 'mi');
+ 			$distance_filter = ObjectLocation::DistanceFilter($lat, $long, $this->get_value($key), 'mi');
  			$filter->join($sf, $distance_filter, 'object_id');
  		}
  		
@@ -338,13 +356,15 @@ class GenericSearchController extends Controller
  	
  	public function handle_text_query($filter)
  	{
- 		if ($this->get->q)
+ 		$text_query = $this->get_text_query();
+ 		
+ 		if ($text_query)
  		{
  			foreach($this->appmeta->text_query as $val)
  			{
- 				$filter_description_tokens[] = $this->get->q;
+ 				$filter_description_tokens[] = $text_query;
  				
-	 			$filter->or->{$val}->contains($this->get->q);
+	 			$filter->or->{$val}->contains($text_query);
  			}	
  		} 		
  	}
@@ -377,12 +397,12 @@ class GenericSearchController extends Controller
  		
  		$filter->parse($filterstr);
  		
- 		if ($this->request->input->exists('order_by'))
+ 		if ($this->get_value('order_by'))
  		{
- 			$sb=$this->request->input->order_by;
+ 			$sb=$this->get_value('order_by');
  			$od="desc";
- 			if ($this->request->input->exists('direction'))
- 				$od=strtolower($this->request->input->direction);
+ 			if ($this->get_value('direction'))
+ 				$od=strtolower($this->get_value('direction'));
 
  			$filter->order_by->{$sb}->{$od};
  		}

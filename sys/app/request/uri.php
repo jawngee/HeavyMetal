@@ -97,7 +97,7 @@ class URI
  	public function get_value($name)
  	{
  		for($i=0; $i<count($this->segments)-1; $i++)
- 			if ($this->segments[$i]==$name)
+ 			if (strtolower($this->segments[$i])==strtolower($name))
  				return $this->segments[$i+1];
  		
  		return false;
@@ -196,10 +196,21 @@ class URI
  	 * @param $removevalues
  	 * @return unknown_type
  	 */
- 	function build($newvalues=null, $queryvalues=null, $removevalues=null)
+ 	function build($newvalues=null, $removevalues=null, $queryvalues=null, $removequeryvalues=null)
  	{
  		$segs=$this->segments;
  		
+ 		if ($removevalues!=null)
+ 			foreach($removevalues as $key=>$value)
+ 			{
+ 				for($i=0; $i<count($segs); $i++)
+ 				{
+ 					if (!$key && $value==$segs[$i]) // matches one segment
+ 						array_splice($segs,$i,1);
+ 					elseif($key && $key==$segs[$i] && $value==$segs[$i+1]) // matches k/v pair (two segments)
+ 						array_splice($segs,$i,2);
+ 				}
+ 			}
  		
   		if ($newvalues!=null)
 	 		foreach($newvalues as $key=>$value)
@@ -223,7 +234,10 @@ class URI
 	 			if (!$added)
 		 			array_splice($segs,count($segs),0,array($key,$value));
 		 	}
- 			
- 		return $this->root."/".implode('/',$segs).$this->query->build($queryvalues,$removevalues);
+ 		
+		for($i=0; $i<count($segs); $i++)
+			$segs[$i] = urlencode($segs[$i]);
+		 	
+ 		return $this->root."/".implode('/',$segs).$this->query->build($queryvalues,$removequeryvalues);
  	}
 }

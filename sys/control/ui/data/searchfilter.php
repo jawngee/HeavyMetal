@@ -60,12 +60,12 @@ class SearchFilterControl extends Control
 
 	function link($parameter,$value,$removevalues=null)
 	{
-		return $this->controller->request->uri->build(null,array($parameter=>$value),$removevalues);
+		return $this->controller->request->uri->build(null,null,array($parameter=>$value),$removevalues);
 	}
 	
 	function option($parameter,$value)
 	{
-		return $this->controller->request->uri->build(null,array($parameter=>$value));
+		return $this->controller->request->uri->build(null,null,array($parameter=>$value));
 	}
 	
 	function value($parameter)
@@ -76,14 +76,14 @@ class SearchFilterControl extends Control
 	function multi_link($parameter, $value)
 	{
 		if ($this->controller->request->input->exists($parameter))
-			return $this->controller->request->uri->build(null,null,array($parameter));
+			return $this->controller->request->uri->build(null,null,null,array($parameter));
 					
 		return $this->link($parameter,$value);
 	}
 	
 	function clear($parameter)
 	{
-		return $this->controller->request->uri->build(null,null,(is_array($parameter))?$parameter:array($parameter));
+		return $this->controller->request->uri->build(null,null,null,(is_array($parameter))?$parameter:array($parameter));
 	}
 	
 	function has_value($parameter)
@@ -109,9 +109,9 @@ class SearchFilterControl extends Control
 	{
 		if ($this->controller->request->input->exists($parameter))
 			if (($this->controller->request->input->exists($parameter) && ($this->controller->request->input->{$parameter}==$value)))
-				return $this->controller->request->uri->build(null,null,array($parameter));
+				return $this->controller->request->uri->build(null,null,null,array($parameter));
 			else
-				return $this->controller->request->uri->build(null,array($parameter=>$value));	
+				return $this->controller->request->uri->build(null,null,array($parameter=>$value));	
 		
 		$link=$this->link($parameter,$value);
 		
@@ -127,12 +127,12 @@ class SearchFilterControl extends Control
 			if(in_array($value,$values))
 			{
 				array_splice($values,array_search($value,$values),1);
-				return $this->controller->request->uri->build(null,array($parameter=>$values),array($parameter=>$value));
+				return $this->controller->request->uri->build(null,null,array($parameter=>$values),array($parameter=>$value));
 			}
 			else
 			{
 				array_push($values,$value);
-				return $this->controller->request->uri->build(null,array($parameter=>$values));	
+				return $this->controller->request->uri->build(null,null,array($parameter=>$values));	
 			}
 		}
 		
@@ -152,7 +152,7 @@ class SearchFilterControl extends Control
 	
 	function order_by($parameter, $value, $direction)
 	{		
-		return $this->controller->request->uri->build(null,array($parameter=>$value, "direction"=>$direction));
+		return $this->controller->request->uri->build(null,null,array($parameter=>$value, "direction"=>$direction));
 	}
 	
 	function active_order($parameter,$value,$direction)
@@ -202,12 +202,13 @@ class SearchFilterControl extends Control
 		$value=$this->controller->request->input->{$field};
 
 		if(!$this->use_filter || $this->use_filter==$field)
-		{			
+		{
 			switch($section->type)
 			{
 				case 'radio':
 				case 'direction':
-					$rtn.=$this->templates['radio']->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
+					if (!$section->hidden)
+						$rtn.=$this->templates['radio']->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
 					break;
 				case 'order_by':
 				case 'multi':
@@ -216,7 +217,8 @@ class SearchFilterControl extends Control
 				case 'list':
 				case 'location':
 				case 'date':
-					$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
+					if (!$section->hidden)
+						$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value));
 					break;
 				case 'lookup':
 		        case 'lookup_select':
@@ -226,7 +228,9 @@ class SearchFilterControl extends Control
 					}
 					else
 						$rows=Channel::GetDatasource($section->datasource,null,null,$count='not needed');
-					$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'items' => $rows, 'value' => $value));
+					
+					if (!$section->hidden)
+						$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'items' => $rows, 'value' => $value));
 					break;
 				case 'faceted':	
 				case 'grouping':
@@ -237,7 +241,8 @@ class SearchFilterControl extends Control
 							$rendered_subfilters .= $this->render_filter($subfield, $subsection);
 					}
 
-					$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value, 'facets' => $this->results['facet_counts'], 'rendered_subfilters' => $rendered_subfilters));
+					if (!$section->hidden)
+						$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'value' => $value, 'facets' => $this->results['facet_counts'], 'rendered_subfilters' => $rendered_subfilters));
 					break;
 				}
 			}

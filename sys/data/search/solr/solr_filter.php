@@ -215,14 +215,11 @@ class SOLRFilter extends Filter
 
    		if (count($fq) > 0)
 			foreach($fq as $filter_query)
-				$query[] = 'fq='.rawurlencode($filter_query);
-   		//   			$query[] = 'fq=' . urlencode(implode($fq, ' '));
-
+				$query[] = 'fq='.urlencode(str_replace('+',' ', $filter_query));
 				
    		// handle specific fields requested
    		if ($select)
    			$query[] = 'fl='.urlencode($select);
-   		
    		
    		// handle offset / limit
    		if ($this->offset)
@@ -327,7 +324,7 @@ class SOLRFilter extends Filter
    		if ($limit)
    			$this->limit=$limit;
 
-//dump('solr_filter->execute(): ' . $this->build_query());   			
+dump('solr_filter->execute(): ' . $this->build_query());   			
    		$response = file_get_contents($this->build_query());
 
 		if ($this->result_format == 'php')

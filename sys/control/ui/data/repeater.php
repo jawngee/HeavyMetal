@@ -82,7 +82,8 @@ class RepeaterControl extends DataboundControl
 				      }
 				
 				      $this->current=&$row;
-				      $this->current_index=$this->count++;
+				      $this->current_index++;
+				      $this->count++;
 			        }
 		        }
 		}

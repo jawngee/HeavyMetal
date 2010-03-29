@@ -122,27 +122,30 @@ class SOLRSearchController extends GenericSearchController
 
  		}
  	}
+
  	
  	public function handle_text_query($filter)
  	{
+ 		$req_text_query = $this->get_text_query();
+ 		
 		if (isset($this->appmeta->text_query))
 		{
 
  			foreach($this->appmeta->text_query as $val)
  			{
- 				$filter_description_tokens[] = $this->request->input->q;
+ 				$filter_description_tokens[] = $req_text_query;
  			
  				$filter->{$val}->q_param = true;
- 				$filter->or->{$val}->contains($this->request->input->q);
+ 				$filter->or->{$val}->contains($req_text_query);
  			}
 		}
 		else
 		{
 			// set q_value in solr_filter directly
-			$filter->q_value = $this->request->input->q;
+			$filter->q_value = $req_text_query;
 		}	
 
- 		if ($this->get->q)
+ 		if ($req_text_query)
  		{
 	 	    // currently only using highlighting for text_query (not narrowing filters)
 	 	    // but this can be changed if desired

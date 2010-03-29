@@ -145,7 +145,7 @@ abstract class DataboundControl extends Control
 	 */
 	function next_page_link()
  	{
- 		return $this->uri->build(null,array($this->id.'_pg' => $this->current_page+1));
+ 		return $this->uri->build(null,null,array($this->id.'_pg' => $this->current_page+1));
  	}
 
  	/**
@@ -155,7 +155,7 @@ abstract class DataboundControl extends Control
  	 */
  	function prev_page_link()
  	{
-	 		return $this->uri->build(null,array($this->id.'_pg' => $this->current_page-1));
+	 		return $this->uri->build(null,null,array($this->id.'_pg' => $this->current_page-1));
  	}
 	
  	/**
@@ -166,7 +166,7 @@ abstract class DataboundControl extends Control
  	 */
  	function page_link($page)
  	{
-		return $this->uri->build(null,array($this->id.'_pg' => $page));
+		return $this->uri->build(null,null,array($this->id.'_pg' => $page));
  	}
 
 	/**
@@ -187,7 +187,7 @@ abstract class DataboundControl extends Control
 		foreach($this->sort_options as $field => $config_items)
 		{
 			$option = $config_items->items;
-			$link = $this->uri->build(null,array("sortby"=>$field),array($this->id.'_pg'));			
+			$link = $this->uri->build(null,null,array("sortby"=>$field),array($this->id.'_pg'));			
 			$rendered.=$template->render(array('sortby' => $this->sortby, 'field' => $field, 'option' => $option, 'control' => $this, 'link' => $link));				
 		}
 		
