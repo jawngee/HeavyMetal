@@ -51,5 +51,8 @@ ob_start();
 $dispatcher=new HTTPDispatcher();
 print $dispatcher->dispatch();
 
+// Shut down the environment
+Config::ShutdownEnvironment();
+
 // flush the buffer
 ob_flush();

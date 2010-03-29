@@ -202,7 +202,7 @@ class ConfigInvalidFormatException extends ConfigException {}
  	public static function LoadEnvironment($env=null)
  	{
  		$config=Config::Get('environment');
-	
+ 		
  		if ($env==null)
  			$env=$config->environment;
 		
@@ -211,7 +211,7 @@ class ConfigInvalidFormatException extends ConfigException {}
  		if ($config->{$env}!=null)
  		{
  			self::$environment_config=$config->{$env};
-			
+ 			
  			// if in debug, load the developer's custom environment and merge it.
  			if ($env=='debug')
 			{
@@ -239,17 +239,27 @@ class ConfigInvalidFormatException extends ConfigException {}
  				}
 
  			if (self::$environment_config->uses!=null)
- 				foreach(self::$environment_config->uses->items as $item)	
-					uses($item);
-
+ 				foreach(self::$environment_config->uses->before->items as $item)
+ 					uses($item);
+ 					
  			if (self::$environment_config->config_map!=null)
  				self::$_config_map=self::$environment_config->config_map->items;
  					
  			define('ENVIRONMENT',$env);
  		}
- 		
  	}
  	
+	/** 
+ 	 * Loads a specific environment, or the default one specified in the .conf
+ 	 * 
+ 	 * @param string $env The environment to load
+ 	 */
+ 	public static function ShutdownEnvironment()
+ 	{
+		if ((self::$environment_config->uses!=null) && (self::$environment_config->uses->after!=null))
+			foreach(self::$environment_config->uses->after->items as $item)
+				uses($item);
+ 	}
 
  
  	/**

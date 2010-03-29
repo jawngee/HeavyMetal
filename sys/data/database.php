@@ -74,7 +74,7 @@ abstract class Database
 				$dsn=$conf->items[$name]->dsn;
 				
 				$matches=array();
-				if (preg_match_all('#([a-z]*)://(.*)#',$dsn,$matches))
+				if (preg_match_all('#([a-z0-9]*)://(.*)#',$dsn,$matches))
 				{
 					$driver=$matches[1][0];
 					
@@ -87,7 +87,6 @@ abstract class Database
 					return $db;
 				}
 			}
-
 			throw new Exception("Cannot find database named '$name' in Config.");
 		}
 	}

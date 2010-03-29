@@ -1,4 +1,6 @@
 <?
+require_once 'sys.php';
+
 /**
  * System functionality for shell
  * 
