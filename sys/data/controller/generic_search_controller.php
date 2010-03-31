@@ -105,7 +105,7 @@ class GenericSearchController extends Controller
 	 * wrapper which allows subclasses to get away from the standard "?q=whatever" syntax
 	 * and implement something different (e.g. more restful)
 	 */
-	protected function get_text_query()
+	public function get_text_query()
 	{
 		return $this->get_value('q');
 	}
@@ -400,11 +400,19 @@ class GenericSearchController extends Controller
  		if ($this->get_value('order_by'))
  		{
  			$sb=$this->get_value('order_by');
- 			$od="desc";
  			if ($this->get_value('direction'))
  				$od=strtolower($this->get_value('direction'));
 
- 			$filter->order_by->{$sb}->{$od};
+  			foreach($this->appmeta->sort->order_by->options as $key => $params)
+ 			{
+ 				if (strtolower($params->orby_by) == strtolower($sb))
+ 				{
+ 					$sb = $params->orby_by;
+ 					$od = ($od)?$od:strtolower($params->direction);
+ 					$filter->order_by->{$sb}->{$od};
+ 					break;
+ 				}
+ 			}
  		}
  		else
  		{
