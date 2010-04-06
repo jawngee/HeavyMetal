@@ -60,6 +60,11 @@ class FilterField
 		$this->and=$and;
 	}
 
+	public function field_name()
+	{
+		return $this->field->name;
+	}
+	
 	/**
 	 * Equals
 	 *
@@ -79,12 +84,12 @@ class FilterField
 
 				$this->value="(";
 				foreach($value as $val)
-					$this->value.="$val = ANY(".$this->filter->table_alias.".".$this->field->name.") AND ";
+					$this->value.="$val = ANY(".$this->filter->table_alias.".".$this->field_name().") AND ";
 				$this->value=rtrim($this->value,'AND ').")";
 			}
 			else
 			{
-				$val=$this->filter->table_alias.".".$this->field->name." IN (";
+				$val=$this->filter->table_alias.".".$this->field_name()." IN (";
 				foreach($value as $item)
 				{
 					$val.=$this->model->db->escape_value($this->field->type,$item).',';
@@ -98,13 +103,13 @@ class FilterField
 			$value=$this->model->db->escape_value($this->field->type,$value);
 
 			$value=$this->wrap($value,$caseconv);
-			$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+			$field=$this->wrap($this->filter->table_alias.".".$this->field_name(),$caseconv);
 		
 			$this->value=$field." $op $value";
 		}
 		
 		if ($include_null)
-                        $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+                        $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 		
 		return $this->filter;
 	}
@@ -118,10 +123,10 @@ class FilterField
 	function not_equal($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=$this->filter->table_alias.".".$this->field->name."<>$value";
+		$this->value=$this->filter->table_alias.".".$this->field_name()."<>$value";
 
 		if ($include_null)
-                   $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+                   $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 
 		return $this->filter;
 	}
@@ -138,7 +143,7 @@ class FilterField
 		{
 			$this->value="(";
 			foreach($values as $value)
-				$this->value.="$value = ANY(".$this->filter->table_alias.".".$this->field->name.") OR ";
+				$this->value.="$value = ANY(".$this->filter->table_alias.".".$this->field_name().") OR ";
 			$this->value=rtrim($this->value,'OR ').")";
 		}
 		else
@@ -146,7 +151,7 @@ class FilterField
 			$this->value='(';
 
 			foreach($values as $value)
-				$this->value.=$this->filter->table_alias.".".$this->field->name."=".$this->model->db->escape_value($this->field->type,$value)." OR ";
+				$this->value.=$this->filter->table_alias.".".$this->field_name()."=".$this->model->db->escape_value($this->field->type,$value)." OR ";
 
 			$this->value=rtrim($this->value,' OR ').')';
 		}
@@ -163,7 +168,7 @@ class FilterField
 	 */
 	function is_in($values, $include_null=false, $caseconv=null)
 	{
-		$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+		$field=$this->wrap($this->filter->table_alias.".".$this->field_name(),$caseconv);
 		
 		$this->value="$field IN (";
 
@@ -188,7 +193,7 @@ class FilterField
 		
 		
 		if ($include_null)
-            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 
 		return $this->filter;
 	}
@@ -201,7 +206,7 @@ class FilterField
 	 */
 	function is_not_in($values, $include_null=false)
 	{
-		$this->value=$this->filter->table_alias.".".$this->field->name." NOT IN (";
+		$this->value=$this->filter->table_alias.".".$this->field_name()." NOT IN (";
 
 		if ($values instanceof Filter)
 			$this->value.=$values->to_sql();
@@ -212,7 +217,7 @@ class FilterField
 		$this->value=rtrim($this->value,',').')';
 		
 		if ($include_null)
-			$this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+			$this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 
 		return $this->filter;
 	}
@@ -228,7 +233,7 @@ class FilterField
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value.'%');
 		$value=$this->wrap($value,$caseconv);
-		$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+		$field=$this->wrap($this->filter->table_alias.".".$this->field_name(),$caseconv);
 		
 		$this->value=$field." $op $value";
 
@@ -246,7 +251,7 @@ class FilterField
 	{
 		$value=$this->model->db->escape_value($this->field->type,'%'.$value.'%');
 		$value=$this->wrap($value,$caseconv);
-		$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+		$field=$this->wrap($this->filter->table_alias.".".$this->field_name(),$caseconv);
 		
 		$this->value=$field." $op $value";
 
@@ -268,7 +273,7 @@ class FilterField
 		{
 			$value=$this->model->db->escape_value($this->field->type,'%'.$value.'%');
 			$value=$this->wrap($value,$caseconv);
-			$field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+			$field=$this->wrap($this->filter->table_alias.".".$this->field_name(),$caseconv);
 			
 			$result.="(".$field." $op $value) OR";
 		}
@@ -293,7 +298,7 @@ class FilterField
 		{
 			$value=$this->model->db->escape_value($this->field->type,'%'.$value.'%');
 	        $value=$this->wrap($value,$caseconv);
-	        $field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+	        $field=$this->wrap($this->filter->table_alias.".".$this->field_name(),$caseconv);
 
 			$result.="(".$field." $op $value) AND";
 		}
@@ -315,7 +320,7 @@ class FilterField
 	{
 		$value=$this->model->db->escape_value($this->field->type,'%'.$value);
 	    $value=$this->wrap($value,$caseconv);
-	    $field=$this->wrap($this->filter->table_alias.".".$this->field->name,$caseconv);
+	    $field=$this->wrap($this->filter->table_alias.".".$this->field_name(),$caseconv);
 	 
 		$this->value=$field." $op $value";
 
@@ -331,10 +336,10 @@ class FilterField
 	function greater_equal($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=$this->filter->table_alias.".".$this->field->name." >= $value";
+		$this->value=$this->filter->table_alias.".".$this->field_name()." >= $value";
 		
         if ($include_null)
-            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 
 		return $this->filter;
 	}
@@ -348,10 +353,10 @@ class FilterField
 	function less_equal($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=$this->filter->table_alias.".".$this->field->name." <= $value";
+		$this->value=$this->filter->table_alias.".".$this->field_name()." <= $value";
 		
         if ($include_null)
-            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 
 		return $this->filter;
 	}
@@ -365,10 +370,10 @@ class FilterField
 	function greater($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=$this->filter->table_alias.".".$this->field->name." > $value";
+		$this->value=$this->filter->table_alias.".".$this->field_name()." > $value";
 		
         if ($include_null)
-            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 
 		return $this->filter;
 	}
@@ -383,7 +388,7 @@ class FilterField
 	{
 		$min=$this->model->db->escape_value($this->field->type,$min);
 		$max=$this->model->db->escape_value($this->field->type,$max);
-		$this->value='('.$this->filter->table_alias.".".$this->field->name." >= $min AND ".$this->filter->table_alias.".".$this->field->name." <= $max)";
+		$this->value='('.$this->filter->table_alias.".".$this->field_name()." >= $min AND ".$this->filter->table_alias.".".$this->field_name()." <= $max)";
 
 		return $this->filter;
 	}
@@ -398,10 +403,10 @@ class FilterField
 	function less($value, $include_null=false)
 	{
 		$value=$this->model->db->escape_value($this->field->type,$value);
-		$this->value=$this->filter->table_alias.".".$this->field->name." < $value";
+		$this->value=$this->filter->table_alias.".".$this->field_name()." < $value";
         
         if ($include_null)
-            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field->name." IS NULL)";
+            $this->value="(".$this->value." OR ".$this->filter->table_alias.".".$this->field_name()." IS NULL)";
 
 		return $this->filter;
 	}
@@ -411,7 +416,7 @@ class FilterField
 	 */
 	function not_null()
 	{
-		$this->value=$this->filter->table_alias.".".$this->field->name." IS NOT NULL";
+		$this->value=$this->filter->table_alias.".".$this->field_name()." IS NOT NULL";
 
 		return $this->filter;
 	}
@@ -421,7 +426,7 @@ class FilterField
 	 */
 	function is_null()
 	{
-		$this->value=$this->filter->table_alias.".".$this->field->name." IS NULL";
+		$this->value=$this->filter->table_alias.".".$this->field_name()." IS NULL";
 
 		return $this->filter;
 	}

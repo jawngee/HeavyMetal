@@ -147,7 +147,7 @@ class GenericSearchController extends Controller
 		$tokens = array();
 		
 		if ($this->get->q)
-			$tokens[] = $this->get->q;
+			$tokens[] = '"'.$this->get_text_query().'"';
 			
 		if ($this->get->location)
 			$tokens[] = $this->get->location;
@@ -155,7 +155,7 @@ class GenericSearchController extends Controller
 		foreach($this->appmeta->filter as $field=>$section)
 		{
 			$value=$this->get_value($field);
-			
+
 			if($section->description && $value)
 			{
 				if (!is_array($value))
@@ -222,6 +222,7 @@ class GenericSearchController extends Controller
 			'page_size' => $filter->limit,
  			'count' => $count,
 			'filter_description_tokens' => $this->search_tokens(),
+			'query' => $this->get_text_query(),
 			'results'=> $results
  		);
  	}

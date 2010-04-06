@@ -205,9 +205,9 @@ class URI
  			{
  				for($i=0; $i<count($segs); $i++)
  				{
- 					if (!$key && $value==$segs[$i]) // matches one segment
+ 					if (is_numeric($key) && strtolower($value)==strtolower($segs[$i])) // matches one segment
  						array_splice($segs,$i,1);
- 					elseif($key && $key==$segs[$i] && $value==$segs[$i+1]) // matches k/v pair (two segments)
+ 					elseif(!is_numeric($key) && strtolower($key)==strtolower($segs[$i]) && strtolower($value)==strtolower($segs[$i+1])) // matches k/v pair (two segments)
  						array_splice($segs,$i,2);
  				}
  			}
@@ -236,7 +236,7 @@ class URI
 		 	}
  		
 		for($i=0; $i<count($segs); $i++)
-			$segs[$i] = urlencode($segs[$i]);
+			$segs[$i] = rawurlencode($segs[$i]);
 		 	
  		return $this->root."/".implode('/',$segs).$this->query->build($queryvalues,$removequeryvalues);
  	}

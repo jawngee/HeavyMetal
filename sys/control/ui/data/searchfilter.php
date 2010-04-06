@@ -224,7 +224,7 @@ class SearchFilterControl extends Control
 		        case 'lookup_select':
 				case 'lookup_checkbox':
 					if ($section->facet) {
-						$rows = $this->results['facet_counts'][$section->filter];
+						$rows = $this->results['facet_counts'][($section->facet->field)?$section->facet->field:$section->filter];
 					}
 					else
 						$rows=Channel::GetDatasource($section->datasource,null,null,$count='not needed');

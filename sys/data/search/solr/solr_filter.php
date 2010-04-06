@@ -32,6 +32,8 @@ class SOLRFilter extends Filter
 	
 	public $result_format = 'php';
 	
+	public $facet_search_ext = null;
+	
 	public $facet=null;
 	public $highlight=null;
 	
@@ -248,7 +250,7 @@ class SOLRFilter extends Filter
    		// TODO:  Factor this into Facet
    		foreach ($this->facet->fields as $facet)
    		{
-   			if ($facet->multi && isset($this->fields[$facet->field_name]))
+   			if (($facet->multi || $facet->freeze) && isset($this->fields[$facet->filter_name]))
 				$query[] = 'facet.field={!ex='.$facet->field_name.'}'.$facet->field_name;
    			else
 				$query[] = 'facet.field='.$facet->field_name;

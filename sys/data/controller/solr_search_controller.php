@@ -66,6 +66,10 @@ class SOLRSearchController extends GenericSearchController
         $result_format = $this->appmeta->result_format;
         $filter->result_format = $result_format;
 
+        // Grab facet search extension if present
+        $facet_search_ext = $this->appmeta->facet_search_ext;
+        $filter->facet_search_ext = $facet_search_ext;
+        
         // Load boost function if present
         $boost_function = $this->appmeta->boost_function;
         $filter->boost_function = $boost_function;
@@ -92,11 +96,14 @@ class SOLRSearchController extends GenericSearchController
  	 	// set up the faceting params
  		if ($section->facet)
  		{
- 			$sf=$section->filter;
+ 			$sf=($section->facet->field)?$section->facet->field:$section->filter;
  			$facet = $filter->facet->{$sf};
+ 			$facet->field_ext = $filter->facet_search_ext;
+			
+ 			$facet->filter_name = $section->filter;
  			
  			foreach($section->facet as $attr=>$value)
- 				$facet->{$attr} = $value;	
+ 				$facet->{$attr} = $value;
 
  			// Handle count reducing tag/exclude for multi-choice filter fields
  			if ($section->type == 'lookup_checkbox')

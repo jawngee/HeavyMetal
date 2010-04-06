@@ -11,6 +11,15 @@ uses('system.data.search.solr.solr_filter');
 class SOLRFilterField extends FilterField
 {
 	public $q_param = false;
+	public $field_ext = null;
+	
+	public function field_name()
+	{
+		if ($this->filter->facet->{$this->field->name}) 
+			return $this->field->name . $this->filter->facet->{$this->field->name}->field_ext;
+		else
+			return $this->field->name;	
+	}
 	
 	/**
 	 * Equals
@@ -28,9 +37,9 @@ class SOLRFilterField extends FilterField
 			$val = '[* TO *]';
 		
 		if ($this->and)
-			$this->value = '+' . $this->field->name . ":" . $val . ' ';
+			$this->value = '+' . $this->field_name() . ":" . $val . ' ';
 		else
-			$this->value = $this->field->name . ":" . $val . ' ';
+			$this->value = $this->field_name() . ":" . $val . ' ';
 			
 		$this->value = $this->check_add_facet_exclusion();
 		
@@ -50,7 +59,7 @@ class SOLRFilterField extends FilterField
 		foreach($value as $val)
 		{
 			$val = $this->escape_value($val);
-			$this->value .= '-' . $this->field->name . ":" . $val . ' ';
+			$this->value .= '-' . $this->field_name() . ":" . $val . ' ';
 		}
 
 		$this->value = $this->check_add_facet_exclusion();
@@ -78,7 +87,7 @@ class SOLRFilterField extends FilterField
 	{
 		if (is_array($values) && count($values) > 0)
 		{
-			$this->value = '+' . $this->field->name . ':(';
+			$this->value = '+' . $this->field_name() . ':(';
 				
 			foreach($values as $val)
 			{
@@ -103,7 +112,7 @@ class SOLRFilterField extends FilterField
 	{
 		if (is_array($values) && count($values) > 0)
 		{
-			$this->value = '-' . $this->field->name . ':(';
+			$this->value = '-' . $this->field_name() . ':(';
 				
 			foreach($values as $val)
 			{
@@ -127,7 +136,7 @@ class SOLRFilterField extends FilterField
 	 */
 	function starts_with($value, $op='ILIKE', $caseconv=null)
 	{
-		$this->value = $this->field->name . ':' . $value . '* ';
+		$this->value = $this->field_name() . ':' . $value . '* ';
 
 		if ($this->and)
 			$this->value = '+'.$this->value;
@@ -210,7 +219,7 @@ class SOLRFilterField extends FilterField
 	{
 		$value = $this->escape_value($value);
 
-	    $this->value = $this->field->name . ':[' . $value . ' TO *]';
+	    $this->value = $this->field_name() . ':[' . $value . ' TO *]';
 
   		if ($this->and)
 			$this->value = '+'.$this->value;
@@ -229,7 +238,7 @@ class SOLRFilterField extends FilterField
 	{
 		$value = $this->escape_value($value);
 				
-		$this->value = $this->field->name . ':[* TO ' . $value . ']';
+		$this->value = $this->field_name() . ':[* TO ' . $value . ']';
 
 		if ($this->and)
 			$this->value = '+'.$this->value;
@@ -263,7 +272,7 @@ class SOLRFilterField extends FilterField
 			$max = $this->escape_value($max);
 		}
 		
-		$this->value = $this->field->name . ':[' . $min . ' TO ' . $max . ']'; 
+		$this->value = $this->field_name() . ':[' . $min . ' TO ' . $max . ']'; 
 		
 		if ($this->and)
 			$this->value = '+'.$this->value;
@@ -289,7 +298,7 @@ class SOLRFilterField extends FilterField
 	 */
 	function not_null()
 	{
-		$this->value = $this->field->name . ':[* TO *]';
+		$this->value = $this->field_name() . ':[* TO *]';
 
 		if ($this->and)
 			$this->value = '+'.$this->value;
@@ -304,7 +313,7 @@ class SOLRFilterField extends FilterField
 	 */
 	function is_null()
 	{
-		$this->value = '-' . $this->field->name . ':[* TO *]';
+		$this->value = '-' . $this->field_name() . ':[* TO *]';
 
 		$this->value = $this->check_add_facet_exclusion();
 
@@ -337,12 +346,11 @@ class SOLRFilterField extends FilterField
 	private function check_add_facet_exclusion()
 	{
 		// Doh!  hasn't been set yet
-		
-		if (isset($this->filter->facet->fields[$this->field->name]))
+		if ($this->filter->facet->{$this->field->name})
 		{
 			$facet = $this->filter->facet->{$this->field->name};
 			
-			if ($facet->multi==true)
+			if ($facet->freeze==true)
 				return '{!tag='.$this->field->name.'}'.$this->value;
 		}
 
