@@ -2,12 +2,6 @@
 
 /**
  * Contains a list of facets for a filter
- * 
- * @author		Peter DM
- * @date		Jun 17, 2007
- * @time		12:26:23 AM
- * @file		order_by.php
- * @copyright  Copyright (c) 2007 massify.com, all rights reserved.
  */
 
 class Facet

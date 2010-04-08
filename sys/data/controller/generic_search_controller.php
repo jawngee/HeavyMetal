@@ -208,7 +208,7 @@ class GenericSearchController extends Controller
 */				
 		$results = $filter->get_rows();
 
-		$count = ($results['total_count']) ? $results['total_count'] : $filter->get_count();
+		$count = (is_numeric($results['total_count'])) ? $results['total_count'] : $filter->get_count();
 
 		//Need to adjust offset if filters have changed and we were at the end of a longer paginated list of previous results
 		if ($filter->offset > $count)

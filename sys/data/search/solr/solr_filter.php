@@ -6,6 +6,7 @@ uses('system.data.join');
 uses('system.data.search.solr.solr_filter_field');
 uses('system.data.search.solr.facets');
 uses('system.data.search.solr.highlights');
+uses('system.data.search.solr.spellcheck');
 
 /**
  * Model filter
@@ -38,6 +39,8 @@ class SOLRFilter extends Filter
 	public $highlight=null;
 	
 	public $clustering=false;
+	
+	public $spellcheck=false;
 	
 	public $boost_function=null;
 
@@ -242,7 +245,10 @@ class SOLRFilter extends Filter
 		if ($this->clustering)
 			$query[] = 'clustering=true';
 			
-   		// handle faceting
+		if ($this->spellcheck)
+			$query[] = 'spellcheck=true';
+			
+		// handle faceting
    		if (!empty($this->facet->fields))
    			$query[] = 'facet=true';
    		
@@ -354,8 +360,13 @@ class SOLRFilter extends Filter
 			foreach ($response_array['clusters'] as $cluster)
 				if ($cluster['labels'][0] != "Other Topics")
 					$result['facet_counts']['cluster'][$cluster['labels'][0]] = count($cluster['docs']);
-		}			
-				
+		}
+
+		// attach spelling suggestion info
+		if ($response_array['spellcheck'])
+		{
+			$result['spellcheck'] = new Spellcheck($response_array['spellcheck']);
+		}
 		
 		// overlay any highlit results into main result set
 		foreach ($response_array['highlighting'] as $id => $hi_fields)
@@ -364,6 +375,7 @@ class SOLRFilter extends Filter
 					foreach ($hi_fields as $field_name => $frags)
 						if (!empty($frags[0]))	
 							$result[$i][$field_name]=$frags[0];
+							
 		
    		return $result;	
    	}
@@ -410,8 +422,9 @@ class SOLRFilter extends Filter
    		$arr = array();
 
    		foreach($this->execute($field) as $row)
-   			$arr[] = $row[$field];
-   			
+			if (is_array($row))
+		   		$arr[] = $row[$field];
+
    		return $arr;
    	}
    	
@@ -424,8 +437,8 @@ class SOLRFilter extends Filter
    	{
    		if (!$field)
    			$field = $this->model->primary_key;
-   			
-		$results = $this->get_array($field);
+
+   		$results = $this->get_array($field);
 		
 		return ($results['total_count']) ? $results['total_count'] : '0';
    	}

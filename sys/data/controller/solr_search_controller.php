@@ -46,6 +46,14 @@ uses('system.data.controller.generic_search_controller');
 
 class SOLRSearchController extends GenericSearchController
 {		
+	
+	public function index($filter=null)
+ 	{
+ 		$data = parent::index($filter);
+
+ 		return $data;
+ 	}
+	
     protected function get_filter($initial_filter_string=null)
     {
         uses('system.data.search.solr.solr_filter');
@@ -78,6 +86,10 @@ class SOLRSearchController extends GenericSearchController
         if ($this->appmeta->clustering)
         	$filter->clustering = true;
         
+        // Turn on spellcheck if requested
+        if ($this->appmeta->spellcheck)
+        	$filter->spellcheck = true;
+        	
         // Load facet config if present
         $facet_configs = $this->appmeta->facets;
 		foreach ($facet_configs as $key => $value)
