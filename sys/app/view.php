@@ -90,8 +90,9 @@ uses('system.app.layout');
 	private $_extracted_content=array();
  	
  	/** regex that extracts the attributes */
- 	const REGEX_ATTRIBUTE = '#([a-zA-Z_0-9]+)[=]+(?:\'|")([^\'"]*)(?:\'|")+#';		
-
+ 	//const REGEX_ATTRIBUTE = '#([a-zA-Z_0-9]+)[=]+(?:\'|")([^\'"]*)(?:\'|")+#';		
+	// better one:  ensures that quotes match (handles cases like title="Jon's Big Idea" correctly)
+	const REGEX_ATTRIBUTE = '#([a-zA-Z_0-9]+)=([\'"])([^\2]*?)\2#';	
  	/**
  	 * Constructor
  	 * 
@@ -131,19 +132,19 @@ uses('system.app.layout');
 				switch($attr[1])
 				{
 					case 'target':
-						$this->target=$attr[2];
+						$this->target=$attr[3];
 						break;
 
 					case 'layout':
-						$layout=$attr[2];
+						$layout=$attr[3];
 						break;
 
 					case 'title':
-						$title=$attr[2];
+						$title=$attr[3];
 						break;
 						
 					case 'description':
-						$description=$attr[2];
+						$description=$attr[3];
 						break;
 				}
 
@@ -165,6 +166,106 @@ uses('system.app.layout');
  		}
  	}
  	
+ 	
+ 	
+ 	/**
+ 	 * Parses out portlets.  Portlets make a request to "controller" and then render the "view" inside the "container_template"
+ 	 * @param string $rendered The view's rendered output that may contain control or uses tags
+ 	 */ 	
+
+ 	protected function parse_ports(&$rendered)
+ 	{
+ 		// extract php control includes
+		$regex = '#<[\s]*render[\s]*:[\s]*port([^>]*?)[\s]*/[\s]*>#is';					// extracts the tag
+		// parse the rendered view
+ 		$matches=array();
+ 		while(preg_match($regex,$rendered,$matches,PREG_OFFSET_CAPTURE)==1)
+ 		{
+ 			$parsed_attr=array();
+			preg_match_all(View::REGEX_ATTRIBUTE,$matches[1][0],$parsed_attr,PREG_SET_ORDER);
+			$controller=null;
+			$view=null;
+			$target=null;
+			$cache=false;
+			$cache_key=false;
+			$container_template=null;
+			foreach($parsed_attr as $attr)
+			{
+				switch($attr[1])
+				{
+					case 'controller':
+						trace('controller',$attr[3]);
+						$controller=$attr[3];
+						break;
+					case 'view':
+						trace('view',$attr[3]);
+						$view=$attr[3];
+						break;
+					case 'target':
+						$target=$attr[3];
+						break;
+					case 'container_template':
+						$container_template=$attr[3];
+						break;
+					default:
+						if (preg_match('#{[^}]*}#is',$attr[3]))
+						{
+							$key=trim(trim($attr[3],'{'),'}');
+							if (strpos($key,'@')!==false)
+							{
+								$key=trim($key,'@');
+								$model=$this->data[$key];
+								if ($model instanceof Model)	
+									$this->data[$attr[1]]=$model->to_array();
+								else if ($model)
+									$this->data[$attr[1]]=$model;
+								else
+									user_error("Cannot bind to variable '$key'.",E_USER_WARNING);
+							}
+							else if (isset($this->data[$key]))
+								$this->data[$attr[1]]=$this->data[$key];
+							else
+								user_error("Cannot bind to variable '$key'.",E_USER_WARNING);
+						}
+						else
+							$this->data[$attr[1]]=$attr[3];
+						break;
+				}
+			}			
+			
+			if ($controller!=null)
+			{
+				$wha=null;
+
+				$result=Dispatcher::Fetch($controller,$wha,$this->data);
+				
+				if (($this->layout!=null) && ($target!=null))
+				{
+					$this->layout->add_content($target,$result);
+					$rendered=str_replace($matches[0][0],'',$rendered);
+				}
+				else
+					$rendered=str_replace($matches[0][0],$result,$rendered);
+					
+				if ($cache)
+					$c->set($cache_key,$result,120);
+				
+			}
+			else
+				$rendered=str_replace($matches[0][0],'',$rendered);
+				
+			
+			if ($container_template!=null)
+			{
+				$this->data['content'] = $rendered;
+				$container=new Template($container_template);
+				$rendered=$container->render($this->data);
+			}
+
+ 		}
+ 	}
+ 	
+ 	 	 	
  	/**
  	 * Parses out controls and uses tags from the view's rendered output, replacing the tags with rendered controls
  	 * 
@@ -188,22 +289,22 @@ uses('system.app.layout');
 				switch($attr[1])
 				{
 					case 'view':
-						$view=$attr[2];
+						$view=$attr[3];
 						break;
 					case 'target':
-						$target=$attr[2];
+						$target=$attr[3];
 						break;
 					default:
-						if (preg_match('#{[^}]*}#is',$attr[2]))
+						if (preg_match('#{[^}]*}#is',$attr[3]))
 						{
-							$key=trim(trim($attr[2],'{'),'}');
+							$key=trim(trim($attr[3],'{'),'}');
 							if (isset($this->data[$key]))
 								$this->data[$attr[1]]=$this->data[$key];
 							else
 								user_error("Cannot bind to variable '$key'.",E_USER_WARNING);
 						}
 						else
-							$this->data[$attr[1]]=$attr[2];
+							$this->data[$attr[1]]=$attr[3];
 						break;
 				}
 			}
@@ -239,12 +340,13 @@ uses('system.app.layout');
 		$regex="@<[\s]*render[\s]*:[\s]*target[\s]*target=['\"]([^\"']*)['\"]>(.*?)<[\s]*/[\s]*render[\s]*:[\s]*target[\s]*>@is";
  		while(preg_match($regex,$rendered,$matches,PREG_OFFSET_CAPTURE)==1)
  		{
+ 		
  			$content=$matches[2][0];
  			$target=$matches[1][0];
- 			
+
  			if ($this->layout!=null)
  				$this->layout->add_content($target,$content);
-
+ 				
 			$rendered=str_replace($matches[0][0],'',$rendered);
  		}
   	}
@@ -373,7 +475,8 @@ uses('system.app.layout');
 		// extract php tags
 		$instances=array();
 		$controls=array();
-		$nested_controls='@<[\s]*php[\s]*:[\s]*(\w+)([^>]*?)>[\s]*(.*?)[\s]*<[\s]*/[\s]*php:(?:\w+)[\s]*>@is';
+		//$nested_controls='@<[\s]*php[\s]*:[\s]*(\w+)([^>]*?)>[\s]*(.*?)[\s]*<[\s]*/[\s]*php:\\1[\s]*>@is';  // replaced with the following regexp to allow for > inside tag parameters
+		$nested_controls='@<[\s]*php[\s]*:[\s]*(\w+)[\s]*((\s+\w+(\s*=\s*(?:"[^"]*?"|\'[^\']*?\'))?)+\s*|\s*)>[\s]*(.*?)[\s]*<[\s]*/[\s]*php:\\1[\s]*>@is';
  		
  		while(preg_match($nested_controls,$rendered,$controls,PREG_OFFSET_CAPTURE)==1)
  		{
@@ -385,7 +488,7 @@ uses('system.app.layout');
 	 			if (class_exists($class))
 				{
 					// parse out the contents
-					$content_xml="<content>".$controls[3][0]."</content>";
+					$content_xml="<content>".$controls[5][0]."</content>";
 					$content=simplexml_load_string($content_xml,'SimpleXMLElement',LIBXML_NOCDATA);
 					
 					// parse out the attributes
@@ -395,16 +498,16 @@ uses('system.app.layout');
 					// create a new instance of the control, render it
 					$instance=new $class($this,$content);
 					foreach($parsed_attr as $attr)
-						if (preg_match('#{[^}]*}#is',$attr[2]))
+						if (preg_match('#{[^}]*}#is',$attr[3]))
 						{
-							$key=trim(trim($attr[2],'{'),'}');
+							$key=trim(trim($attr[3],'{'),'}');
 							if (isset($this->data[$key]))
 								$instance->{$attr[1]}=$this->data[$key];
 							else
 								user_error("Cannot bind to variable '$key'.",E_USER_WARNING);
 						}
 						else
-							$instance->{$attr[1]}=$instance->attributes[$attr[1]]=$attr[2];
+							$instance->{$attr[1]}=$instance->attributes[$attr[1]]=$attr[3];
 					
 					if (($id) && ($instance->id==$id))
 					{
@@ -454,7 +557,8 @@ uses('system.app.layout');
 		// extract php tags
 		$instances=array();
 		$controls=array();
-		$php_controls = '#<[\s]*php[\s]*:[\s]*(\w+)([^>]*?)[\s]*/[\s]*>#is';					// extracts the tag
+//		$php_controls = '#<[\s]*php[\s]*:[\s]*(\w+)([^>]*?)[\s]*/[\s]*>#is'; // replaced with the following regexp to allow for > inside tag parameters
+		$php_controls = '#<[\s]*php[\s]*:[\s]*(\w+)[\s]*((\s+\w+(\s*=\s*(?:"[^"]*?"|\'[^\']*?\'))?)+\s*|\s*)/>#is';					// extracts the tag
  		while(preg_match($php_controls,$rendered,$controls,PREG_OFFSET_CAPTURE)==1)
  		{
  			// found that the tag has been registered 
@@ -472,16 +576,16 @@ uses('system.app.layout');
 					$instance=new $class($this);
 					foreach($parsed_attr as $attr)
 					{
-						if (preg_match('#{[^}]*}#is',$attr[2]))
+						if (preg_match('#{[^}]*}#is',$attr[3]))
 						{
-							$key=trim(trim($attr[2],'{'),'}');
+							$key=trim(trim($attr[3],'{'),'}');
 							if (isset($this->data[$key]))
 								$instance->{$attr[1]}=$this->data[$key];
 							else
 								user_error("Cannot bind to variable '$key'.",E_USER_WARNING);
 						}
 						else
-							$instance->{$attr[1]}=$instance->attributes[$attr[1]]=$attr[2];
+							$instance->{$attr[1]}=$instance->attributes[$attr[1]]=$attr[3];
 					}
 					
 					if (($id) && ($instance->id==$id))
@@ -557,6 +661,7 @@ uses('system.app.layout');
  		$this->parse_other_tags($result);
  		$this->parse_targets($result);
  		$this->parse_uses($result);
+ 		$this->parse_ports($result);
  		$this->parse_controls($result);
  		$this->parse_nestedcontrols($result);
 

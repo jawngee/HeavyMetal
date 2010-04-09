@@ -272,16 +272,16 @@ uses('sys.app.view');
 						switch(strtolower($attr[1]))
 	 					{
 	 						case 'id':
-	 							$id=$attr[2];
+	 							$id=$attr[3];
 	 							break;
 	 						case 'wrap':
-	 							$wrap=$attr[2];
+	 							$wrap=$attr[3];
 	 							break;
 	 						case 'use_id':
-	 							$use_id=($attr[2]!='false');
+	 							$use_id=($attr[3]!='false');
 	 							break;
 	 						case 'class':
-	 							$class_name=$attr[2];
+	 							$class_name=$attr[3];
 	 							break;
 	 					}
 	 					

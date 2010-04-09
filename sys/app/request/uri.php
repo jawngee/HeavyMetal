@@ -199,7 +199,7 @@ class URI
  	function build($newvalues=null, $removevalues=null, $queryvalues=null, $removequeryvalues=null)
  	{
  		$segs=$this->segments;
- 		
+
  		if ($removevalues!=null)
  			foreach($removevalues as $key=>$value)
  			{
@@ -217,10 +217,13 @@ class URI
 	 		{
 		 		$added=false;
  			
-				if (!$key)
- 				{
- 					$segs[]=$value;
+				if (is_numeric($key) && count($segs)>=$key)
+ 				{   
+ 					// allows segment to be added at a specific index (or in front of the current value)
+ 					//$segs[]=$value;
+					array_splice($segs,$key,0,$value);
  					$added=true;
+
  				}
  				else for($i=0; $i<count($segs); $i++)
 	 				if ($segs[$i]==$key)
