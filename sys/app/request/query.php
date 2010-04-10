@@ -45,12 +45,29 @@ class Query
 {
  	private $items=array();
  	
- 	public function __construct()
+ 	public function __construct($query=null)
  	{
  		$this->items=array();
 
- 		foreach($_GET as $key => $item)
-			$this->items[$key]=xss_clean($item);
+ 		if (!$query) // Use HTTP request
+ 		{ 		
+	 		foreach($_GET as $key => $item)
+		 		if (is_array($item))
+	 				$this->items[$key]=$item;
+	 			else
+	 				$this->items[$key]=xss_clean($item);
+ 		}
+ 		else // Parse it out ourselves (from a render:port)
+ 		{
+ 			$matches = array();
+ 			preg_match_all("/([^=&]+)=([^&]+)/", $query, $matches);
+ 			
+ 			$keys = $matches[1];
+ 			$values = $matches[2];
+ 			
+ 			for($i=0; $i<count($keys); $i++)
+ 				$this->items[$keys[$i]]=$values[$i];
+ 		}
  	}
  	
  	/**

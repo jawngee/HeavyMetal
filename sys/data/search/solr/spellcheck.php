@@ -11,10 +11,10 @@ class Spellcheck
 	private $termFrequency;
 	private $startOffset;
 	private $endOffset;
-	private $correctlySpelled;
 	private $collation;
 	
-	private $suggestions = array(); // List of suggested terms followed by frequency
+	public $correctlySpelled;
+	public $suggestions = array(); // List of suggested terms followed by frequency
 	
 	public function __construct($solrSpellcheck)
 	{
@@ -33,6 +33,8 @@ class Spellcheck
 				$this->suggestions[$sugg['word']] = $sugg['freq'];
 			}
 			
+			arsort($this->suggestions); // most frequent to least frequent 
+			
 			
 			break;  // only should be getting back one of these
 		}
@@ -42,6 +44,6 @@ class Spellcheck
 	{
 		return ($this->correctlySpelled)?null:$this->collation;
 	}
-
+	
 }
  

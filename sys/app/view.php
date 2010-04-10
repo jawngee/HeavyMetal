@@ -183,29 +183,18 @@ uses('system.app.layout');
  		{
  			$parsed_attr=array();
 			preg_match_all(View::REGEX_ATTRIBUTE,$matches[1][0],$parsed_attr,PREG_SET_ORDER);
-			$controller=null;
-			$view=null;
+			$path=null;
 			$target=null;
-			$cache=false;
-			$cache_key=false;
-			$container_template=null;
 			foreach($parsed_attr as $attr)
 			{
+
 				switch($attr[1])
 				{
-					case 'controller':
-						trace('controller',$attr[3]);
-						$controller=$attr[3];
-						break;
-					case 'view':
-						trace('view',$attr[3]);
-						$view=$attr[3];
+					case 'path':
+						$path=$attr[3];
 						break;
 					case 'target':
 						$target=$attr[3];
-						break;
-					case 'container_template':
-						$container_template=$attr[3];
 						break;
 					default:
 						if (preg_match('#{[^}]*}#is',$attr[3]))
@@ -233,11 +222,11 @@ uses('system.app.layout');
 				}
 			}			
 			
-			if ($controller!=null)
+			if ($path!=null)
 			{
-				$wha=null;
-
-				$result=Dispatcher::Fetch($controller,$wha,$this->data);
+				$port_dispatcher=new HTTPDispatcher($path);
+ 
+				$result = $port_dispatcher->dispatch();
 				
 				if (($this->layout!=null) && ($target!=null))
 				{
@@ -246,21 +235,9 @@ uses('system.app.layout');
 				}
 				else
 					$rendered=str_replace($matches[0][0],$result,$rendered);
-					
-				if ($cache)
-					$c->set($cache_key,$result,120);
-				
 			}
 			else
 				$rendered=str_replace($matches[0][0],'',$rendered);
-				
-			
-			if ($container_template!=null)
-			{
-				$this->data['content'] = $rendered;
-				$container=new Template($container_template);
-				$rendered=$container->render($this->data);
-			}
 
  		}
  	}

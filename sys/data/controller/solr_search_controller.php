@@ -51,6 +51,8 @@ class SOLRSearchController extends GenericSearchController
  	{
  		$data = parent::index($filter);
 
+ 		$data['spellcheck'] = $data['results']['spellcheck'];
+ 		
  		return $data;
  	}
 	

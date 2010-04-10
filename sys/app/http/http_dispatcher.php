@@ -48,6 +48,9 @@ uses('system.app.http.http_request');
  */
 class HTTPDispatcher extends Dispatcher
 {
+	
+	private $query=null;  // Need this when dispatching internally for portlets (no $_GET present)
+	
 	/**
 	 * Constructor 
 	 * 
@@ -64,6 +67,17 @@ class HTTPDispatcher extends Dispatcher
 			$path = (isset ($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : @ getenv('PATH_INFO');
 			$path = rtrim(strtolower($path), '/');
 		}
+		else
+		{
+			$query_pos = strpos($path,'?');
+			if ($query_pos)
+			{
+				$query = substr($path,$query_pos+1);
+				$this->query = new Query($query); 
+
+				$path = substr($path,0,$query_pos); // remove query part for Dispatcher
+			}
+		}
 		
 		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
 	}
@@ -73,7 +87,7 @@ class HTTPDispatcher extends Dispatcher
 	 */
 	public function build_request()
 	{
-		return new HTTPRequest($this,$this->controller_root,$this->segments);
+		return new HTTPRequest($this,$this->controller_root,$this->segments,$this->query);
 	}
 
 
