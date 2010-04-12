@@ -221,7 +221,7 @@ uses('system.app.layout');
 						break;
 				}
 			}			
-			
+		
 			if ($path!=null)
 			{
 				$port_dispatcher=new HTTPDispatcher($path);

@@ -194,9 +194,9 @@ class GenericSearchController extends Controller
  	{
  		$filter = $this->build_filter($filter);
 		
- 		$filter->limit=$this->get_value('limit') | $this->appmeta->page_size;
-		$filter->offset=($this->get_value('pg') * $filter->limit) | 0;
-		
+ 		$filter->limit = ($this->get_value('limit')) ? $this->get_value('limit') : $this->appmeta->page_size;
+ 		$filter->offset=($this->get_value('pg')) ? ($this->get_value('pg') * $filter->limit) : 0;
+
 		// is this search a saved one?
 /*
 		if ($this->session->id)

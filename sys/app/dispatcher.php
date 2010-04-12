@@ -337,7 +337,7 @@ abstract class Dispatcher
 			throw new ControllerNotFoundException("'$classname' can not be found in '".$this->controller."'.");
 			
 		$request=$this->build_request();
-			
+	
 		$found_action=find_methods($classname, $request->method."_".$this->action, $this->action);
 
 		if (!$found_action)
@@ -352,7 +352,7 @@ abstract class Dispatcher
 		}
 			
 		$root = implode('/', array_diff($this->path_array, $this->segments));
-		$class=new $classname(new Request($request->method,$root,$this->segments));
+		$class=new $classname(new Request($request->method,$root,$this->segments, $request->query));
 
 		$action=$found_action;
 		$this->action=$action;

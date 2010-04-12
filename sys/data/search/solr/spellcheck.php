@@ -33,7 +33,7 @@ class Spellcheck
 				$this->suggestions[$sugg['word']] = $sugg['freq'];
 			}
 			
-			arsort($this->suggestions); // most frequent to least frequent 
+			asort($this->suggestions); // least frequent to most frequent 
 			
 			
 			break;  // only should be getting back one of these
