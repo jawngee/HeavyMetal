@@ -42,6 +42,9 @@ class SOLRFilter extends Filter
 	
 	public $spellcheck=false;
 	
+	public $tv=null; // term vectors
+	public $tv_unique_key=null; // uses SOLR docUniqueId not docId
+		
 	public $boost_function=null;
 
 	public $query_parser=null;
@@ -248,7 +251,14 @@ class SOLRFilter extends Filter
 		if ($this->spellcheck)
 			$query[] = 'spellcheck=true';
 			
-		// handle faceting
+		if ($this->tv)
+		{
+			$query[] = 'tv=true';
+			
+			foreach(split(',',$this->tv) as $tv_field)
+				$query[] = 'tv.fl='.trim($tv_field);
+		}	
+			// handle faceting
    		if (!empty($this->facet->fields))
    			$query[] = 'facet=true';
    		
@@ -377,6 +387,13 @@ class SOLRFilter extends Filter
 							$result[$i][$field_name]=$frags[0];
 							
 		
+		// overlay any term-vector information if present
+		foreach ($response_array['termVectors'] as $doc)
+			for ($i=0; $i<$result_count; $i++)
+				if ($result[$i][$this->tv_unique_key]==$doc['uniqueKey'])
+					foreach($doc as $fieldname => $termlist)
+						if (is_array($termlist))
+							$result[$i]['termvectors'][$fieldname] = implode('|', array_keys($termlist));
    		return $result;	
    	}
    	

@@ -91,6 +91,13 @@ class SOLRSearchController extends GenericSearchController
         // Turn on spellcheck if requested
         if ($this->appmeta->spellcheck)
         	$filter->spellcheck = true;
+        
+        // Request termVectors if needed
+        if ($this->appmeta->tv)
+        {
+        	$filter->tv = $this->appmeta->tv;
+        	$filter->tv_unique_key = $this->appmeta->tv_unique_key;
+        }       	
         	
         // Load facet config if present
         $facet_configs = $this->appmeta->facets;
