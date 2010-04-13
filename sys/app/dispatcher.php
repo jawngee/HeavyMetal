@@ -277,7 +277,7 @@ abstract class Dispatcher
 	
 				if (count($segments) > 0)
 				{
-					$this->action = str_replace('-','_',$segments[0]);
+					$this->action = $segments[0];
 					$segments = array_slice($segments, 1);
 				}
 			}
@@ -285,11 +285,11 @@ abstract class Dispatcher
 			else if (is_dir($this->controller_root . $segments[0]))
 				$this->recurse_segment($segments);
 			else
-				$this->action = str_replace('-','_',$segments[0]);
+				$this->action = $segments[0];
 		
 			if ((count($segments)>0) && ($this->action=='index')) 
 			{
-				$this->action=str_replace('-','_',$segments[0]);
+				$this->action = $segments[0];
 				$segments=array_slice($segments,1);
 			}
 		}
@@ -338,7 +338,7 @@ abstract class Dispatcher
 			
 		$request=$this->build_request();
 	
-		$found_action=find_methods($classname, $request->method."_".$this->action, $this->action);
+		$found_action=find_methods($classname, $request->method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
 
 		if (!$found_action)
 		{
