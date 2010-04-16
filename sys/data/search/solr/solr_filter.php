@@ -394,7 +394,8 @@ class SOLRFilter extends Filter
 					foreach($doc as $fieldname => $termlist)
 						if (is_array($termlist))
 							$result[$i]['termvectors'][$fieldname] = implode('|', array_keys($termlist));
-   		return $result;	
+
+		return $result;	
    	}
    	
    	
