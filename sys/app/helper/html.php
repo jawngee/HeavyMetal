@@ -376,4 +376,13 @@ function default_value($checking, $default='Any')
 	return ($checking==null)?$default:$checking;
 }
 
+/* applies alternating css class (zero based) */
+function even_odd($count, $existing="", $even="even", $odd="odd")
+{
+	if($existing != "")
+		$existing .= " ";
+		
+	return $existing . ((++$count % 2 == 0) ? $even : $odd);
+}
+
 

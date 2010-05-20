@@ -161,6 +161,24 @@ final class Input extends DynamicObject
 		return ($this->props[$prop_name]) ? $this->props[$prop_name] : '0';
 	}
 	
+	 /**
+     * Fetches the value, insuring it's an array
+     *
+     * @param unknown_type $prop_name
+     * @return unknown
+     */
+    function get_array($prop_name)
+    {
+        if ((!isset($this->props[$prop_name])) || (!is_a($this->props[$prop_name], "Input")))
+            return false;
+			
+		$r = array();
+		foreach($this->props[$prop_name]->props as $id => $val)
+			$r[] = xss_clean($val);
+		
+		return $r;
+    }
+	
 	/**
 	 * Returns the value as a boolean
 	 *

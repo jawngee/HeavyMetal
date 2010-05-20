@@ -156,3 +156,19 @@ function clean_string($string)
 	return strtolower(preg_replace("/[^a-zA-Z0-9]/", "", $string));
 }
 
+/**
+ * Cleans a string of all non-acceptable file name characters
+ * @param string $sting The string to check
+ * @return valid folder name
+ */
+function clean_file_name($string)
+{
+		// readability 
+	$string = preg_replace('/\s|\t|:/', "_", trim($string));
+	// replace invalid folder characters
+	$invald_chars = array("|", ";", ",", "!", "@", "#", "$", "(", ")", "<", ">", "/", "\\", "\"", "'", "`", "~", "{", "}", "[", "]", "=", "+", "&", "^");	
+	$string = str_replace($invald_chars, "", $string);
+	// length requirement
+	return substr($string, 0, 255);
+}
+
