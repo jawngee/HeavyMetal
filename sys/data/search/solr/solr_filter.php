@@ -44,6 +44,8 @@ class SOLRFilter extends Filter
 	
 	public $tv=null; // term vectors
 	public $tv_unique_key=null; // uses SOLR docUniqueId not docId
+	
+	public $add_phrase_query; // workaround to get exact matching w/ shingles
 		
 	public $boost_function=null;
 
@@ -185,6 +187,22 @@ class SOLRFilter extends Filter
 		$fq = array();
 		$q = array($this->q_value);
 		$loc = array();
+		
+		
+		// Need this phrase query (which looks like a quoted mirror of the main query:  ?q=new york "new york"&...)
+		// in special cases where the edismax/dismax parsers currently crap out when matching multi-word terms.
+		// SOLR doesn't really handle a term like [new york] very well when it's all part of one token.
+		// This is only needed if you want to force an exact match using a ShingleFilter.  
+		// Otherwise, the std behavior is to match [new] [york] on either term when searched individually
+		if ($this->add_phrase_query)
+		{
+			$phrase_query = $this->build_phrase_query($this->q_value);
+			$phrase_query = trim($phrase_query);
+
+			if (!empty($phrase_query))
+				$q[] = $phrase_query;
+		}	
+		
 
 		// primary query string (deal with this optimization)
 
@@ -319,6 +337,46 @@ class SOLRFilter extends Filter
    		return SOLR_SERVER . '/select?' . implode($query, '&');
    	}
 
+   	
+   	function build_phrase_query($query)
+   	{
+   		// don't duplicate queries that already have quotes in them
+   		if (false!==strpos($query,'"'))
+   			return null;
+   			
+	   	$input = explode(' ', $query);
+	   	$output = null;
+	   	
+	   	$phrases = array();
+	   	$phrase_no = 0;
+	   	$seen_phrase_break = false;
+	   	
+	   	foreach($input as $in)
+	   	{
+	   		$in = trim($in);
+	   		
+	   		if ($in[0]!='-' && $in[0]!='+' && strtolower($in)!='and' && strtolower($in)!='or')
+	   		{
+	   			if ($seen_phrase_break)
+	   			{
+	   				$phrase_no++;
+	   				$seen_phrase_break = false;
+	   			}
+	   				   				
+	   			$phrases[$phrase_no][] = $in;
+	   		}	   		
+   			else
+   			{
+	   			$seen_phrase_break = true;
+   			}	
+	   	}
+
+	   	foreach ($phrases as $phrase)
+	   		if (count($phrase) > 1)
+	   			$output .= ' "' . implode(' ', $phrase) . '"';	
+	   	
+	   	return $output;
+   	}
    	
 
 	function show_query()

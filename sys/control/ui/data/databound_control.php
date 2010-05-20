@@ -124,11 +124,11 @@ abstract class DataboundControl extends Control
 
 		if ($this->allowpaging)
 		{		
-			if ($this->uri->query->get_number($this->id.'_pg'))
-				$this->current_page=$this->uri->query->get_number($this->id.'_pg');
+			if ($this->uri->query->get_number('pg'))
+				$this->current_page=$this->uri->query->get_number('pg');
 	
 			if ($this->current_page==0)
-				$this->uri->query->remove_value($this->id.'_pg');
+				$this->uri->query->remove_value('pg');
 	    }
 	    else
 	    {
@@ -145,7 +145,7 @@ abstract class DataboundControl extends Control
 	 */
 	function next_page_link()
  	{
- 		return $this->uri->build(null,null,array($this->id.'_pg' => $this->current_page+1));
+ 		return $this->uri->build(null,null,array('pg' => $this->current_page+1));
  	}
 
  	/**
@@ -155,7 +155,7 @@ abstract class DataboundControl extends Control
  	 */
  	function prev_page_link()
  	{
-	 		return $this->uri->build(null,null,array($this->id.'_pg' => $this->current_page-1));
+	 		return $this->uri->build(null,null,array('pg' => $this->current_page-1));
  	}
 	
  	/**
@@ -166,7 +166,7 @@ abstract class DataboundControl extends Control
  	 */
  	function page_link($page)
  	{
-		return $this->uri->build(null,null,array($this->id.'_pg' => $page));
+		return $this->uri->build(null,null,array('pg' => $page));
  	}
 
 	/**
@@ -187,7 +187,7 @@ abstract class DataboundControl extends Control
 		foreach($this->sort_options as $field => $config_items)
 		{
 			$option = $config_items->items;
-			$link = $this->uri->build(null,null,array("sortby"=>$field),array($this->id.'_pg'));			
+			$link = $this->uri->build(null,null,array("sortby"=>$field),array('pg'));			
 			$rendered.=$template->render(array('sortby' => $this->sortby, 'field' => $field, 'option' => $option, 'control' => $this, 'link' => $link));				
 		}
 		
@@ -246,7 +246,7 @@ abstract class DataboundControl extends Control
 		$this->lastpage = ceil($this->total_count / $this->page_size);
 
 		$this->firstpage  = $_SERVER['REQUEST_URI'];
-		$this->firstpage  = explode($this->id."_pg", $this->firstpage);
+		$this->firstpage  = explode("pg", $this->firstpage);
 		$this->firstpage  = $this->firstpage[0].'results_pg=0';
 
 		if ($this->pageno < 1)

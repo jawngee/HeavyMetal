@@ -97,7 +97,11 @@ class SOLRSearchController extends GenericSearchController
         {
         	$filter->tv = $this->appmeta->tv;
         	$filter->tv_unique_key = $this->appmeta->tv_unique_key;
-        }       	
+        }
+
+        // Shadow the main query with a phrase query if needed (hack for exact matching reqs)
+        if ($this->appmeta->add_phrase_query)
+        	$filter->add_phrase_query = true;
         	
         // Load facet config if present
         $facet_configs = $this->appmeta->facets;
@@ -155,7 +159,7 @@ class SOLRSearchController extends GenericSearchController
  	public function handle_text_query($filter)
  	{
  		$req_text_query = $this->get_text_query();
- 		
+		
 		if (isset($this->appmeta->text_query))
 		{
 

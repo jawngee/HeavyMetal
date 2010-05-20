@@ -252,8 +252,8 @@ abstract class Dispatcher
 			// parse the segments out for security
 			foreach ($path_array as $val)
 			{
-				if (!preg_match('|^[a-z 0-9~%.:_\-\+\(\);&]+$|i', $val))
-					$val=preg_replace('|[^a-z 0-9~%.:_\-\+\(\);&]*|i','',$val);
+				if (!preg_match('|^[a-z 0-9~%".:_\-\+\(\);&]+$|i', $val))
+					$val=preg_replace('|[^a-z 0-9~%".:_\-\+\(\);&]*|i','',$val);
 
 				$val = trim($val);
 
