@@ -159,7 +159,7 @@ uses('system.app.layout');
 	 				$view_type=array_pop(explode('.',$this->view_name));
 	 				
 	 				$layoutclass= str_replace('_','',$layout).'Layout';
-	 				$this->layout=new $layoutclass($title,$description,"$layout.$view_type");
+					$this->layout=new $layoutclass($title,$description,"$layout.$view_type");
 					$this->layout->controller = $this->controller;
 	 			}
 	 		}
@@ -351,10 +351,10 @@ uses('system.app.layout');
  		{
  			$include=$matches[1][0];
  			
- 			if ($this->layout!=null)
- 				$this->layout->add_include($include);
- 			else
- 				Layout::$MasterLayout->add_include($include);
+ 			if ($this->layout==null)
+ 				$this->layout = Layout::MasterLayout();
+ 				
+ 			$this->layout->add_include($include);
 
 			$rendered=str_replace($matches[0][0],'',$rendered);
 
@@ -626,6 +626,8 @@ uses('system.app.layout');
  		
  		$result=get_view($this->base_path.$this->view_name);
  		
+ 		$this->parse_layout($result,$subview);
+ 		
  		$this->parse_includes($result);
  		$this->parse_nestedcontrols_cdata($result);
  		
@@ -633,7 +635,6 @@ uses('system.app.layout');
 		
  		$result=render_fragment($result,$this->data);
 
-		$this->parse_layout($result,$subview);
  		$this->parse_subviews($result);
  		$this->parse_other_tags($result);
  		$this->parse_targets($result);
