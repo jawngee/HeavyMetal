@@ -146,6 +146,10 @@ uses('system.app.layout');
 					case 'description':
 						$description=$attr[3];
 						break;
+						
+					case 'optimize':
+						$optimize=$attr[3];
+						break;
 				}
 
  			// we matched, so remove it from the rendered view
@@ -159,7 +163,7 @@ uses('system.app.layout');
 	 				$view_type=array_pop(explode('.',$this->view_name));
 	 				
 	 				$layoutclass= str_replace('_','',$layout).'Layout';
-					$this->layout=new $layoutclass($title,$description,"$layout.$view_type");
+					$this->layout=new $layoutclass($title,$description,"$layout.$view_type",$optimize);
 					$this->layout->controller = $this->controller;
 	 			}
 	 		}
@@ -373,6 +377,22 @@ uses('system.app.layout');
 
 			$rendered=str_replace($matches[0][0],'',$rendered);
  		}
+ 		
+ 		// extract js blocks
+		$matches=array();
+		$regex="@<[\s]*uses[\s]*:[\s]*block[\s]*name=['\"]([^\"']*)['\"]>(.*?)<[\s]*/[\s]*uses[\s]*:[\s]*block[\s]*>@is";
+ 		while(preg_match($regex,$rendered,$matches,PREG_OFFSET_CAPTURE)==1)
+ 		{
+ 		
+ 			$content=$matches[2][0];
+ 			$name=$matches[1][0];
+
+ 			if ($this->layout!=null)
+ 				$this->layout->register_block($name,$content);
+ 				
+			$rendered=str_replace($matches[0][0],'',$rendered);
+ 		}
+ 		
   	}
   	
   	/**

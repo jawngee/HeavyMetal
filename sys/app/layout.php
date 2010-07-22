@@ -36,6 +36,7 @@
  */
 
 uses('sys.app.view');
+uses('sys.app.dynamic_object');
 
 /**
  * Layout for rendering the layout page with a controller.
@@ -53,6 +54,9 @@ uses('sys.app.view');
  	
  	/** The page description for SEO */
  	public $description='';
+ 	
+ 	/** The page optimization */
+ 	public $optimize='';
  	
  	/** list of styles */
  	public $styles=array();
@@ -74,12 +78,17 @@ uses('sys.app.view');
  	 * 
  	 * @param string $view The view to use for this layout
  	 */
- 	public function __construct($title,$description,$view)
+ 	public function __construct($title,$description,$view,$optimize='')
  	{
  		parent::__construct($view,null,PATH_APP.'layout/');
  		
  		$this->title=$title;
  		$this->description=$description;
+ 		
+ 		// optimization options
+ 		$this->optimize=new DynamicObject();
+ 		foreach(split(",", strtoupper($optimize)) as $id)
+ 			$this->optimize->{$id}=true;
  		
  		if (self::$_master==null)
  			self::$_master=$this;
