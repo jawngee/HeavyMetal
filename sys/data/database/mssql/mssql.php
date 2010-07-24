@@ -222,7 +222,7 @@ class MSSQLDatabase extends Database
      */
     public function get_row($query)
     {
-    	$res=mssql_query($this->connection,$query);
+    	$res=mssql_query($query,$this->connection);
     	return mssql_fetch_assoc($res);
     }
 
@@ -235,7 +235,7 @@ class MSSQLDatabase extends Database
      */
     public function fetch_row($table_name,$key,$id)
     {
-		$res=mssql_query($this->connection,"SELECT * FROM $table_name WHERE $key=$id");
+		$res=mssql_query("SELECT * FROM $table_name WHERE $key=$id",$this->connection);
 		return mssql_fetch_assoc($res);
     }
 

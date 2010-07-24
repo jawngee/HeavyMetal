@@ -85,7 +85,7 @@ class MSSQLResult implements Iterator
     public function rewind()
     {
     	$this->cindex=0;
-    	pg_result_seek($this->result,0);
+    	mssql_data_seek($this->result,0);
     	$this->last=mssql_fetch_assoc($this->result);
     	return $this->last;
     }
