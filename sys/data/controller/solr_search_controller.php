@@ -43,6 +43,7 @@
  */
  
 uses('system.data.controller.generic_search_controller');
+uses('system.data.search.solr.facet');
 
 class SOLRSearchController extends GenericSearchController
 {		
@@ -53,6 +54,60 @@ class SOLRSearchController extends GenericSearchController
 
  		$data['spellcheck'] = $data['results']['spellcheck'];
  		
+ 		return $data;
+ 	}
+ 	
+ 	public function morefacet()
+ 	{
+ 		// Run just a facet query given the current selection
+ 		// ... don't return any search results, just all values for this facet
+ 		$field = $this->request->input->facet;
+ 		$facet_field = $this->appmeta->filter->{$field}->facet->field;
+ 		$filter = $this->build_filter();
+ 		$filter->limit="0";
+ 		$filter->offset=200;
+ 		$filter->clustering=false;
+ 		$filter->spellcheck=false;
+ 		$filter->tv=false;
+
+ 		foreach(array_keys($filter->facet->fields) as $facet_name)
+ 		{
+ 			if ($facet_name != $facet_field)
+ 				unset($filter->facet->fields[$facet_name]);
+ 			else
+ 				$filter->facet->fields[$facet_name]->limit = null;
+ 		}
+ 		
+ 		$results = $filter->get_rows();
+ 		
+ 		return array(
+ 			'filters' => array($field => $this->appmeta->filter->{$field}),
+ 			'facet_field' => $facet_field,
+ 			'results' => $results,
+ 			'count' => count($results['facet_counts'][$facet_field])
+ 		);
+ 	}
+ 	
+ 	public function morelike()
+ 	{
+ 		// build filter with a flag for mlt
+ 		$filter = $this->build_filter();
+
+ 		$filter->more_like_this = true;
+ 		$filter->clustering=false;
+ 		$filter->spellcheck=false;
+ 		$filter->q_value = $this->appmeta->unique_key . ':' . $filter->q_value;
+ 		
+ 		$data = parent::index($filter);
+ 		
+ 		$data['interesting'] = $data['results']['interesting_terms'];
+		
+ 		$data['filter_description_tokens'][0]['description'] = 
+			'Images similar to '. $data['filter_description_tokens'][0]['description'];
+		$data['filter_description_tokens'][0]['remove_url'] = 
+			str_replace('/morelike','',$data['filter_description_tokens'][0]['remove_url']);
+ 		
+		
  		return $data;
  	}
 	
@@ -96,7 +151,7 @@ class SOLRSearchController extends GenericSearchController
         if ($this->appmeta->tv)
         {
         	$filter->tv = $this->appmeta->tv;
-        	$filter->tv_unique_key = $this->appmeta->tv_unique_key;
+        	$filter->tv_unique_key = $this->appmeta->unique_key;
         }
 
         // Shadow the main query with a phrase query if needed (hack for exact matching reqs)

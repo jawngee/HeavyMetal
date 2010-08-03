@@ -49,6 +49,8 @@ class GenericSearchController extends Controller
 	 */
 	protected $context='search';
 
+	protected $no_query_text = '';
+	
 	/**
 	 * The application specific metadata
 	 *
@@ -110,6 +112,16 @@ class GenericSearchController extends Controller
 		return $this->get_value('q');
 	}
 	
+	public function get_text_query_description()
+	{
+		return '"'.$this->get_text_query().'"';
+	}
+	
+	public function get_no_text_query_url($query)
+	{
+		return $this->uri->build(null,null,null,array('q'=>$query));
+	}
+	
 	protected function init_filter()
 	{
 		if ($this->appmeta->init_filter)
@@ -146,11 +158,22 @@ class GenericSearchController extends Controller
 	{
 		$tokens = array();
 		
-		if ($this->get->q)
-			$tokens[] = '"'.$this->get_text_query().'"';
+		if ($this->get_text_query())
+			$tokens[] = array(
+				'field'=>'query',
+				'value'=>$this->get_text_query(), 
+				'description'=>$this->get_text_query_description(), 
+				'remove_url'=>$this->get_no_text_query_url($this->get_text_query(), $this->no_q_value));
+		else
+			$tokens[] = array(
+				'field'=>'query',
+				'value'=>null, 
+				'description'=>$this->no_query_text, 
+				'remove_url'=>null);
 			
 		if ($this->get->location)
-			$tokens[] = $this->get->location;
+			$tokens[] = array('field'=>'location', 'value'=>$this->get->location, 'description'=>$this->get->location, 'remove_url'=>$this->request->uri->build(null,array('location'=>$this->get->location)));
+			
 		
 		foreach($this->appmeta->filter as $field=>$section)
 		{
@@ -174,7 +197,7 @@ class GenericSearchController extends Controller
 						$token .= ' ' . $section->description_append;
 				
 					if (!empty($token))
-						$tokens[] = $token;
+						$tokens[] = array('field'=>$field, 'value'=>$val, 'description'=>$token, 'remove_url'=>$this->request->uri->build(null,array($field=>$val)));
 				}
 			}
 		}

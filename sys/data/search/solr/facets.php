@@ -11,7 +11,7 @@ class Facets
 	private $model=null;		/** Reference to the filter's model */
 	private $filter=null;		/** Reference to filter object */
 	public $config=array(); /** any addt'l facet parameters */
-	public
+
 	
 	/*
 	 * Sample parameters:  facet.mincount, facet.limit, 
