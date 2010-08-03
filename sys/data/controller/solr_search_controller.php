@@ -57,7 +57,7 @@ class SOLRSearchController extends GenericSearchController
  		return $data;
  	}
  	
- 	public function morefacet()
+ 	public function morefacet($morelike=false)
  	{
  		// Run just a facet query given the current selection
  		// ... don't return any search results, just all values for this facet
@@ -69,7 +69,14 @@ class SOLRSearchController extends GenericSearchController
  		$filter->clustering=false;
  		$filter->spellcheck=false;
  		$filter->tv=false;
-
+ 		
+ 		if ($morelike && $morelike!='all')
+ 		{
+ 			$filter->more_like_this=true;
+ 		 	$filter->q_value = $this->appmeta->unique_key . ':' . $filter->q_value;	
+ 		}
+ 		
+ 		
  		foreach(array_keys($filter->facet->fields) as $facet_name)
  		{
  			if ($facet_name != $facet_field)
@@ -79,12 +86,13 @@ class SOLRSearchController extends GenericSearchController
  		}
  		
  		$results = $filter->get_rows();
- 		
+
  		return array(
  			'filters' => array($field => $this->appmeta->filter->{$field}),
  			'facet_field' => $facet_field,
  			'results' => $results,
- 			'count' => count($results['facet_counts'][$facet_field])
+ 			'count' => count($results['facet_counts'][$facet_field]),
+ 			'base' => str_replace('/morefacet', '', $this->request->uri->root)
  		);
  	}
  	
