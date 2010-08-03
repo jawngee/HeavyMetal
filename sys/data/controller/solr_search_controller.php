@@ -70,7 +70,7 @@ class SOLRSearchController extends GenericSearchController
  		$filter->spellcheck=false;
  		$filter->tv=false;
  		
- 		if ($morelike && $morelike!='all')
+ 		if ($morelike && $morelike!=$this->no_query_text)
  		{
  			$filter->more_like_this=true;
  		 	$filter->q_value = $this->appmeta->unique_key . ':' . $filter->q_value;	
