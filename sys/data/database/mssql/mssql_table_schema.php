@@ -23,85 +23,38 @@ class MSSQLTableSchema extends TableSchema
 		$this->schema=$schema;
 		$this->tablename=$tablename;
 		
-		$this->view=(strpos($tablename,'_view')>0);
-		
-		$sql='';		
-		$sql.="SELECT ";
-		$sql.="	a.attnum, ";
-		$sql.="	a.attname AS field, ";
-		$sql.="	t.typname AS type, ";
-		$sql.="	format_type(a.atttypid, a.atttypmod) AS complete_type, ";
-		$sql.="	( ";
-		$sql.="		SELECT ";
-		$sql.="			't' ";
-		$sql.="		FROM ";
-		$sql.="			pg_index ";
-		$sql.="		WHERE ";
-		$sql.="			c.oid = pg_index.indrelid ";
-		$sql.="			AND pg_index.indkey[0] = a.attnum ";
-		$sql.="			AND pg_index.indisprimary = 't' ";
-		$sql.="	) AS pri, ";
-		$sql.="	( ";
-		$sql.="		SELECT ";
-		$sql.="			pg_attrdef.adsrc ";
-		$sql.="		FROM "; 
-		$sql.="			pg_attrdef ";
-		$sql.="		WHERE ";
-		$sql.="			c.oid = pg_attrdef.adrelid ";
-		$sql.="			AND pg_attrdef.adnum=a.attnum ";
-		$sql.="	) AS default, ";
-		$sql.="	a.attnotnull AS isnotnull, ";
-		$sql.="	d.description ";
-		$sql.="FROM ";
-		$sql.="	pg_attribute a ";
-		$sql.="INNER JOIN ";
-		$sql.="	pg_class c ";
-		$sql.="ON ";
-		$sql.="	a.attrelid = c.oid ";
-		$sql.="INNER JOIN ";
-		$sql.="	 pg_type t ";
-		$sql.="ON ";
-		$sql.="	a.atttypid = t.oid ";
-		$sql.="LEFT OUTER JOIN ";
-		$sql.="	pg_description d ";
-		$sql.="ON ";
-		$sql.="	d.objoid=a.attrelid ";
-		$sql.="	AND d.objsubid=a.attnum ";
-		$sql.="WHERE ";
-		$sql.="	c.relname = '$tablename' ";
-		$sql.="	AND a.attnum > 0 ";
-		$sql.="ORDER BY ";
-		$sql.="	a.attnum ";
+		$this->view=false;
 
-	    $result=$db->execute($sql);
+	    $result=$db->execute("exec sp_columns '$tablename';");
 	    if ($result->count==0)
 	    	throw new Exception("No schema information for $tablename found.");
 	    
 	    foreach ($result as $key => $val) 
 	    {
-	    	$length=0;
+	    	$length=$val['PRECISION'];
 	    	
-	        if ($val['type'] === 'varchar')
-		{
-	            $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $val['complete_type']);
-		    if (!is_numeric($length))
-			$length=0;
-		}
-
 	        $valtype=0;
-	        switch($val['type'])
+	        $isprimary=false;
+	        switch($val['TYPE_NAME'])
 	        {
+	        	case 'int identity':
+	        		$valtype=Field::NUMBER;
+	        		$isprimary=true;
+	        		break;
+	        	case 'uniqueidentifier':
 	        	case 'varchar':
 	        	case 'char':
 	        		$valtype=Field::STRING;
 	        		break;
-	        	case 'int4':
-	        	case 'int8':
+	        	case 'int':
+	        	case 'tinyint':
+	        	case 'decimal':
 	        	case 'float':
-	        	case 'double precision':
+	        	case 'double':
+	        	case 'money':
 	        		$valtype=Field::NUMBER;
 	        		break;
-	        	case 'timestamp':
+	        	case 'datetime':
 	        		$valtype=Field::TIMESTAMP;
 	        		break;
 	        	case 'bool':
@@ -109,10 +62,10 @@ class MSSQLTableSchema extends TableSchema
 	        		break;
 	        }
 	
-	        $field=new Field($val['field'],$valtype,$length,$val['description'],($val['isnotnull'] == 't'));
-	        $field->db_type=$val['type'];
+	        $field=new Field($val['COLUMN_NAME'],$valtype,$length,$val['REMARKS'],($val['IS_NULLABLE'] == 'YES'));
+	        $field->db_type=$val['TYPE_NAME'];
 	        
-			if ($val['pri'] == 't')                
+			if ($isprimary)           
 				$this->primarykey=$field;
 			else
 				$this->columns[]=$field;
@@ -120,7 +73,7 @@ class MSSQLTableSchema extends TableSchema
 		
 		if ($related==true)
 		{
-			$this->alltables=array( $schema.'.'.$tablename => $this);
+			$this->alltables=array( $tablename => $this);
 			$this->get_related($this->alltables,$restricted);
 			$this->alltables=array_slice($this->alltables,1);
 		}
@@ -132,56 +85,56 @@ class MSSQLTableSchema extends TableSchema
 		$fkeys=$this->get_related_tables();
 		foreach($fkeys as $fkey)
 		{
-			$key=$fkey['source_schema'].'.'.$fkey['source'];
+			$key=$fkey['referenced_object'];
 			if (isset($alltables[$key]))
 				$this->related[$key]=&$alltables[$key];
 			else
 			{
-				$schema=new PGSQLTableSchema($this->db,$fkey['source_schema'],$fkey['source'],false);
-				$schema->related_key=$fkey['name'];
+				$schema=new MSSQLTableSchema($this->db,null,$fkey['referenced_object'],false);
+				$schema->related_key=$fkey['foreign_key_name'];
 
-				$schema->related_column=$fkey['source_column'];
+				$schema->related_column=$fkey['constraint_column_name'];
 
-				if ($this->has_constraint($fkey['source_schema'],$fkey['source'],$fkey['source_column'])!=false)
-				{
-					$schema->type=Relation::RELATION_SINGLE;
-					//$schema->related_field=$fkey['dest_column'];
-				}
-				else
-					$schema->type=Relation::RELATION_MANY;
-				
-				if (($restricted==false) || ($this->schema==$schema->schema))
-				{
+//				if ($this->has_constraint($fkey['source_schema'],$fkey['source'],$fkey['source_column'])!=false)
+//				{
+//					$schema->type=Relation::RELATION_SINGLE;
+//					//$schema->related_field=$fkey['dest_column'];
+//				}
+//				else
+//					$schema->type=Relation::RELATION_MANY;
+//				
+//				if (($restricted==false) || ($this->schema==$schema->schema))
+//				{
 					$alltables[$key]=$schema;
 					$this->related[$key]=$schema;
 					$schema->get_related($alltables,$restricted);
-				}
+//				}
 			}
 		}
 
-		/** 1..1 Forward **/
-		$fkeys=$this->get_foreign_keys();
-		foreach($fkeys as $fkey)
-		{
-			$key=$fkey['dest_schema'].'.'.$fkey['dest'];
-			if (isset($alltables[$key]))
-				$this->related[$key]=&$alltables[$key];
-			else
-			{
-				$schema=new PGSQLTableSchema($this->db,$fkey['dest_schema'],$fkey['dest'],false);
-				$schema->related_key=$fkey['name'];
-				$schema->type=Relation::RELATION_SINGLE;
-				$schema->related_field=$fkey['source_column'];
-				$schema->related_column=$fkey['dest_column'];
-
-				if (($restricted==false) || ($this->schema==$schema->schema))
-				{
-					$alltables[$key]=$schema;
-					$this->related[$key]=$schema;
-					$schema->get_related($alltables,$restricted);
-				}
-			}
-		}
+//		/** 1..1 Forward **/
+//		$fkeys=$this->get_foreign_keys();
+//		foreach($fkeys as $fkey)
+//		{
+//			$key=$fkey['dest_schema'].'.'.$fkey['dest'];
+//			if (isset($alltables[$key]))
+//				$this->related[$key]=&$alltables[$key];
+//			else
+//			{
+//				$schema=new PGSQLTableSchema($this->db,$fkey['dest_schema'],$fkey['dest'],false);
+//				$schema->related_key=$fkey['name'];
+//				$schema->type=Relation::RELATION_SINGLE;
+//				$schema->related_field=$fkey['source_column'];
+//				$schema->related_column=$fkey['dest_column'];
+//
+//				if (($restricted==false) || ($this->schema==$schema->schema))
+//				{
+//					$alltables[$key]=$schema;
+//					$this->related[$key]=$schema;
+//					$schema->get_related($alltables,$restricted);
+//				}
+//			}
+//		}
 	}
 	
 	public function get_foreign_keys()
@@ -229,44 +182,22 @@ class MSSQLTableSchema extends TableSchema
   
 	public function get_related_tables()
 	{
-		$sql='';		
-		$sql.="select ";
-		$sql.="	c.conname as name, ";
-		$sql.="	sns.nspname as source_schema, ";
-		$sql.="	s.relname as source, ";
-		$sql.="	sa.attname as source_column, ";
-		$sql.="	dns.nspname as dest_schema, ";
-		$sql.="	d.relname as dest, ";
-		$sql.="	da.attname as dest_column ";
-		$sql.="from  ";
-		$sql.="	pg_class s ";
-		$sql.="inner join ";
-		$sql.="	pg_namespace sns ";
-		$sql.="on ";
-		$sql.="	s.relnamespace=sns.oid ";
-		$sql.="inner join  ";
-		$sql.="	pg_constraint c ";
-		$sql.="on  ";
-		$sql.="	s.oid=c.conrelid ";
-		$sql.="inner join ";
-		$sql.="	pg_class d ";
-		$sql.="on ";
-		$sql.="	d.oid=c.confrelid ";
-		$sql.="inner join ";
-		$sql.="	pg_namespace dns ";
-		$sql.="on ";
-		$sql.="	d.relnamespace=dns.oid ";
-		$sql.="inner join ";
-		$sql.="	pg_attribute sa ";
-		$sql.="on ";
-		$sql.="	sa.attrelid=s.oid and sa.attnum = c.conkey[1] ";
-		$sql.="inner join ";
-		$sql.="	pg_attribute da ";
-		$sql.="on ";
-		$sql.="	da.attrelid=d.oid and da.attnum = c.confkey[1] ";
-		$sql.="where ";
-		$sql.="	d.relname='$this->tablename'; ";
 		
+		$sql=<<<EOD
+		SELECT 
+		    f.name AS foreign_key_name
+		   ,OBJECT_NAME(f.parent_object_id) AS table_name
+		   ,COL_NAME(fc.parent_object_id, fc.parent_column_id) AS constraint_column_name
+		   ,OBJECT_NAME (f.referenced_object_id) AS referenced_object
+		   ,COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS referenced_column_name
+		   ,is_disabled
+		   ,delete_referential_action_desc
+		   ,update_referential_action_desc
+		FROM sys.foreign_keys AS f
+		INNER JOIN sys.foreign_key_columns AS fc 
+   			ON f.object_id = fc.constraint_object_id 
+		WHERE f.parent_object_id = OBJECT_ID('{$this->tablename}');
+EOD;
 		return $this->db->execute($sql);
 	}
 	
