@@ -352,7 +352,7 @@ abstract class Dispatcher
 		}
 			
 		$root = implode('/', array_diff($this->path_array, $this->segments));
-		$class=new $classname(new Request($request->method,$root,$this->segments, $request->query));
+		$class=new $classname(new Request($this, $request->method, $root, $this->segments, $request->query));
 
 		$action=$found_action;
 		$this->action=$action;
