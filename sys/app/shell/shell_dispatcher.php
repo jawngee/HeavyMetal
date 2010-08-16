@@ -64,12 +64,12 @@ class ShellDispatcher extends Dispatcher
 		
 		$path=array_shift($args);
 
-		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
+		$controller_root=($controller_root) ? $controller_root : PATH_APP.'shell/controller/';
+		$view_root=($view_root) ? $view_root : PATH_APP.'shell/view/';
 		
 		$this->segments=$args;
 		
-		$this->controller_root=($controller_root) ? $controller_root : PATH_APP.'shell/controller/';
-		$this->view_root=($view_root) ? $view_root : PATH_APP.'shell/view/';
+		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
 	}
 
 	/**

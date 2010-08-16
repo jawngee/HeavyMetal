@@ -208,5 +208,6 @@ class Session
 	{
 		$this->data=array();
 		delete_cookie($this->name);
+		$this->save();
 	}
 }

@@ -82,7 +82,7 @@ class Relation
      */
     public function get_value()
     {
-        if ($this->value!=null)
+    	if ($this->value!=null)
             return $this->value;
             
         if ($this->type==self::RELATION_MANY)
@@ -100,12 +100,18 @@ class Relation
         {
             if (isset($this->parent->fields[$this->field]))
             {
-		if ($this->field == $this->parent->primary_key)
-		      $field=$this->parent->primary_key_value;
-		else
-                      $field=$this->parent->db->escape_value($this->field->type,$this->field->value);
+            	if ($this->field == $this->parent->primary_key)
+				      $field=$this->parent->primary_key_value;
+				else
+				{
+					// yo pdm what is this db->escape_value stuff?
+					if (is_string($this->field))
+						$field=$this->parent->__get($this->field);
+					else
+                      	$field=$this->parent->db->escape_value($this->field->type,$this->field->value);
+				}
             
-                if (($field==null) || ($field=='') || ($field=="''"))
+				if (($field==null) || ($field=='') || ($field=="''"))
                     return null;
                     
                 return filter($this->model)
@@ -116,9 +122,14 @@ class Relation
                 throw new ModelException("The field '$this->field' could not be found on the parent model.");
         }
         else
-            return filter($this->model)
+        {
+    	vomit($this);
+        	return filter($this->model)
                        ->{$this->foreign_field}->equals($this->parent->primary_key_value)
                        ->first();
+        }
+            	vomit($this);
+        
     }
     
     public function get_many()

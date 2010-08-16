@@ -97,7 +97,6 @@ uses('sys.app.request.query');
  	{
  		$this->dispatcher=$dispatcher;
  		
- 		
  		$this->method='GET';
 		
  		$this->uri=new URI($root,$segments);

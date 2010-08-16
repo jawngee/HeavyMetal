@@ -364,7 +364,7 @@ class PGSQLDatabase extends Database
 	 */
 	public function table($schema,$tablename, $related=false, $restricted_to_schema=false)
 	{
-		uses('system.data.driver.database.pgsql_table_schema');
+		uses('system.data.database.pgsql.pgsql_table_schema');
 		$fuck=new PGSQLTableSchema($this,$schema,$tablename,$related,$restricted_to_schema);
 		return $fuck;
 	}
