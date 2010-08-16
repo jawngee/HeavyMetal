@@ -241,6 +241,6 @@ class URI
 		for($i=0; $i<count($segs); $i++)
 			$segs[$i] = rawurlencode($segs[$i]);
 		 	
- 		return $this->root."/".implode('/',$segs).$this->query->build($queryvalues,$removequeryvalues);
+ 		return rtrim($this->root."/".implode('/',$segs).$this->query->build($queryvalues,$removequeryvalues), '/');
  	}
 }

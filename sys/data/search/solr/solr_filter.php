@@ -50,6 +50,8 @@ class SOLRFilter extends Filter
 	public $boost_function=null;
 
 	public $query_parser=null;
+	
+	public $more_like_this=false;
 
 
 	
@@ -187,7 +189,7 @@ class SOLRFilter extends Filter
 		$fq = array();
 		$q = array($this->q_value);
 		$loc = array();
-		
+
 		
 		// Need this phrase query (which looks like a quoted mirror of the main query:  ?q=new york "new york"&...)
 		// in special cases where the edismax/dismax parsers currently crap out when matching multi-word terms.
@@ -238,7 +240,7 @@ class SOLRFilter extends Filter
 	
    		$query[] = 'q=' . rawurlencode(implode($q, ' '));
    		$query = array_merge($query, $loc);
-
+   		
    		if (count($fq) > 0)
 			foreach($fq as $filter_query)
 				$query[] = 'fq='.urlencode(str_replace('+',' ', $filter_query));
@@ -250,7 +252,7 @@ class SOLRFilter extends Filter
    		// handle offset / limit
    		if ($this->offset)
    			$query[] = 'start='.$this->offset;
-   			
+	
    		if ($this->limit)
    			$query[] = 'rows='.$this->limit;
 		
@@ -334,7 +336,13 @@ class SOLRFilter extends Filter
    		// tack on the result_format
    		$query[] = 'wt='.$this->result_format;			
 
-   		return SOLR_SERVER . '/select?' . implode($query, '&');
+   		// don't need the header
+   		$query[] = 'omitHeader=true';
+   		
+   		
+   		$handler = ($this->more_like_this) ? 'mlt' : 'select';
+   		
+   		return SOLR_SERVER . '/' . $handler . '?' . implode($query, '&');
    	}
 
    	
@@ -399,7 +407,6 @@ class SOLRFilter extends Filter
    			
    		if ($limit)
    			$this->limit=$limit;
-
 //dump('solr_filter->execute(): ' . $this->build_query());   			
    		$response = file_get_contents($this->build_query());
 
@@ -419,6 +426,7 @@ class SOLRFilter extends Filter
 		$result['count'] = $result_count;
 		$result['total_count'] = $response_array['response']['numFound'];
 		$result['facet_counts'] = $response_array['facet_counts']['facet_fields'];
+		$result['interesting_terms'] = $response_array['interestingTerms'];
 
 		//  weave clusters in as a facet (replace cluster facet)
 		if ($response_array['clusters'])

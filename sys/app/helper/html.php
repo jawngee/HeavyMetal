@@ -115,7 +115,7 @@ function checkbox($name,$value,$current_value=null,$class='no-border')
 function get_value($what,$input=null,&$object=null)
 {
 	if ($input && $input->exists($what)) {
-		return $input->get_string($what);
+		return $input->$what;
 	} elseif (isset($object->fields[$what])) {
 		return $object->$what;
 	}  elseif ($object!=null && count($object->fields) == 0) {
