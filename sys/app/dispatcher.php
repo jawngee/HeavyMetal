@@ -342,7 +342,7 @@ abstract class Dispatcher
 		if (!$found_action)
 		{
 			$found_action=find_methods($classname, $request->method."_index", 'index');
-   		   array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
+   			array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
 		}
 		
 		if (!$found_action)
@@ -350,7 +350,7 @@ abstract class Dispatcher
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
 		}
 			
-		$root = implode('/', array_diff($this->path_array, $this->segments));
+		$request->uri->segments = $this->segments;  // use the unshifted version
 		$class=new $classname($request);
 		
 		$action=$found_action;
