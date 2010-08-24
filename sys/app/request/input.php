@@ -81,6 +81,9 @@ final class Input extends DynamicObject
 		if (!isset($this->props[$name]))
 			return null;
 			
+		if ($this->props[$name] instanceof Input)
+			return $this->props[$name];
+			
 		return xss_clean($this->props[$name]);
 	}
 	

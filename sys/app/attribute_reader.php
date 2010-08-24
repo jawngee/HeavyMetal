@@ -152,7 +152,7 @@ class AttributeReader extends DynamicObject
 	 	
 	 	$key='cm-'.$class->getFileName();
  		$reader=$cache->get($key);
- 				
+ 		
  		if (!$reader)
  		{
 			$yaml=AttributeReader::ParseDocComments($class->getDocComment());

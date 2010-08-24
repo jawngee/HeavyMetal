@@ -97,10 +97,10 @@ uses('sys.app.request.query');
  	{
  		$this->dispatcher=$dispatcher;
  		
+
  		$this->method=$method;
-		
- 		$this->uri=new URI($root,$segments);
- 		$this->query=($query)?$query:new Query();
+
+ 		$this->method='GET';
  		
  		// assign the get and post vars
  		$this->input=Input::Get();

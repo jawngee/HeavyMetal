@@ -231,11 +231,11 @@ abstract class Dispatcher
 			{
 				
 			}
-		
+			
 		// explode it's segments
 		$path_array = explode('/', preg_replace('|/*(.+?)/*$|', '\\1', $this->path));
 		$segments = array();
-
+		
 		$this->path_array=$path_array;
 		// If it's the root uri, this is easy fo sheezy.
 		if ($this->path == '/' || $this->path == '')
@@ -261,7 +261,7 @@ abstract class Dispatcher
 					$segments[] = $val;
 			}			
 		}
-
+		
 		// setup the parsed uri result
 		$this->controller_path = '';
 		$this->controller = 'index';
@@ -328,7 +328,7 @@ abstract class Dispatcher
 		$data = array(); // any data to return to the view from the controller
 		
 		if (!file_exists($this->controller_root.$this->controller_path.$this->controller.EXT))
-			throw new ControllerNotFoundException("Could not find a suitable controller.");
+			throw new ControllerNotFoundException("Could not find a suitable controller: ".$this->controller_root.$this->controller_path.$this->controller.EXT);
 			
 		require_once($this->controller_root.$this->controller_path.$this->controller.EXT);
 		$classname=str_replace('/','',$this->controller_path).$this->controller.'Controller';
@@ -337,13 +337,12 @@ abstract class Dispatcher
 			throw new ControllerNotFoundException("'$classname' can not be found in '".$this->controller."'.");
 			
 		$request=$this->build_request();
-	
 		$found_action=find_methods($classname, $request->method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
 
 		if (!$found_action)
 		{
 			$found_action=find_methods($classname, $request->method."_index", 'index');
-   		   array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
+   			array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
 		}
 		
 		if (!$found_action)
@@ -354,8 +353,8 @@ abstract class Dispatcher
 		$root = implode('/', array_diff($this->path_array, $this->segments));
 		$class=new $classname(new Request($this, $request->method, $root, $this->segments, $request->query));
 
-		$action=$found_action;
-		$this->action=$action;
+		$request->uri->segments = $this->segments;  // use the unshifted version
+		$class=new $classname($request);
 		
 		if ((isset ($class->ignored)) && (in_array($action, $class->ignored)))
 			throw new IgnoredMethodCalledException("Ignored method called.");
@@ -383,7 +382,7 @@ abstract class Dispatcher
 			$this->view=$class->view;
 		else if ($meta->view)
 			$this->view=$meta->view;
-
+			
 		$data['controller']=&$class;
 		$data['session']=&$class->session;
 		return $data;

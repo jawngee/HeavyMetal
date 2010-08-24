@@ -236,7 +236,9 @@ class Model implements ArrayAccess
        	else if (isset($this->fields[$prop_name]))
            $val=$this->fields[$prop_name]->value;
 		else if (isset($this->related[$prop_name]))
+		{
 			$val=$this->related[$prop_name]->get_value();
+		}
 		
 		return $val;
    	}
