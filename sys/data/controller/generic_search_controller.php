@@ -114,7 +114,7 @@ class GenericSearchController extends Controller
 	
 	public function get_text_query_description()
 	{
-		return '"'.$this->get_text_query().'"';
+		return '&quot;'.$this->get_text_query().'&quot;';
 	}
 	
 	public function get_no_text_query_url($query)
@@ -236,6 +236,7 @@ class GenericSearchController extends Controller
 		//Need to adjust offset if filters have changed and we were at the end of a longer paginated list of previous results
 		if ($filter->offset > $count)
 			$filter->offset = floor($count/$filter->limit)*$filter->limit;
+
 
 		return array(
 			'form' => $this->appmeta->form,
