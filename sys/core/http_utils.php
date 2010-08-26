@@ -87,19 +87,6 @@ function set_cookie($name = '', $value = '', $expire = '', $domain = '', $path =
 		@setcookie($prefix.$name, $value, $expire, $path, $domain, 0);
 }
 
-/**
- * Delete a COOKIE
- *
- * @param	mixed
- * @param	string	the cookie domain.  Usually:  .yourdomain.com
- * @param	string	the cookie path
- * @param	string	the cookie prefix
- * @return	void
- */
-function delete_cookie($name = '', $domain = '', $path = '/', $prefix = '')
-{
-	set_cookie($name, '', '', $domain, $path, $prefix);
-}
 
 	
 /**
