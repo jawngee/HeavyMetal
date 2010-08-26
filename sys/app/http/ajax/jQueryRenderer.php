@@ -23,43 +23,44 @@ class jQueryRenderer
 	{
 		
 		$result='';
+		$selector=str_replace('"', '\"', $attrs['selector']);
 		    
 		switch($tag)
 		{
 			case 'update':
-				$result="$(\"".$attrs['selector']."\").html(\"".$content."\");";
+				$result="$(\"".$selector."\").html(\"".$content."\");";
 			break;
 			
 			case 'prepend':
-				$result="$(\"".$attrs['selector']."\").prepend(\"".$content."\");";
+				$result="$(\"".$selector."\").prepend(\"".$content."\");";
 			break;
 			
 			case 'append':
-				$result="$(\"".$attrs['selector']."\").append(\"".$content."\");";
+				$result="$(\"".$selector."\").append(\"".$content."\");";
 			break;
 			
 			case 'replace':
-				$result="$(\"".$attrs['selector']."\").replaceAll(\"".$content."\");";
+				$result="$(\"".$selector."\").replaceAll(\"".$content."\");";
 			break;
 			
 			case 'insert':
 				$where=(isset($attrs['where'])) ? $attrs['where'] : 'before';
-				$result="$(\"".$attrs['selector']."\").".strtolower($where)."(\"".$content."\");";
+				$result="$(\"".$selector."\").".strtolower($where)."(\"".$content."\");";
 			break;
 			
 			case 'remove':
 				$fade=(isset($attrs['fade'])) ? $attrs['fade'] : false;
 				if ($fade)
-			       $result='$("'.$attrs['selector'].'".fadeOut("slow", function() { $(this).remove(); });';
+			       $result='$("'.$selector.'".fadeOut("slow", function() { $(this).remove(); });';
 				else
-			       $result='$("'.$attrs['selector'].'").remove();'; 
+			       $result='$("'.$selector.'").remove();'; 
 			break;
 			case 'hide':
-				$result='$("'.$attrs['selector'].'").hide();'; 
+				$result='$("'.$selector.'").hide();'; 
 			break;
 			
 			case 'show':
-				$result='$("'.$attrs['selector'].'").show();';
+				$result='$("'.$selector.'").show();';
 				
 			default:
 				$result="Tag '$tag' not implemented.";
