@@ -216,4 +216,12 @@ class DynamicObject implements ArrayAccess, Iterator, Countable
     {
     	return count($this->props);
     }
+    
+    /**
+     * Returns the underlying array of properties
+     */
+    public function properties()
+    {
+    	return $this->props;
+    }
 }
