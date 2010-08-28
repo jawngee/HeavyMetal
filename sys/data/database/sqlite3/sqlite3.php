@@ -58,7 +58,7 @@ class SQLite3Database extends Database
 		if (!$this->config)
 		    throw new DatabaseException("Invalid dsn '$dsn'.");
 		
-		$this->connection=sqlite_open(PATH_APP.'/data/'.$this->config['host']);
+		$this->connection=sqlite3_open(PATH_ROOT.$this->config['path']);
 		if (!$this->connection)
 			throw new DatabaseException("Invalid database settings.");
     }
@@ -69,7 +69,7 @@ class SQLite3Database extends Database
      *
      * @param string $feature
      */
-    public function supports($feature) { return true; }
+    public function supports($feature) { return ($feature!=FEATURE_TABLE_ALIAS); }
     
 
 
@@ -93,11 +93,12 @@ class SQLite3Database extends Database
 
    		$sql.=");";
 
-    	$res=sqlite_query($this->connection,$sql);
+    	$res=sqlite3_query($this->connection,$sql);
     	if (!$res)
-    		throw new DatabaseException(sqlite_last_error($this->connection));
+    		throw new DatabaseException(sqlite3_error($this->connection));
     		
-    	return sqlite_last_insert_rowid($this->connection);    }
+    	return sqlite3_last_insert_rowid($this->connection);    
+    }
 
     /**
      * Performs an update
@@ -120,9 +121,9 @@ class SQLite3Database extends Database
     	$sql=trim($sql,',');
 
    		$sql.=" where $key=$id";
-    	$res=sqlite_query($this->connection,$sql);
-    	if (sqlite_changes($this->connection)<=0)
-    		throw new DatabaseException(sqlite_last_error($this->connection));
+    	$res=sqlite3_query($this->connection,$sql);
+    	if (sqlite3_changes($this->connection)<=0)
+    		throw new DatabaseException(sqlite3_error($this->connection));
     		
     	return true;
     }
@@ -136,8 +137,8 @@ class SQLite3Database extends Database
      */
     public function delete($table_name,$key,$id)
     {
-		$res=sqlite_query($this->connection,"delete from $table_name where $key=$id");
-    	return (sqlite_changes($this->connection)>0);
+		$res=sqlite3_query($this->connection,"delete from $table_name where $key=$id");
+    	return (sqlite3_changes($this->connection)>0);
     }
 
     /**
@@ -154,10 +155,11 @@ class SQLite3Database extends Database
     		
     	if ($limit)
     		$query.=" LIMIT $limit";
-    	$res=sqlite_query($this->connection,$query);
+
+      	$res=sqlite3_query($this->connection,$query);
     	
     	if (!$res)
-    		throw new DatabaseException(sqlite_last_error($this->connection));
+    		throw new DatabaseException(sqlite3_error($this->connection));
     	
     	return new SQLite3Result($res);
     }
@@ -188,8 +190,8 @@ class SQLite3Database extends Database
      */
     public function get_one($query)
     {
-    	$res=sqlite_query($this->connection,$query);
-    	$row=sqlite_fetch_array($res);
+    	$res=sqlite3_query($this->connection,$query);
+    	$row=sqlite3_fetch_array($res);
     	return $row[0];
     }
 
@@ -200,8 +202,8 @@ class SQLite3Database extends Database
      */
     public function get_row($query)
     {
-    	$res=sqlite_query($this->connection,$query);
-    	return sqlite_fetch_array($res,SQLITE_ASSOC);
+    	$res=sqlite3_query($this->connection,$query);
+    	return sqlite3_fetch_array($res);
     }
 
     /**
@@ -213,8 +215,8 @@ class SQLite3Database extends Database
      */
     public function fetch_row($table_name,$key,$id)
     {
-		$res=sqlite_query($this->connection,"SELECT * FROM $table_name WHERE $key=$id");
-		return sqlite_fetch_array($res,SQLITE_ASSOC);
+		$res=sqlite3_query($this->connection,"SELECT * FROM $table_name WHERE $key=$id");
+		return sqlite3_fetch_array($res);
     }
 
 
@@ -225,8 +227,10 @@ class SQLite3Database extends Database
      */
     public function get_rows($query)
     {
-    	$res=sqlite_query($this->connection,$query);
-    	return sqlite_fetch_all($res);
+    	$res=sqlite3_query($this->connection,$query);
+    	
+    	while ($r=sqlite3_fetch_array($res)) $result[]=$r;
+    	return $result;
     }
 
     /**
