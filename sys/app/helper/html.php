@@ -76,6 +76,56 @@ function option($name,$value,$current_value=null)
 
 /**
  * 
+ * Generates html options from an array of values.  Remember that models can be treated as associative arrays!
+ * 
+ * @param $array The array of items
+ * @param $title_prop The name of the key that holds the title for the option
+ * @param $value_prop The name of the key that holds the value for the option
+ * @param $value The current value of the option
+ * @param $any_title Name of "Any" option, such as "None".  If null, won't be generated.
+ * @param $any_value Value of "Any" option, such as "None".  If null, won't be generated.
+ */
+function options($array,$title_prop,$value_prop,$value=null,$any_title=null,$any_value=null)
+{
+	$result='';
+	
+	if ($any_title)
+		$result.="<option value='{$any_value}'>{$any_title}</option>\n";
+		
+	foreach($array as $item)
+	{
+		$t=$item[$title_prop];
+		$v=$item[$value_prop];
+		$sel=($v==$value) ? " selected " : "";
+		$result.="<option {$sel} value='{$v}'>{$t}</option>\n";
+	}		
+	
+	return $result;
+}
+
+/**
+ * Generates hidden INPUTs for all of the keys and values in an Input object.
+ * @param $input The Input object
+ * @param $except An array of keys that should be ignored.
+ */
+function generate_hidden_inputs($except=null)
+{
+	uses('sys.app.request.input');
+	$input=Input::Get();
+	if (!$except)
+		$except=array();
+	foreach($input->properties() as $key => $value)
+	{
+		if (!in_array($key, $except))
+			$result.="<input type='hidden' name='{$key}' value='{$value}' />\n";
+	}
+		
+	return $result;
+}
+
+
+/**
+ * 
  * Generates an html radio element.
  * 
  * @param $name
