@@ -342,7 +342,7 @@ abstract class Dispatcher
 		if (!$found_action)
 		{
 			$found_action=find_methods($classname, $request->method."_index", 'index');
-   		   array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
+   			array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
 		}
 		
 		if (!$found_action)
@@ -351,15 +351,15 @@ abstract class Dispatcher
 		}
 			
 		$root = implode('/', array_diff($this->path_array, $this->segments));
+		$class=new $classname(new Request($this, $request->method, $root, $this->segments, $request->query));
+
+		$request->uri->segments = $this->segments;  // use the unshifted version
 		$class=new $classname($request);
 		
-		$action=$found_action;
-		$this->action=$action;
-		
-		if ((isset ($class->ignored)) && (in_array($action, $class->ignored)))
+		if ((isset ($class->ignored)) && (in_array($this->action, $class->ignored)))
 			throw new IgnoredMethodCalledException("Ignored method called.");
 		
-		$meta=AttributeReader::MethodAttributes($class,$action);
+		$meta=AttributeReader::MethodAttributes($class,$this->action);
 			
 		// Call the before screens	
 		$screen_data=array();
@@ -367,7 +367,7 @@ abstract class Dispatcher
 		Screen::Run('before',$class,$meta,$screen_data,$method_args);
 			
 		// call the method and pass the segments (add returned data to any initially returned by screens)
-		$data = call_user_func_array(array(&$class, $action), $method_args);
+		$data = call_user_func_array(array(&$class, $this->action), $method_args);
 		if (is_array($data))
 			$data=array_merge($screen_data,$data);
 		else

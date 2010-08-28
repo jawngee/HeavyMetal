@@ -93,14 +93,14 @@ uses('sys.app.request.query');
 	 * @param array $segments The uri segments following the root path
 	 * @param string $query This is only passed when rendering a portlet (which simulates a HTTP request w/o making one)
 	 */
- 	public function __construct($dispatcher,$root,&$segments,$query=null)
+ 	public function __construct($dispatcher,$method,$root,&$segments,$query=null)
  	{
  		$this->dispatcher=$dispatcher;
  		
+
+ 		$this->method=$method;
+
  		$this->method='GET';
-		
- 		$this->uri=new URI($root,$segments);
- 		$this->query=($query)?$query:new Query();
  		
  		// assign the get and post vars
  		$this->input=Input::Get();
