@@ -117,7 +117,7 @@ class Model implements ArrayAccess
 	if (isset($db))
 		$this->db=$db;
 	else if (isset($this->database))
-		$this->db=Database::Get($this->database);
+		$this->db=$this->get_db();
 
 	// give the class a chance to describe itself for special case
 	// or business rule setup
@@ -145,6 +145,15 @@ class Model implements ArrayAccess
 		// CRUD:  post_read hook
         if (isset($id) || isset($fields) || isset($row))
             $this->post_read();
+    }
+    
+    /**
+     * returns an instance of the model's database,
+     * override in base classes where you have special needs.
+     */
+    protected function get_db()
+    {
+    	return Database::Get($this->database);
     }
 
     /**

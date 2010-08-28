@@ -824,7 +824,7 @@ class Filter
 	        
 	        $uniq = (isset($_REQUEST['TAKE_A_NUMBER']) && 
 	        		 count($_REQUEST['TAKE_A_NUMBER'])>0) ? array_pop($_REQUEST['TAKE_A_NUMBER']) : rand(0,9999);
-	        $this->table_alias = $readable . $uniq;	
+	        $this->table_alias = 'a' . $readable . $uniq;	
 
               }
               else
