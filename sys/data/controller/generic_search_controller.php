@@ -73,7 +73,7 @@ class GenericSearchController extends Controller
  		if (file_exists($filename))
  		{
  			$yaml=file_get_contents($filename);
- 			$this->appmeta=new AttributeReader(syck_load($yaml));
+ 			$this->appmeta=new AttributeReader(yaml_parse($yaml));
  		}
  		else 
  			throw new Exception("No app metadata specified.");

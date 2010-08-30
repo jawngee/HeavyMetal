@@ -89,7 +89,7 @@ abstract class Serializer
 			else if (file_exists($filename.'.yaml'))
 	 		{
 	 			$format="yaml";
-				$data=syck_load(file_get_contents($filename.'.yaml'));
+				$data=yaml_parse(file_get_contents($filename.'.yaml'));
 	 		}
 	 		
 	 		$map=new Config($data,$filename,$format);
