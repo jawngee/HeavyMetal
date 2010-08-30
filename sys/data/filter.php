@@ -807,9 +807,8 @@ class Filter
               $mdl_parts = split('\.',$this->model->table_name);
 
               $tablename = $mdl_parts[1];
-        
-        
-              if ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS))
+
+             if ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS))
               {
 	        $tbl_parts = split('_',$tablename);
 	        $readable = $tbl_parts[0];

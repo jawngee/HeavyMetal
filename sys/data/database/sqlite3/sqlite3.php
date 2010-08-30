@@ -192,7 +192,7 @@ class SQLite3Database extends Database
     {
     	$res=sqlite3_query($this->connection,$query);
     	$row=sqlite3_fetch_array($res);
-    	return $row[0];
+    	return array_shift($row);
     }
 
     /**

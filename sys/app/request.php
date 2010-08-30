@@ -101,7 +101,9 @@ uses('sys.app.request.query');
  		$this->method=$method;
 
  		$this->method='GET';
- 		
+ 		$this->uri=new URI($root,$segments);
+		$this->query=new Query();
+		
  		// assign the get and post vars
  		$this->input=Input::Get();
  		$this->files=Upload::Files();
