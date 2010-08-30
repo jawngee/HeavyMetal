@@ -35,7 +35,7 @@
 /**
  * Wraps a postgresql resultset for streaming through iterating
  */
-class SQLite3Result implements Iterator
+class SQLite3ResultSet implements Iterator
 {
 	private $result=null;
 	
@@ -47,7 +47,7 @@ class SQLite3Result implements Iterator
 	
 	public function __construct($result)
 	{
-		while($res=sqlite3_fetch_array($result)) $this->result[]=$res;
+		while($res=$result->fetchArray()) $this->result[]=$res;
 		$this->count=count($this->result);
 	}
 	
