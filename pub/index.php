@@ -1,7 +1,7 @@
 <?
 /**
 *
-* Copyright (c) 2009, Jon Gilkison and Trunk Archive Inc.
+* Copyright (c) 2009, Jon Gilkison and Massify LLC.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -32,11 +32,12 @@
 *
 */
 
+
 // include heavy metal
 include '../sys/sys.php';
 
 // init the framework
-init();
+init(dirname(dirname(__FILE__)."..")."/");
 
 uses('sys.app.http.http_dispatcher');
 uses('sys.app.config');
@@ -48,10 +49,22 @@ Config::LoadEnvironment();
 ob_start();
 
 // dispatch the request
-$dispatcher=new HTTPDispatcher();
-print $dispatcher->dispatch();
+try
+{
+	$dispatcher=new HTTPDispatcher();
+	print $dispatcher->dispatch();
+}
+catch (DispatcherException $ex)
+{
+	ob_end_clean();
+	header('HTTP/1.0 404 Not Found');
+}
+catch (ErrorResponseException $ex)
+{
+	ob_end_clean();
+	header('HTTP/1.0 '.$ex->error_code());
+}
 
-// Shut down the environment
 Config::ShutdownEnvironment();
 
 // flush the buffer

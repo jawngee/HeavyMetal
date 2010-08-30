@@ -51,14 +51,14 @@ class ShellRequest extends Request
 	 * @param $segments
 	 * @return unknown_type
 	 */
-	public function __construct($dispatcher,$root,&$segments)
+	public function __construct($dispatcher,$method,$root,&$segments,$query=null)
 	{
 		$result=parse_switches();
 		
 		foreach($result as $key => $value)
 			$_GET[$key]=$value;
 		
-		parent::__construct($dispatcher,$root,$segments);
+		parent::__construct($dispatcher,$method,$root,$segments,$query);
 			
 		$this->method='POST';	
 	}
