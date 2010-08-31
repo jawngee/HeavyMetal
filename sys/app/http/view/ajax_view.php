@@ -69,46 +69,32 @@ uses('system.app.view');
 			preg_match_all(View::REGEX_ATTRIBUTE,trim($attributes),$rawattrs,PREG_SET_ORDER);
 			foreach($rawattrs as $attr)
 			{
-				if (preg_match('#{[^}]*}#is',$attr[2]))
+				if (preg_match('#{[^}]*}#is',$attr[3]))
 				{
-					$key=trim(trim($attr[2],'{'),'}');
+					$key=trim(trim($attr[3],'{'),'}');
 					if (isset($this->data[$key]))
 						$attrs[$attr[1]]=$this->data[$key];
 					else
 						user_error("Cannot bind to variable '$key'.",E_USER_WARNING);
 				}
 				else
-					$attrs[$attr[1]]=$attr[2];
+					$attrs[$attr[1]]=$attr[3];
 			}
-							
-			$result='';
 			
-			switch($tag)
- 			{
- 				case 'update':
-					$result="Element.update(\"".$attrs['id']."\",\"".$content."\");";
- 	 				break;
- 				case 'replace':
-					$result="Element.replace(\"".$attrs['id']."\",\"".$content."\").remove();";
- 	 				break;
- 	 			case 'insert':
- 					$where=(isset($attrs['where'])) ? $attrs['where'] : 'before';
-					$result="new Insertion.".ucfirst(strtolower($where))."(\"".$attrs['id']."\",\"".$content."\");";
-	 				break;
- 				case 'remove':
- 					$fade=(isset($attrs['fade'])) ? $attrs['fade'] : false;
-					if ($fade)
-						$result='Effect.Fade("'.$attrs['id'].'",{ afterFinish:function(effect) { $(effect.element).remove(); }});';
-					else
-						$result='$("'.$attrs['id'].'").remove();'; 
- 	 				break;
- 				case 'hide':
-					$result='$("'.$attrs['id'].'").hide();'; 
- 	 				break;
- 				case 'show':
-					$result='$("'.$attrs['id'].'").show();'; 
-	 				break;
- 			}
+			// ajax conf
+			$conf=Config::Get('ajax');
+			$default_lib=$conf->default;
+			
+			$conf=$conf->libraries->{$default_lib};
+			
+			if (!$conf)
+				throw new Exception("Your ajax.conf file is invalid.  Missing default library.");
+			
+			uses($conf->uses);
+			$ajax_renderer=$conf->class;
+			
+			$renderer=new $ajax_renderer();
+			$result=$renderer->render($tag, $attrs, $content);
  			
  			$rendered=str_replace($full_tag,$result,$rendered)."\n";
  		}
