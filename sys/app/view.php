@@ -645,6 +645,9 @@ uses('system.app.layout');
  		$this->data['layout']=$this;
  		
  		$result=get_view($this->base_path.$this->view_name);
+ 		
+ 		$this->parse_layout($result,$subview);
+ 		
  		$this->parse_includes($result);
  		
  		$this->parse_nestedcontrols_cdata($result);
@@ -652,9 +655,6 @@ uses('system.app.layout');
  		$this->data['_extracted_content']=$this->_extracted_content;
 		
  		$result=render_fragment($result,$this->data);
-
- 		$this->parse_layout($result,$subview);
- 		
 
  		$this->parse_subviews($result);
  		$this->parse_other_tags($result);
