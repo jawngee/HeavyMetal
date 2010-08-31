@@ -3,7 +3,7 @@ echo " "
 echo "========================================================================================"
 echo "| Installing PHP5 SQLite3 Mod                                                          |"
 echo "========================================================================================"
-sudo apt-get install libsqlite3-dev sqlite
+sudo apt-get install -y libsqlite3-dev sqlite
 cd ~
 sudo apt-get source php5
 cd php5-5.3.2/ext/sqlite3
