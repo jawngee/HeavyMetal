@@ -94,8 +94,8 @@ function options($array,$title_prop,$value_prop,$value=null,$any_title=null,$any
 		
 	foreach($array as $item)
 	{
-		$t=$item[$title_prop];
-		$v=$item[$value_prop];
+		$t=($title_prop instanceOf Closure) ? $title_prop($item) : $item[$title_prop];
+		$v=($value_prop instanceOf Closure) ? $value_prop($item) : $item[$value_prop];
 		$sel=($v==$value) ? " selected " : "";
 		$result.="<option {$sel} value='{$v}'>{$t}</option>\n";
 	}		
@@ -121,6 +121,28 @@ function generate_hidden_inputs($except=null)
 	}
 		
 	return $result;
+}
+
+function sort_link($sort_id,$dir_id,$sort_val,$title,$default=false)
+{
+	$input=Input::Get();
+
+	$sort_arrow='';
+	$sort_dir=($input->{$dir_id}) ? $input->{$dir_id} : 'desc';
+	
+	foreach($input->properties() as $key => $value)
+		if (($key!=$sort_id) && ($key!=$dir_id))
+			$qstring.=$key.'='.urlencode($value).'&';
+	
+	if (($input->{$sort_id}==$sort_val) || ((!$input->{$sort_id}) && ($default)))
+	{
+		$sort_arrow=($sort_dir=='desc') ? '&darr;' : '&uarr;';
+		$sort_dir=($sort_dir=='desc') ? 'asc' : 'desc';
+	}
+	
+	$qstring.="{$sort_id}={$sort_val}&{$dir_id}={$sort_dir}";
+	
+	return "<a href='?{$qstring}'>{$title} {$sort_arrow}</a>";
 }
 
 
