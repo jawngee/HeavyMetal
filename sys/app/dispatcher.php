@@ -367,7 +367,7 @@ abstract class Dispatcher
 		Screen::Run('before',$class,$meta,$screen_data,$method_args);
 			
 		// call the method and pass the segments (add returned data to any initially returned by screens)
-		$data = call_user_func_array(array(&$class, $this->action), $method_args);
+		$data = call_user_func_array(array(&$class, $found_action), $method_args);
 		if (is_array($data))
 			$data=array_merge($screen_data,$data);
 		else
