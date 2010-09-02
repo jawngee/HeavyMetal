@@ -349,10 +349,7 @@ abstract class Dispatcher
 		{
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
 		}
-			
-		$root = implode('/', array_diff($this->path_array, $this->segments));
-		$class=new $classname(new Request($this, $request->method, $root, $this->segments, $request->query));
-
+		
 		$request->uri->segments = $this->segments;  // use the unshifted version
 		$class=new $classname($request);
 		
