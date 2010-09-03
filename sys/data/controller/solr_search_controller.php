@@ -110,7 +110,7 @@ class SOLRSearchController extends GenericSearchController
  	{
  		// build filter with a flag for mlt
  		$filter = $this->build_filter();
-
+ 		
  		$filter->more_like_this = true;
  		$filter->clustering=false;
  		$filter->spellcheck=false;

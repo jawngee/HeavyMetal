@@ -68,8 +68,8 @@ class ResultFilterControl extends RepeaterControl
 	}
 	
 	function link($parameter,$value,$removevalues=null)
-	{	
-		return $this->controller->request->uri->build(null,null,$values,$removevalues);
+	{
+		return $this->controller->request->uri->build(null,null,$value,$removevalues);
 	}
 
 	function radio_link($parameter, $value, $removevalues=null)
@@ -79,55 +79,39 @@ class ResultFilterControl extends RepeaterControl
 		
 	function active($parameter,$value=null)
 	{
-		$values=$this->controller->get_value($parameter);
-		
-		if (empty($values))
-			return false;
-		
-		$active = false;
-		
-		if (!is_array($values))
-			$vals[] = $values;
-		else
-			$vals = $values;
-		
-		// is this parameter being used to filter at all?
-		if (!$value && !empty($vals))
-			return true;
+		if (!$value)
+			return $this->controller->exists($parameter);
 
-		// if so, check against the passed value
-		foreach($vals as $val)
-			if ($value && $value!='' && strtolower($val)==strtolower($value))
-				$active = true;
-
-		return $active;
+		$val=$this->controller->get_value($parameter);
+		
+		return (strtolower($value)===$val);
+	}
+	
+	function checked($parameter, $value)
+	{
+		$values=$this->controller->get_array($parameter);
+		
+		return in_array(strtolower($value), $values);
 	}
 	
 	function checkbox($parameter, $value, $removevalues=null)
 	{
-		$values=$this->controller->get_value($parameter);
+		$values=$this->controller->get_array($parameter);		
 
-		if (!is_array($values))
-			$vals[] = $values;
-		else
-			$vals = $values;
+		$uri = $this->controller->request->uri->copy();
 		
-			
-		if (count($vals)>0)
+		$value = strtolower($value);
+		
+		foreach($values as $val)
 		{
-			if(in_array(rawurlencode(strtolower($value)),$vals))
+			// if this option is currently filtering, stop filtering
+			if($value===$val)
 			{
-				array_splice($vals,array_search(rawurlencode(strtolower($value)),$vals),1);
-				return $this->link($parameter,$vals,array_merge($removevalues,array($parameter=>rawurlencode(strtolower($value)))));
-			}
-			else
-			{
-				array_push($vals,rawurlencode(strtolower($value)));
-				return $this->link($parameter,$vals,$removevalues);
+				return $this->link(null,null,array($parameter=>$value));
 			}
 		}
-		
-		$link=$this->link($parameter,array($value),$removevalues);
+
+		$link=$this->link_multi($parameter,$value,$removevalues);
 		
 		return $link;
 	}

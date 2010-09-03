@@ -115,34 +115,28 @@ class Query
  	 * 
  	 * @param string $name
  	 * @param string $value
- 	 * @return unknown_type
+ 	 * @return Query
  	 */
  	function set_value($name,$value)
  	{
  		$this->items[$name]=$value;
+ 		
+ 		return $this;
  	}
  	
  	/**
  	 * Removes a value from the query
  	 * 
- 	 * @param $name
- 	 * @return unknown_type
+ 	 * @param string $name
+ 	 * @return Query
  	 */
  	function remove_value($name)
  	{
  		unset($this->items[$name]);
+ 		
+ 		return $this;
  	}
- 	
- 	/**
- 	 * Removes a value from the query
- 	 * 
- 	 * @param $name
- 	 * @return unknown_type
- 	 */
- 	function remove($name)
- 	{
- 		unset($this->items[$name]);
- 	}
+
  	
  	/**
  	 * Returns the query string

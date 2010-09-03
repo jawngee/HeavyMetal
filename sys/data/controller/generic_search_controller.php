@@ -103,6 +103,17 @@ class GenericSearchController extends Controller
 		return $this->request->input->{$key};			
 	}
 	
+	public function get_array($key=null)
+	{
+		return $this->request->input->get_array($key);			
+	}
+	
+	public function exists($key=null)
+	{
+		return $this->request->input->exists($key);
+	}
+	
+	
 	
 	/**
 	 * wrapper which allows subclasses to get away from the standard "?q=whatever" syntax
@@ -120,7 +131,10 @@ class GenericSearchController extends Controller
 	
 	public function get_no_text_query_url($query)
 	{
-		return $this->uri->build(null,null,null,array('q'=>$query));
+		$uri = $this->controller->request->uri->copy();
+		$uri->query->remove_value('q');
+		
+		return $uri->build();
 	}
 	
 	protected function init_filter()
@@ -198,7 +212,13 @@ class GenericSearchController extends Controller
 						$token .= ' ' . $section->description_append;
 				
 					if (!empty($token))
-						$tokens[] = array('field'=>$field, 'value'=>$val, 'description'=>$token, 'remove_url'=>$this->request->uri->build(null,array($field=>$val)));
+						$tokens[] = array(
+							'field'=>$field, 
+							'value'=>$val, 
+							'description'=>comma_or_explode($this->request->uri->multi_seperator, $token), 
+							'remove_url'=>$this->request->uri->copy()
+								->remove_value($field, $val)
+								->build());
 				}
 			}
 		}
@@ -238,7 +258,7 @@ class GenericSearchController extends Controller
 		if ($filter->offset > $count)
 			$filter->offset = floor($count/$filter->limit)*$filter->limit;
 
-
+			
 		return array(
 			'form' => $this->appmeta->form,
 		    'current_saved_id' => $current_saved_id,
@@ -283,17 +303,17 @@ class GenericSearchController extends Controller
                      }
                      break;
  			case "lookup_checkbox":
-                    $sf=$section->filter;
+                $sf=$section->filter;
  		        if ($this->get->exists($key))
                     {
                         if ($section->join_model && $section->join_column && $section->join_foreign_column)
                         {
                             $join_filter = filter($section->join_model);
-                        if($section->case_insensitive)   
-                            $join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls, 'lower');
-						else
-							$join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls);
-                        $join_filter->select='';
+	                        if($section->case_insensitive)   
+	                            $join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls, 'lower');
+							else
+								$join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls);
+	                        $join_filter->select='';
                             $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER');                          
                         }
                         else
@@ -305,10 +325,14 @@ class GenericSearchController extends Controller
                         }
                     }
  				break;
+ 			case "faceted_multi":
+                $sf=$section->filter;
+ 		        if ($this->exists($key))   
+                    $filter->{$sf}->is_in($this->get_array($key));
+ 				break;
             case "lookup":
  			case "lookup_select":
  			case "faceted_single":
- 			case "faceted_multi":
  				$sf=$section->filter;
  				if ($this->get_value($key))
  				{

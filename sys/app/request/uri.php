@@ -48,6 +48,8 @@ uses('sys.app.request.query');
  */
 class URI
 {
+	public $multi_seperator = '_';
+	
 	/**
 	 * The root of the URI
 	 * 
@@ -78,6 +80,9 @@ class URI
 			$segments=explode('/',$path);
 			array_shift($segments);
 			$root=array_shift($segments);
+			
+			for($i=0;$i<count($segments);$i++)
+				$segments[$i] = strtolower($segments[$i]);
  		}
  		
  		if ((strlen($root)==0) || ($root[0]!='/'))
@@ -88,6 +93,32 @@ class URI
  		$this->query=new Query();
  	}
  	
+ 	public function __clone() 
+ 	{
+	    foreach($this as $key => $val) 
+	    {
+	        if(is_object($val)||(is_array($val)))
+	        {
+	            $this->{$key} = unserialize(serialize($val));
+	        }
+	    }
+	} 
+ 	
+
+	public function copy()
+	{
+		return clone $this;
+	}
+	
+	public function set_root($root)
+	{
+		$this->root = $root;
+		
+		return $this;
+	}
+	
+	
+	
  	/**
 	 * Gets the value of a segment-value in the URI
  	 * 
@@ -96,18 +127,22 @@ class URI
  	 */
  	public function get_value($name)
  	{
+ 		for($i=0; $i<count($this->segments)-1; $i++)
+ 			if ($this->segments[$i]===strtolower($name))
+ 				return $this->segments[$i+1];
+
+ 		return false;
+ 	}
+ 	
+ 	public function get_array($name)
+ 	{
  		$values = array();
  		
  		for($i=0; $i<count($this->segments)-1; $i++)
- 			if (strtolower($this->segments[$i])==strtolower($name))
+ 			if ($this->segments[$i]===strtolower($name))
  				$values[] = $this->segments[$i+1];
  		
- 		if (empty($values))
-	 		return false;
-	 	elseif (count($values) == 1)
-	 		return $values[0];
-	 	else
-	 		return $values;
+	 	return $values; 		
  	}
  	
  	/**
@@ -125,43 +160,113 @@ class URI
  	
  	/**
  	 * Sets the value of a URI segment-pair
+ 	 * or single segment (if value param is omitted)
  	 * 
  	 * @param string $name
  	 * @param string $value
  	 */
- 	function set_value($name,$value)
+ 	function set_value($name,$value=null)
  	{
  		if (!$name)
+ 			return $this;
+ 		
+ 		if (!$value)
  		{
- 			$this->segments[]=$value;
- 			return;
+ 			$this->segments[]=strtolower($name);
+ 			return $this;
  		}
  			
- 		for($i=0; $i<count($this->segments); $i++)
- 			if ($this->segments[$i]==$name)
+ 		for($i=0; $i<count($this->segments)-1; $i++)
+ 		{
+	 		if ($this->segments[$i]===strtolower($name))
  			{
- 				array_splice($this->segments,$i+1,1,$value);
- 				return;
+ 				array_splice($this->segments,$i+1,1,strtolower($value));
+ 				return $this;
  			}
+ 		}
+ 				
+ 		return $this->add_value($name, $value);
+ 	}
+ 	
+ 	function add_value($name, $value=null)
+ 	{
+ 		$found = false;
+ 		
+ 	 	if (!$name)
+ 			return $this;
+ 		
+ 		// If $value wasn't specified, just add a segment for $name
+ 		if (!$value)
+ 		{
+ 			$this->segments[]=strtolower($name);
+ 			return $this;
+ 		} 		
+ 	
+ 		// Look through existing segments to see if a multi-valued segment already exists for this $name
+ 	 	for($i=0; $i<count($this->segments)-1; $i++)
+ 		{
+	 		if ($this->segments[$i]===strtolower($name))
+ 			{
+ 				if (isset($this->segments[$i+1]))
+ 				{
+ 					$vals = explode($this->multi_seperator,$this->segments[$i+1]);
+
+ 					if (!in_array(strtolower($value), $vals))
+ 					{
+ 						$vals[] = strtolower($value);
+ 						$this->segments[$i+1] = implode($this->multi_seperator,$vals);
+ 					
+ 						$found = true;
+ 					}	
+ 				}
+ 			}
+ 		}
+ 				
+ 		// If no multi-valued segment exists.  Add a new segment pair for $name/$value.
+ 		if (!$found)
+ 		{
+ 			$this->segments[] = strtolower($name);
+ 			$this->segments[] = strtolower($value);
+ 		}
  			
- 		array_splice($this->segments,count($this->segments),0,array($name,$value));
+ 		
+ 		return $this;
  	}
  	
  	/**
  	 * Removes a segment-value pair from the URI
  	 * 
  	 * @param string $name
+ 	 * @param string $value
  	 */
- 	function remove_value($name)
+ 	function remove_value($name, $value=null)
  	{
  		for($i=0; $i<count($this->segments)-1; $i++)
- 			if ($this->segments[$i]==$name)
+ 		{
+ 			if ($this->segments[$i]===$name)
  			{
- 				array_splice($this->segments,$i,2);
- 				return;
+ 				if (!$value || strtolower($value)===$this->segments[$i+1])
+ 				{
+ 					array_splice($this->segments,$i,2);
+ 				}	
+				else
+				{	// Here we're checking for OR conditions expressed in the url as /key/value1_value2
+					$vals = explode($this->multi_seperator,$this->segments[$i+1]);
+
+					for($j=0; $j<count($vals); $j++)
+					{
+						if (strtolower($value)===$vals[$j])
+						{
+							array_splice($vals,$j,1);
+							
+							$this->segments[$i+1] = implode($this->multi_seperator,$vals);						
+						}
+					}
+				}
  			}
+ 		}
  			
- 		$this->remove($name);
+ 		return $this;//->remove($name);
  	}
  	
 	/**
@@ -172,12 +277,38 @@ class URI
  	function remove($name)
  	{
  		for($i=0; $i<count($this->segments); $i++)
- 			if ($this->segments[$i]==$name)
+ 		{
+ 			if ($this->segments[$i]==strtolower($name))
  			{
  				array_splice($this->segments,$i,1);
- 				return;
+ 				return $this;
  			}
+ 		}
+ 			
+ 		return $this;		
  	}
+ 	
+ 	/**
+ 	 * Removes multiple segments from the URI
+	 * 
+	 * @param array Array of values, or key=>value pairs to remove
+	 */
+	public function remove_values($removevalues=null)
+	{
+ 		foreach($removevalues as $key=>$value)
+ 		{
+ 			if (is_numeric($key))
+ 			{
+ 				$this->remove($value);	
+ 			}
+ 			else
+ 			{
+ 				$this->remove_value($key, $value);
+ 			}
+ 		}
+ 		
+ 		return $this;
+	}
  	
  	/**
  	 * Replace a single segment in the URI
@@ -188,12 +319,15 @@ class URI
  	function replace($name,$what)
  	{
  		for($i=0; $i<count($this->segments); $i++)
- 			if ($this->segments[$i]==$name)
+ 			if ($this->segments[$i]==strtolower($name))
  			{
- 				$this->segments[$i]=$what;
- 				return;
+ 				$this->segments[$i]=strtolower($what);
+ 				return $this;
  			}
+ 	
+ 	 	return $this;	
  	}
+ 	
 
  	/**
  	 * Returns the values + original path as a complete URI
@@ -204,29 +338,14 @@ class URI
  	 * @return unknown_type
  	 */
  	function build($newvalues=null, $removevalues=null, $queryvalues=null, $removequeryvalues=null)
- 	{
- 		
+ 	{ 		
  		$segs=$this->segments;
-
+		
+ 		// remove any values or key=>value pairs first
  		if ($removevalues!=null)
  			foreach($removevalues as $key=>$value)
  			{
- 				if (is_array($value))
-					foreach ($value as $val)
-						$values[] = rawurlencode(strtolower($val));
-	 			else
-	 				$values[] = rawurlencode(strtolower($value));
- 				
- 				foreach($values as $val) 
- 				{	
- 					for($i=0; $i<count($segs); $i++)
-	 				{
-	 					if (is_numeric($key) && strtolower($val)==strtolower($segs[$i])) // matches one segment
-	 						array_splice($segs,$i,1);
-	 					elseif(!is_numeric($key) && strtolower($key)==strtolower($segs[$i]) && (!$val || strtolower($val)==strtolower($segs[$i+1]))) // matches k/v pair (two segments)
-	 						array_splice($segs,$i,2);
-	 				}
- 				}
+ 				$this->remove_value($key, $value);
  			}
  		
   		if ($newvalues!=null)
@@ -234,9 +353,9 @@ class URI
 	 		{
  				if (is_array($value))
 					foreach ($value as $val)
-						$values[] = rawurlencode(strtolower($val));
+						$values[] = strtolower($val);
 	 			else
-	 				$values[] = rawurlencode(strtolower($value));
+	 				$values[] = strtolower($value);
 	 				 			
 		 		$added=false;
 
@@ -264,7 +383,7 @@ class URI
 			 			array_splice($segs,count($segs),0,array($key,$val));
  				}
 	 		}
- 		
+	 		
 		for($i=0; $i<count($segs); $i++)
 			$segs[$i] = rawurlencode($segs[$i]);
 		 	

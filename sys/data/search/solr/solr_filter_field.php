@@ -96,7 +96,6 @@ class SOLRFilterField extends FilterField
 			}
 	
 			$this->value .= ') ';
-
 			$this->value = $this->check_add_facet_exclusion();
 		}
 				
