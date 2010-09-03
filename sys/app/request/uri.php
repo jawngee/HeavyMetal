@@ -96,11 +96,18 @@ class URI
  	 */
  	public function get_value($name)
  	{
+ 		$values = array();
+ 		
  		for($i=0; $i<count($this->segments)-1; $i++)
  			if (strtolower($this->segments[$i])==strtolower($name))
- 				return $this->segments[$i+1];
+ 				$values[] = $this->segments[$i+1];
  		
- 		return false;
+ 		if (empty($values))
+	 		return false;
+	 	elseif (count($values) == 1)
+	 		return $values[0];
+	 	else
+	 		return $values;
  	}
  	
  	/**
@@ -198,45 +205,65 @@ class URI
  	 */
  	function build($newvalues=null, $removevalues=null, $queryvalues=null, $removequeryvalues=null)
  	{
+ 		
  		$segs=$this->segments;
 
  		if ($removevalues!=null)
  			foreach($removevalues as $key=>$value)
  			{
- 				for($i=0; $i<count($segs); $i++)
- 				{
- 					if (is_numeric($key) && strtolower($value)==strtolower($segs[$i])) // matches one segment
- 						array_splice($segs,$i,1);
- 					elseif(!is_numeric($key) && strtolower($key)==strtolower($segs[$i]) && (!$value || strtolower($value)==strtolower($segs[$i+1]))) // matches k/v pair (two segments)
- 						array_splice($segs,$i,2);
+ 				if (is_array($value))
+					foreach ($value as $val)
+						$values[] = rawurlencode(strtolower($val));
+	 			else
+	 				$values[] = rawurlencode(strtolower($value));
+ 				
+ 				foreach($values as $val) 
+ 				{	
+ 					for($i=0; $i<count($segs); $i++)
+	 				{
+	 					if (is_numeric($key) && strtolower($val)==strtolower($segs[$i])) // matches one segment
+	 						array_splice($segs,$i,1);
+	 					elseif(!is_numeric($key) && strtolower($key)==strtolower($segs[$i]) && (!$val || strtolower($val)==strtolower($segs[$i+1]))) // matches k/v pair (two segments)
+	 						array_splice($segs,$i,2);
+	 				}
  				}
  			}
  		
   		if ($newvalues!=null)
 	 		foreach($newvalues as $key=>$value)
 	 		{
+ 				if (is_array($value))
+					foreach ($value as $val)
+						$values[] = rawurlencode(strtolower($val));
+	 			else
+	 				$values[] = rawurlencode(strtolower($value));
+	 				 			
 		 		$added=false;
- 			
-				if (is_numeric($key) && count($segs)>=$key)
- 				{   
- 					// allows segment to be added at a specific index (or in front of the current value)
- 					//$segs[]=$value;
-					array_splice($segs,$key,0,$value);
- 					$added=true;
 
- 				}
- 				else for($i=0; $i<count($segs); $i++)
-	 				if ($segs[$i]==$key)
-		 			{
-	 					array_splice($segs,$i+1,1,$value);
-	 					
+	 			foreach($values as $val) 
+ 				{	
+	 			
+					if (is_numeric($key) && count($segs)>=$key)
+	 				{   
+	 					// allows segment to be added at a specific index (or in front of the current value)
+	 					//$segs[]=$value;
+						array_splice($segs,$key,0,$val);
 	 					$added=true;
-	 					break;
+	
 	 				}
- 			
-	 			if (!$added)
-		 			array_splice($segs,count($segs),0,array($key,$value));
-		 	}
+	 				else for($i=0; $i<count($segs); $i++)
+		 				if ($segs[$i]==$key)
+			 			{
+		 					array_splice($segs,$i+1,1,$val);
+		 					
+		 					$added=true;
+		 					break;
+		 				}
+	 			
+		 			if (!$added)
+			 			array_splice($segs,count($segs),0,array($key,$val));
+ 				}
+	 		}
  		
 		for($i=0; $i<count($segs); $i++)
 			$segs[$i] = rawurlencode($segs[$i]);

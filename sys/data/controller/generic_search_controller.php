@@ -103,6 +103,7 @@ class GenericSearchController extends Controller
 		return $this->request->input->{$key};			
 	}
 	
+	
 	/**
 	 * wrapper which allows subclasses to get away from the standard "?q=whatever" syntax
 	 * and implement something different (e.g. more restful)
@@ -240,7 +241,6 @@ class GenericSearchController extends Controller
 
 		return array(
 			'form' => $this->appmeta->form,
-			'filters' => $this->appmeta->filter,
 		    'current_saved_id' => $current_saved_id,
 			'sorts' => $this->appmeta->sort->order_by->options,
 			'page_size' => $filter->limit,
@@ -307,6 +307,8 @@ class GenericSearchController extends Controller
  				break;
             case "lookup":
  			case "lookup_select":
+ 			case "faceted_single":
+ 			case "faceted_multi":
  				$sf=$section->filter;
  				if ($this->get_value($key))
  				{

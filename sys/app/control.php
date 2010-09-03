@@ -58,6 +58,9 @@ uses('system.app.session');
  	/** The owning layout */
  	public $layout=null;
  	
+ 	/** The owning view */
+ 	public $view=null;
+ 	
  	/** The owning controller */
  	public $controller=null;
  	

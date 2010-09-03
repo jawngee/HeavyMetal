@@ -52,13 +52,24 @@ class SOLRSearchController extends GenericSearchController
  	{
  		$data = parent::index($filter);
 
+ 		$data['facet_counts'] = $data['results']['facet_counts'];
  		$data['spellcheck'] = $data['results']['spellcheck'];
  		
  		return $data;
  	}
  	
- 	public function morefacet($morelike=false)
+ 	public function morefacet()
  	{
+ 		return $this->morefacet_common($morelike=false);
+ 	}
+ 	
+ 	public function morelikefacet()
+ 	{
+ 		return $this->morefacet_common($morelike=true);
+ 	}
+ 	
+ 	private function morefacet_common($morelike=false)
+ 	{ 		
  		// Run just a facet query given the current selection
  		// ... don't return any search results, just all values for this facet
  		$field = $this->request->input->facet;
@@ -70,7 +81,7 @@ class SOLRSearchController extends GenericSearchController
  		$filter->spellcheck=false;
  		$filter->tv=false;
  		
- 		if ($morelike && $morelike!=$this->no_query_text)
+ 		if ($morelike && $morelike=='morelike')
  		{
  			$filter->more_like_this=true;
  		 	$filter->q_value = $this->appmeta->unique_key . ':' . $filter->q_value;	
@@ -88,13 +99,12 @@ class SOLRSearchController extends GenericSearchController
  		$results = $filter->get_rows();
 
  		return array(
- 			'filters' => array($field => $this->appmeta->filter->{$field}),
- 			'facet_field' => $facet_field,
- 			'results' => $results,
- 			'count' => count($results['facet_counts'][$facet_field]),
- 			'base' => str_replace('/morefacet', '', $this->request->uri->root)
+ 			'field' => $field,
+ 			'facet_counts' => $results['facet_counts']
  		);
  	}
+ 	
+ 	
  	
  	public function morelike()
  	{
@@ -107,6 +117,7 @@ class SOLRSearchController extends GenericSearchController
  		$filter->q_value = $this->appmeta->unique_key . ':' . $filter->q_value;
  		
  		$data = parent::index($filter);
+ 		$data['facet_counts'] = $data['results']['facet_counts'];
  		
  		$data['interesting'] = $data['results']['interesting_terms'];
 		
@@ -193,6 +204,10 @@ class SOLRSearchController extends GenericSearchController
  			foreach($section->facet as $attr=>$value)
  				$facet->{$attr} = $value;
 
+ 			// automatically populate facet limit if show_max is sepecified
+ 			if ($section->show_max && !$facet->limit)
+ 				$facet->limit = $section->show_max+1;
+ 				
  			// Handle count reducing tag/exclude for multi-choice filter fields
  			if ($section->type == 'lookup_checkbox')
  			{

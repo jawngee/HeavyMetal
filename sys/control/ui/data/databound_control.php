@@ -116,7 +116,7 @@ abstract class DataboundControl extends Control
 		parent::init();
 		
 		if ($this->uri)  // allows override for pagination links
-			$this->uri = new URI($this->uri);
+			$this->uri = new URI($this->uri->root, $this->uri->segments);
 		else if (isset($this->controller->uri))
 			$this->uri = $this->controller->uri;
 		else
