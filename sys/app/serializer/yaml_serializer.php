@@ -20,7 +20,7 @@ class YAMLSerializer extends ArraySerializer
 	public function do_serialize()
 	{
 		$result=parent::do_serialize();
-		$syck=syck_dump($result);
+		$syck=yaml_emit($result);
 		
 		$syck=preg_replace('#"([^"]+)":#m','$1:',$syck);
 		return $syck;
@@ -31,7 +31,7 @@ class YAMLSerializer extends ArraySerializer
 	 */
 	public function do_deserialize()
 	{
-		$dom=syck_load($this->content);
+		$dom=yaml_parse($this->content);
 		return $this->deserialize_array($dom);
 	}
 }

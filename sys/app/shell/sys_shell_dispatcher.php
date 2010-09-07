@@ -40,13 +40,13 @@ uses('system.app.dispatcher');
 uses('system.app.shell.shell_request');
 
 /**
- * Shell Dispatcher
+ * System Shell Dispatcher
  * 
  * @package		application
  * @subpackage	dispatcher
  * @link          http://wiki.getheavy.info/index.php/Dispatcher
  */
-class ShellDispatcher extends Dispatcher
+class SysShellDispatcher extends ShellDispatcher
 {
 	/**
 	 * Constructor 
@@ -64,22 +64,13 @@ class ShellDispatcher extends Dispatcher
 		
 		$path=array_shift($args);
 
-		$controller_root=($controller_root) ? $controller_root : PATH_APP.'shell/controller/';
-		$view_root=($view_root) ? $view_root : PATH_APP.'shell/view/';
+		$controller_root=($controller_root) ? $controller_root : PATH_SYS.'shell/controller/';
+		$view_root=($view_root) ? $view_root : PATH_SYS.'shell/view/';
 		
 		$this->segments=$args;
 		
 		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
 	}
-
-	/**
-	 * @see sys/app/Dispatcher#build_request()
-	 */
-	public function build_request()
-	{
-		return new ShellRequest($this,$this->path,$this->segments,$this->query);
-	}
-
 
 	/**
 	 * (non-PHPdoc)
@@ -89,114 +80,6 @@ class ShellDispatcher extends Dispatcher
 	{
 		$controller_root=($controller_root) ? $controller_root : $this->controller_root;
 		$view_root=($view_root) ? $view_root : $this->view_root;
-		return new ShellDispatcher($path,$controller_root,$view_root,$use_routes,$force_routes);
-	}
-		
-	/**
-	 * @see sys/app/Dispatcher#transform($data, $req_type)
-	 */
-	public function transform(&$data, $req_type=null)
-	{
-		
-		// fetch the view conf
-		$viewconf=Config::Get('view');
-		
-		$default_engine=$viewconf->default;
-		
-		// set the default extension
-		$extension=EXT;
-		
-		// if request type hasn't been specified
-		// run it through the map to see if we get a hit.
-		if ($req_type==null)
-		{
-			// default
-			$req_type=$default_engine;
-			
-			try
-			{
-				foreach($viewconf->map as $item)
-				{
-					switch($item->test)
-					{
-						case 'server':
-							$array=&$_SERVER;
-							break;
-						case 'get':
-							$array=&$_GET;
-							break;
-						case 'post':
-							$array=&$_POST;
-							break;
-						case 'env':
-							$array=&$_ENV;
-							break;
-					}
-					
-					if (isset($array[$item->key]))
-					{
-						if ($item->matches)
-						{
-							if (preg_match("#{$item->matches}#",$array[$item->key]))
-							{
-								$req_type=$item->type;
-								break;
-							}
-						}
-						else
-						{
-							$req_type=$item->type;
-							break;
-						}
-					}
-				}
-			}
-			catch (ConfigInvalidFormatException $fex)
-			{
-				throw $fex;
-			}
-			catch (ConfigException $ex)
-			{
-				
-			}
-		}
-		
-		
-		if ($this->view)
-			$view_name=$this->view;
-		else
-			$view_name=strtolower($this->controller_path.$this->controller.'/'.$this->action);
-
-		$conf=$viewconf->engines->{$req_type};
-		if (!$conf)
-			$conf=$viewconf->engines->{$default_engine};
-		if (!$conf)
-			throw new Exception("Your view.conf file is invalid.  Missing default engine.");
-			
-		if ($conf->extension)
-			$extension=$conf->extension;
-			
-		$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
-		
-		// if we didn't find the view for the request type, try the default one
-		if ((!$view_found) && ($req_type!=$viewconf->default) && (file_exists($this->view_root.$view_name.'.'.$viewconf->default.EXT)))
-		{
-			$req_type=$viewconf->default;
-			$extension=EXT;
-			$view_found=true;
-		}
-			
-		if ($view_found==false)
-			return '';
-							
-		if ($view_found)
-		{		
-			$viewclass=$conf->class;
-			
-			uses($conf->uses);
-			$view=new $viewclass($view_name.'.'.$req_type,$data['controller'],$this->view_root);
-			
-			return $view->render($data);
-		}		
+		return new SysShellDispatcher($path,$controller_root,$view_root,$use_routes,$force_routes);
 	}
 }

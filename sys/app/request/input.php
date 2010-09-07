@@ -65,7 +65,15 @@ final class Input extends DynamicObject
 	public static function Get()
 	{
 		if (self::$_input==null)
+		{
+			foreach($_GET as $key=>$value)
+				$_GET[$key]=xss_clean($value);
+				
+			foreach($_POST as $key=>$value)
+				$_POST[$key]=xss_clean($value);
+			
 			self::$_input=new Input(array_merge($_GET,$_POST));
+		}
 		
 		return self::$_input;
 	}

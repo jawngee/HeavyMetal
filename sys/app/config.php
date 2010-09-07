@@ -168,7 +168,7 @@ class ConfigInvalidFormatException extends ConfigException {}
 			else if (file_exists($filename.'.conf'))
  			{
  				$format="yaml";
-				$data=syck_load(file_get_contents($filename.'.conf'));
+				$data=yaml_parse(file_get_contents($filename.'.conf'));
  			}
 			else if (file_exists($filename.'.php'))
 			{
@@ -392,7 +392,7 @@ class ConfigInvalidFormatException extends ConfigException {}
  				file_put_contents($filename.'.js',json_encode($conf));
  				break;
  			case 'yaml':
- 				file_put_contents($filename.'.conf',syck_dump($conf));
+ 				file_put_contents($filename.'.conf',yaml_emit($conf));
  				break;
  			default:
  				throw new Exception("Invalid format for saving.");

@@ -35,7 +35,7 @@
 /**
  * Wraps a postgresql resultset for streaming through iterating
  */
-class SQLite3Result implements Iterator
+class SQLite3ResultSet implements Iterator
 {
 	private $result=null;
 	
@@ -47,8 +47,8 @@ class SQLite3Result implements Iterator
 	
 	public function __construct($result)
 	{
-		$this->result=$result;
-		$this->count=sqlite_num_rows($result);
+		while($res=$result->fetchArray()) $this->result[]=$res;
+		$this->count=count($this->result);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ class SQLite3Result implements Iterator
 	 */
     public function current()
     {
-    	return $this->last;
+    	return $this->result[$this->cindex];
     }
 
 	/**
@@ -72,11 +72,11 @@ class SQLite3Result implements Iterator
 	 */
     public function next()
     {
-    	$this->last=sqlite_fetch_array($this->result,SQLITE_ASSOC);
-    	
-    	if (!$this->last)
-    		$this->cindex++;
-    	return $this->last;
+    	$this->cindex++;
+    	if ($this->cindex>=$this->count)
+    		return null;
+    		
+    	return $this->result[$this->cindex];
     }
 
 	/**
@@ -85,9 +85,7 @@ class SQLite3Result implements Iterator
     public function rewind()
     {
     	$this->cindex=0;
-    	sqlite_rewind($this->result);
-    	$this->last=sqlite_fetch_array($this->result,SQLITE_ASSOC);
-    	return $this->last;
+    	return $this->result[$this->cindex];
     }
 
 	/**
@@ -95,12 +93,11 @@ class SQLite3Result implements Iterator
 	 */
     public function valid()
     {
-        return ($this->last!=null);
+    	return $this->result[$this->cindex]!=null;
     }	
     
     public function to_array()
     {
-    	sqlite_rewind($this->result);
-    	return sqlite_fetch_all($this->result);
+    	return $this->result;
     }
 }

@@ -807,9 +807,8 @@ class Filter
               $mdl_parts = split('\.',$this->model->table_name);
 
               $tablename = $mdl_parts[1];
-        
-        
-              if ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS))
+
+             if ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS))
               {
 	        $tbl_parts = split('_',$tablename);
 	        $readable = $tbl_parts[0];
@@ -824,7 +823,7 @@ class Filter
 	        
 	        $uniq = (isset($_REQUEST['TAKE_A_NUMBER']) && 
 	        		 count($_REQUEST['TAKE_A_NUMBER'])>0) ? array_pop($_REQUEST['TAKE_A_NUMBER']) : rand(0,9999);
-	        $this->table_alias = $readable . $uniq;	
+	        $this->table_alias = 'a' . $readable . $uniq;	
 
               }
               else
