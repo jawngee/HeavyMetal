@@ -24,7 +24,6 @@ class SearchFilterControl extends Control
 	public $date_template='ctrl/searchfilter/date';
 	public $list_template='ctrl/searchfilter/list';
 	public $grouping_template='ctrl/searchfilter/grouping';
-	public $faceted_template='ctrl/searchfilter/faceted';
 	public $token_template='ctrl/searchfilter/token';
 	public $container_template='ctrl/searchfilter/container';
 	public $always_expanded=false;
@@ -52,7 +51,6 @@ class SearchFilterControl extends Control
 		$this->templates['date']=new Template($this->date_template);
 		$this->templates['list']=new Template($this->list_template);
 		$this->templates['grouping']=new Template($this->grouping_template);
-		$this->templates['faceted']=new Template($this->faceted_template);
 		$this->templates['token']=new Template($this->token_template);
 		
 		
@@ -158,15 +156,15 @@ class SearchFilterControl extends Control
 	function active_order($parameter,$value,$direction)
 	{
 		return (
-			$this->controller->request->input->exists($parameter) && 
-			($this->controller->request->input->{$parameter}==$value) &&
-			($this->controller->request->input->direction==$direction)
+			$this->controller->exists($parameter) && 
+			($this->controller->{$parameter}==$value) &&
+			($this->controller->direction==$direction)
 		);
 	}
 	
 	function active($parameter,$value)
 	{
-		return ($this->controller->request->input->exists($parameter) && (strtolower($this->controller->request->input->{$parameter})==strtolower($value)));
+		return ($this->controller->exists($parameter) && (strtolower($this->controller->{$parameter})==strtolower($value)));
 	}
 	
 	function build()
@@ -232,7 +230,6 @@ class SearchFilterControl extends Control
 					if (!$section->hidden)
 						$rtn.=$this->templates[$section->type]->render(array('meta' =>$this->controller->appmeta, 'field' => $field, 'section' => $section, 'control' => $this, 'items' => $rows, 'value' => $value));
 					break;
-				case 'faceted':	
 				case 'grouping':
 				{	
 					$rendered_subfilters = ''; 

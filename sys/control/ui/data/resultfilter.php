@@ -2,7 +2,7 @@
 /**
  * Search Result Filter Control
  *
- * This control is used to show facets and sort criteria
+ * This control is used to show facets
  * for search results and faceted browsing
  * 
  * At base, this is a Repeater with some extra information
@@ -49,8 +49,7 @@ class ResultFilterControl extends RepeaterControl
 			
 		if (!$this->container_template)
 			$this->container_template = $this->controller->appmeta->renderer_map->{$filter_type}->container;
-	
-			
+				
 		// dig specific facet counts out of facets
 		if (is_assoc($this->datasource))
 		{

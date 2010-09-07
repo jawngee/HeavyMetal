@@ -78,6 +78,15 @@ class GenericSearchController extends Controller
  		else 
  			throw new Exception("No app metadata specified.");
  	}
+ 	
+ 	/**
+ 	 * Gets the value of a field value pair submitted to the search controller 
+ 	 * @param $key
+ 	 */
+ 	public function __get($key)
+ 	{
+ 		return $this->get_value($key);
+ 	}
  		
  	
  	/**
@@ -186,8 +195,8 @@ class GenericSearchController extends Controller
 				'description'=>$this->no_query_text, 
 				'remove_url'=>null);
 			
-		if ($this->get->location)
-			$tokens[] = array('field'=>'location', 'value'=>$this->get->location, 'description'=>$this->get->location, 'remove_url'=>$this->request->uri->build(null,array('location'=>$this->get->location)));
+		if ($this->location)
+			$tokens[] = array('field'=>'location', 'value'=>$this->location, 'description'=>$this->location, 'remove_url'=>$this->request->uri->build(null,array('location'=>$this->location)));
 			
 		
 		foreach($this->appmeta->filter as $field=>$section)
@@ -282,7 +291,7 @@ class GenericSearchController extends Controller
 			if ($section->description_before)
 				$description .= $description_before;
 				
-			$description .= $this->get->{$key};
+			$description .= $this->{$key};
 			
 			if ($section->description_after)
 				$description .= $description_after;
@@ -297,38 +306,34 @@ class GenericSearchController extends Controller
  			case "multi":
  				foreach($section->options as $name=>$option)
                      {
-                         if ($this->get->{$key}==$name){
+                         if ($this->{$key}==$name){
                              $filterstr.=$option->filter.'&';
                              }
                      }
                      break;
  			case "lookup_checkbox":
+ 			case "faceted_multi":
                 $sf=$section->filter;
- 		        if ($this->get->exists($key))
+ 		        if ($this->exists($key))
                     {
                         if ($section->join_model && $section->join_column && $section->join_foreign_column)
                         {
                             $join_filter = filter($section->join_model);
 	                        if($section->case_insensitive)   
-	                            $join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls, 'lower');
+	                            $join_filter->{$sf}->is_in(($this->get_array($key)), $section->allow_nulls, 'lower');
 							else
-								$join_filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls);
+								$join_filter->{$sf}->is_in(($this->get_array($key)), $section->allow_nulls);
 	                        $join_filter->select='';
                             $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER');                          
                         }
                         else
                         {
                         if($section->case_insensitive)    
-                        	$filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls, 'lower');
+                        	$filter->{$sf}->is_in(($this->get_array($key)), $section->allow_nulls, 'lower');
                         else
-                        	$filter->{$sf}->is_in(($this->get->get_array($key)), $section->allow_nulls);
+                        	$filter->{$sf}->is_in(($this->get_array($key)), $section->allow_nulls);
                         }
                     }
- 				break;
- 			case "faceted_multi":
-                $sf=$section->filter;
- 		        if ($this->exists($key))   
-                    $filter->{$sf}->is_in($this->get_array($key));
  				break;
             case "lookup":
  			case "lookup_select":
@@ -358,7 +363,7 @@ class GenericSearchController extends Controller
  			    break;
  			case "text":
  				$sf=$section->filter;
- 				if ($this->get->exists($key))
+ 				if ($this->exists($key))
  				{
  				    if ($section->join_model && $section->join_column && $section->join_foreign_column)
                         {
@@ -375,14 +380,12 @@ class GenericSearchController extends Controller
  			    break;
  			case "date":
  				$sf=$section->filter;
- 				if ($this->get->exists($key))
+ 				if ($this->exists($key))
  					$filter->{$sf}->greater_equal(date('m/d/Y',time()-($this->get_value($key) * 24 * 60 * 60)));
  				break;
  			case "location":
  				$sf=$section->filter;
 				$this->handle_location($filter, $section, $key);
-
-
                 break;
 
  		}
@@ -393,8 +396,8 @@ class GenericSearchController extends Controller
  	{
  		$sf = $section->filter;
  		
- 		$lat = $this->get->lat;
- 		$long = $this->get->long;
+ 		$lat = $this->lat;
+ 		$long = $this->long;
  		
  		if (is_numeric($lat) && is_numeric($long))
  		{
