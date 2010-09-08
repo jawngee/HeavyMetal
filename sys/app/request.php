@@ -99,7 +99,8 @@ uses('sys.app.request.query');
 
  		$this->method=$method;
  		$this->uri=new URI($root,$segments);
-		$this->query=new Query();
+		$this->query=($query)?$query:new Query();
+		$this->uri->query = $this->query;
 		
  		// assign the get and post vars
  		$this->input=Input::Get();

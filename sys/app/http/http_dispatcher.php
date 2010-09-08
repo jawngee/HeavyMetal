@@ -74,7 +74,6 @@ class HTTPDispatcher extends Dispatcher
 			{
 				$query = substr($path,$query_pos+1);
 				$this->query = new Query($query); 
-
 				$path = substr($path,0,$query_pos); // remove query part for Dispatcher
 			}
 		}

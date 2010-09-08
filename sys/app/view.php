@@ -229,7 +229,7 @@ uses('system.app.layout');
 			if ($path!=null)
 			{
 				$port_dispatcher=new HTTPDispatcher($path);
- 
+
 				$result = $port_dispatcher->dispatch();
 				
 				if (($this->layout!=null) && ($target!=null))
