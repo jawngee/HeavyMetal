@@ -75,9 +75,12 @@ class ShellDispatcher extends Dispatcher
 	/**
 	 * @see sys/app/Dispatcher#build_request()
 	 */
-	public function build_request()
+	public function build_request($base=null)
 	{
-		return new ShellRequest($this,$this->path,$this->segments,$this->query);
+		if (!$base)
+			$base=$this->path;
+			
+		return new ShellRequest($this,null,$base,$this->segments,$this->query);
 	}
 
 

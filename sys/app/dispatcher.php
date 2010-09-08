@@ -305,7 +305,7 @@ abstract class Dispatcher
 	 * @param $segments
 	 * @return Request
 	 */
-	abstract function build_request();
+	abstract function build_request($base=null);
 	
 	/**
 	 * Returns a new instance of a dispatcher
@@ -335,13 +335,15 @@ abstract class Dispatcher
 		
 		if (!class_exists($classname))
 			throw new ControllerNotFoundException("'$classname' can not be found in '".$this->controller."'.");
-			
-		$request=$this->build_request();
-		$found_action=find_methods($classname, $request->method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
 
+		$request_method = HTTPRequest::get_request_method();
+		$found_action=find_methods($classname, $request_method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
+		$base = $this->controller . '/' . $this->action;
+		
 		if (!$found_action)
 		{
-			$found_action=find_methods($classname, $request->method."_index", 'index');
+			$found_action=find_methods($classname, $request_method."_index", 'index');
+			$base = $this->controller;
    			array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
 		}
 		
@@ -350,13 +352,13 @@ abstract class Dispatcher
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
 		}
 		
-		$request->uri->segments = $this->segments;  // use the unshifted version
+		$request=$this->build_request($base);
 		$class=new $classname($request);
 		
 		if ((isset ($class->ignored)) && (in_array($this->action, $class->ignored)))
 			throw new IgnoredMethodCalledException("Ignored method called.");
 		
-		$meta=AttributeReader::MethodAttributes($class,$this->action);
+		$meta=AttributeReader::MethodAttributes($class,$found_action);
 			
 		// Call the before screens	
 		$screen_data=array();

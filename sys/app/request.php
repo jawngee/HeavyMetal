@@ -96,7 +96,6 @@ uses('sys.app.request.query');
  	public function __construct($dispatcher,$method,$root,&$segments,$query=null)
  	{
  		$this->dispatcher=$dispatcher;
- 		
 
  		$this->method=$method;
  		$this->uri=new URI($root,$segments);
