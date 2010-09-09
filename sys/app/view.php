@@ -331,14 +331,9 @@ uses('system.app.layout');
 			$rendered=str_replace($matches[0][0],'',$rendered);
  		}
   	}
- 	
- 	/**
- 	 * Parses out controls and uses tags from the view's rendered output, replacing the tags with rendered controls
- 	 * 
- 	 * @param string $rendered The view's rendered output that may contain control or uses tags
- 	 */
- 	protected function parse_includes(&$rendered)
- 	{
+  	
+  	protected function parse_helpers(&$rendered)
+  	{
 		// extract helper code
 		$matches=array();
 		$regex="@<[\s]*uses[\s]*:[\s]*helper[\s]*helper[\s]*=[\s]*['\"]([^\"']*)['\"][\s]*\/[\s]*>@is";
@@ -347,7 +342,15 @@ uses('system.app.layout');
  			uses("app.helper.".$matches[1][0]);
 			$rendered=str_replace($matches[0][0],'',$rendered);
  		}
- 			
+  	}
+ 	
+ 	/**
+ 	 * Parses out controls and uses tags from the view's rendered output, replacing the tags with rendered controls
+ 	 * 
+ 	 * @param string $rendered The view's rendered output that may contain control or uses tags
+ 	 */
+ 	protected function parse_includes(&$rendered)
+ 	{
  		// extract javascript includes
 		$matches=array();
 		$regex="@<[\s]*uses[\s]*:[\s]*include[\s]*include[\s]*=[\s]*['\"]([^\"']*)['\"][\s]*/[\s]*>@is";
@@ -649,6 +652,8 @@ uses('system.app.layout');
 		$this->parse_nestedcontrols_cdata($result);
 		
 		$this->data['_extracted_content']=$this->_extracted_content;
+		
+		$this->parse_helpers($result);
 		
 		$result=render_fragment($result,$this->data);
 		
