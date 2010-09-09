@@ -124,15 +124,65 @@ class Query
  		return $this;
  	}
  	
+ 	
+ 	function add_value($name,$value)
+ 	{
+ 		$val = strtolower($value);
+
+ 		if (!isset($this->items[$name]))
+ 		{
+ 			$this->items[$name] = array($val);
+ 		}
+ 		else
+ 		{
+ 			$vals = $this->items[$name];
+ 			
+ 			if (!is_array($vals))
+ 				$this->items[$name] = array($vals, $val);
+ 			else
+ 				if (!in_array($val, $vals))
+ 					$this->items[$name][] = $val; 			
+ 		} 		
+
+ 		return $this;
+ 	}
+ 	
  	/**
  	 * Removes a value from the query
  	 * 
  	 * @param string $name
  	 * @return Query
  	 */
- 	function remove_value($name)
+ 	function remove_value($name, $value=null)
  	{
- 		unset($this->items[$name]);
+ 		$i=0;
+ 		foreach ($this->items as $n => $v)
+ 		{
+ 			if (strtolower($n)===strtolower($name))
+ 			{
+ 				if (!$value || strtolower($value)===strtolower($v))
+ 				{
+ 					array_splice($this->items,$i,1);
+ 					break;
+ 				}
+ 				elseif (is_array($v))
+ 				{
+ 					$j=0;
+ 					foreach($v as $inner_val)
+ 					{
+ 						if (strtolower($value)===strtolower($inner_val))
+ 						{
+ 							array_splice($this->items[$n],$j,1);
+ 							break;
+ 						}
+ 						
+ 						$j++;
+ 					}
+ 				}
+ 			}
+ 			
+ 			$i++;
+ 		}
  		
  		return $this;
  	}
@@ -149,29 +199,34 @@ class Query
  	{
  		$result='';
  		
- 		$items=$this->items;
- 		
  		if ($removevalues!=null)
-			foreach($removevalues as $key)
-				unset($items[$key]);
- 		
-		if ($newvalues!=null)
+			foreach($removevalues as $key => $value) 		
+ 				$this->remove_value($key, $value);
+
+ 		if ($newvalues!=null)
 			foreach($newvalues as $key => $value)
-				$items[$key]=$value;
- 		
+				$this->items[$key]=$value;
+ 
+ 				
+ 		$items=$this->items;
+ 				
+ 				
 		$result='';
 		
 		foreach($items as $key=>$value)
 		{
-			if (is_array($value))
+			if (!empty($key))
 			{
-				foreach($value as $item)
-					$result.=$key.urlencode("[]")."=".urlencode($item)."&";
+				if (is_array($value))
+				{
+					foreach($value as $item)
+						$result.=$key.rawurlencode("[]")."=".rawurlencode(strtolower($item))."&";
+				}
+				else
+					$result.=$key.'='.rawurlencode(strtolower($value))."&";
 			}
-			else
-				$result.=$key.'='.urlencode($value)."&";
 		}
-				
+			
  		$result=trim($result,'&');
 		
 		if ($result=='')

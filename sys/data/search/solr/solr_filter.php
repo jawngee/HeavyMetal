@@ -408,6 +408,7 @@ class SOLRFilter extends Filter
    		if ($limit)
    			$this->limit=$limit;
 //dump('solr_filter->execute(): ' . $this->build_query());   			
+
    		$response = file_get_contents($this->build_query());
 
 		if ($this->result_format == 'php')

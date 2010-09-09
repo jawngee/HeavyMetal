@@ -133,17 +133,7 @@ class URI
 
  		return false;
  	}
- 	
- 	public function get_array($name)
- 	{
- 		$values = array();
- 		
- 		for($i=0; $i<count($this->segments)-1; $i++)
- 			if ($this->segments[$i]===strtolower($name))
- 				$values[] = $this->segments[$i+1];
- 		
-	 	return $values; 		
- 	}
+
  	
  	/**
  	 * Makes sure that the value of the segment-value in the URI is a number

@@ -302,10 +302,9 @@ abstract class Dispatcher
 	 * Builds a Request
 	 * 
 	 * @param $root
-	 * @param $segments
 	 * @return Request
 	 */
-	abstract function build_request($base=null);
+	abstract function build_request($root=null);
 	
 	/**
 	 * Returns a new instance of a dispatcher
@@ -338,12 +337,10 @@ abstract class Dispatcher
 
 		$request_method = HTTPRequest::get_request_method();
 		$found_action=find_methods($classname, $request_method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
-		$base = $this->controller . '/' . $this->action;
-		
+
 		if (!$found_action)
 		{
 			$found_action=find_methods($classname, $request_method."_index", 'index');
-			$base = $this->controller;
    			array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
 		}
 		
@@ -352,7 +349,14 @@ abstract class Dispatcher
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
 		}
 		
-		$request=$this->build_request($base);
+		// Handle the fact that some URIs contain extra segments that are not part of the controller/action root
+		$root = $this->controller_path . 
+			(($this->controller!='index') ? $this->controller . "/" : "") .
+			(($this->action!='index' && $found_action!='index') ? $this->action : "");
+
+		$root = rtrim($root,'/');		
+			
+		$request=$this->build_request($root);
 		$class=new $classname($request);
 		
 		if ((isset ($class->ignored)) && (in_array($this->action, $class->ignored)))

@@ -60,42 +60,14 @@ class ResultFilterControl extends RepeaterControl
 		}
 	}
 	
-	
-	function has_value($parameter)
-	{
-		return ($this->controller->request->input->exists($parameter));
-	}
-	
-	function link($parameter,$value,$removevalues=null)
-	{
-		return $this->controller->request->uri->build(null,null,$value,$removevalues);
-	}
-
 	function radio_link($parameter, $value, $removevalues=null)
 	{ 
 		return $this->link($parameter,$value,$removevalues);
 	}
-		
-	function active($parameter,$value=null)
-	{
-		if (!$value)
-			return $this->controller->exists($parameter);
-
-		$val=$this->controller->get_value($parameter);
-		
-		return (strtolower($value)===$val);
-	}
-	
-	function checked($parameter, $value)
-	{
-		$values=$this->controller->get_array($parameter);
-		
-		return in_array(strtolower($value), $values);
-	}
 	
 	function checkbox($parameter, $value, $removevalues=null)
 	{
-		$values=$this->controller->get_array($parameter);		
+		$values=$this->controller->request_scheme->get_array($parameter);		
 
 		$uri = $this->controller->request->uri->copy();
 		
@@ -113,6 +85,40 @@ class ResultFilterControl extends RepeaterControl
 		$link=$this->link_multi($parameter,$value,$removevalues);
 		
 		return $link;
+	}
+	
+	
+	function link($parameter, $value, $removevalues=null)
+	{
+		return $this->link_common($parameter, $value, $removevalues);
+	}
+	
+	function link_multi($parameter, $value, $removevalues=null)
+	{
+		return $this->link_common($parameter, $value, $removevalues, true);
+	}
+	
+	protected function link_common($parameter,$value=null,$removevalues=null, $multi=false)
+	{
+		$uri = $this->controller->request->uri->copy();
+		
+		// remove values
+		foreach($removevalues as $key=>$val)
+		{
+			$uri->query->remove_value($key, $val);
+		}
+
+		// add new
+		if ($multi)
+			$uri->query->add_value($parameter, $value); // used for multi-select
+		else
+			$uri->query->set_value($parameter, $value);
+
+			
+		// remove facet query parameter
+		$uri->query->remove_value('facet');
+		
+		return $uri->build();
 	}
 	
 }
