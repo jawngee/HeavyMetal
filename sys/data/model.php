@@ -86,7 +86,8 @@ class Model implements ArrayAccess
     {
 		uses("model.$model");
 	
-		$class=str_replace('_','',array_pop(explode('.',$model)));
+		$modelparts=explode('.',$model);
+		$class=str_replace('_','',array_pop($modelparts));
 		$instance=new $class($id,$fields,$db,$row,$cacheable);
 	
 		return $instance;

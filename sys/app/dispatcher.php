@@ -136,6 +136,12 @@ abstract class Dispatcher
 	protected $view=null;
 	
 	/**
+	 * The request type
+	 * @var string
+	 */
+	protected static $req_type=null;
+	
+	/**
 	 * Constructor
 	 * 
 	 * @param string $path The URI to dispatch
@@ -410,5 +416,13 @@ abstract class Dispatcher
 		$data=$this->call();
 		
 		return $this->transform($data,$req_type);
+	}
+	
+	/**
+	 * Returns the request type
+	 */
+	public static function RequestType()
+	{
+		return self::$req_type;
 	}
 }

@@ -170,6 +170,8 @@ class HTTPDispatcher extends Dispatcher
 			}
 		}
 		
+		self::$req_type=$req_type;
+		
 		
 		if ($this->view)
 			$view_name=$this->view;

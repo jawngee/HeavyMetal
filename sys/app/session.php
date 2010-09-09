@@ -99,7 +99,8 @@ class Session
 			if ($config->class)
 			{
 				uses($config->class);
-				$class=array_pop(explode('.',$config->class)).'Session';
+				$cparts=explode('.',$config->class);
+				$class=array_pop($cparts).'Session';
 				
 				if (!class_exists($class))
 					throw new Exception("Could not find $class in {$config->class}.");
