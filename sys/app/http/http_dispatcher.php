@@ -84,9 +84,9 @@ class HTTPDispatcher extends Dispatcher
 	/**
 	 * @see sys/app/Dispatcher#build_request()
 	 */
-	public function build_request($base=null)
+	public function build_request($root=null)
 	{				
-		return new HTTPRequest($this,null,$base,$this->segments,$this->query);
+		return new HTTPRequest($this,null,$root,$this->segments,$this->query);
 	}
 
 

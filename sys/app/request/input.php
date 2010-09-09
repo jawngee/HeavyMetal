@@ -180,7 +180,7 @@ final class Input extends DynamicObject
      */
     function get_array($prop_name)
     {
-        if ((!isset($this->props[$prop_name])) || (!is_a($this->props[$prop_name], "Input")))
+        if (!$this->is_array($prop_name))
             return false;
 			
 		$r = array();
@@ -188,6 +188,11 @@ final class Input extends DynamicObject
 			$r[] = xss_clean($val);
 		
 		return $r;
+    }
+    
+    function is_array($prop_name)
+    {
+    	return ((isset($this->props[$prop_name])) && (is_a($this->props[$prop_name], "Input")));
     }
 	
 	/**
