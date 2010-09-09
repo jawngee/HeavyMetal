@@ -804,13 +804,11 @@ class Filter
 	 */
 	private function generate_table_alias()
 	{
-              $mdl_parts = split('\.',$this->model->table_name);
-
-              $tablename = $mdl_parts[1];
-
-             if ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS))
-              {
-	        $tbl_parts = split('_',$tablename);
+		$mdl_parts = explode('.',$this->model->table_name);
+		$tablename = array_pop($mdl_parts);
+		if ($this->model->db->supports(Database::FEATURE_TABLE_ALIAS))
+		{
+	        $tbl_parts = explode('_',$tablename);
 	        $readable = $tbl_parts[0];
 	        
 	        if (count($tbl_parts) > 1)
@@ -825,12 +823,12 @@ class Filter
 	        		 count($_REQUEST['TAKE_A_NUMBER'])>0) ? array_pop($_REQUEST['TAKE_A_NUMBER']) : rand(0,9999);
 	        $this->table_alias = 'a' . $readable . $uniq;	
 
-              }
-              else
-              {
+		}
+		else
+        {
         	// not supported, so we'll just use tablename, e.g.  "select profiles.gender from ... "
         	$this->table_alias = $tablename;
-              }
+		}
 	}
 }
    	

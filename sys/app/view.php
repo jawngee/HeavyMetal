@@ -114,6 +114,8 @@ uses('system.app.layout');
  	 */
  	protected function parse_layout(&$rendered,$subview=false)
  	{
+ 		$optimize=false;
+ 		
 		// extract php control includes
 		$regex = '#<[\s]*uses[\s]*:[\s]*layout([^>]*?)[\s]*/[\s]*>#is';					// extracts the tag
 		
@@ -160,7 +162,8 @@ uses('system.app.layout');
  				uses("app.layout.$layout");
 	 			if (class_exists(str_replace('_','',$layout).'Layout'))
 	 			{
-	 				$view_type=array_pop(explode('.',$this->view_name));
+	 				$vtypes=explode('.',$this->view_name);
+	 				$view_type=array_pop($vtypes);
 	 				
 	 				$layoutclass= str_replace('_','',$layout).'Layout';
 					$this->layout=new $layoutclass($title,$description,"$layout.$view_type",$optimize);

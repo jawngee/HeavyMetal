@@ -87,7 +87,7 @@ uses('sys.app.dynamic_object');
  		
  		// optimization options
  		$this->optimize=new DynamicObject();
- 		foreach(split(",", strtoupper($optimize)) as $id)
+ 		foreach(explode(",", strtoupper($optimize)) as $id)
  			$this->optimize->{$id}=true;
  		
  		if (self::$_master==null)
