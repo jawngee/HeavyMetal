@@ -68,8 +68,6 @@ class ResultFilterControl extends RepeaterControl
 	function checkbox($parameter, $value, $removevalues=null)
 	{
 		$values=$this->controller->request->get_array($parameter);		
-
-		$uri = $this->controller->request->uri->copy();
 		
 		$value = strtolower($value);
 		
@@ -100,25 +98,28 @@ class ResultFilterControl extends RepeaterControl
 	
 	protected function link_common($parameter,$value=null,$removevalues=null, $multi=false)
 	{
-		$uri = $this->controller->request->uri->copy();
-		
-		// remove values
-		foreach($removevalues as $key=>$val)
-		{
-			$uri->query->remove_value($key, $val);
-		}
-
+		$uri = $this->controller->request->uri
+			->remove_values($removevalues);
+			
 		// add new
 		if ($multi)
-			$uri->query->add_value($parameter, $value); // used for multi-select
+			$uri->add_value($parameter, $value); // used for multi-select
 		else
-			$uri->query->set_value($parameter, $value);
+			$uri->set_value($parameter, $value);
 
 			
-		// remove facet query parameter
-		$uri->query->remove_value('facet');
+		$uri = $this->trim_uri($uri);
 		
 		return $uri->build();
+	}
+	
+	protected function trim_uri($uri)
+	{
+		$uri->root = str_replace('/morefacet', '', $uri->root);
+		
+		$uri->query->remove_value('facet');
+
+		return $uri;
 	}
 	
 }

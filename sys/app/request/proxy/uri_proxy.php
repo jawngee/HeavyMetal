@@ -51,5 +51,44 @@ abstract class URIProxy
 	public function __call($uri_method, $params)
 	{
 		return call_user_func_array(array( $this->uri, $uri_method ), $params);
-	}	
+	}
+	
+	
+	abstract function add_value($parameter, $value);
+	
+	public function add_values($assoc)
+	{
+		foreach ($assoc as $parameter => $value)
+		{
+			$this->add_value($parameter, $value);
+		}
+		
+		return $this;
+	}
+
+	
+	abstract function set_value($parameter, $value);
+	
+	public function set_values($assoc)
+	{
+		foreach ($assoc as $parameter => $value)
+		{
+			$this->set_value($parameter, $value);
+		}
+		
+		return $this;		
+	}
+	
+	
+	abstract function remove_value($parameter, $value);
+	
+	public function remove_values($assoc)
+	{
+		foreach ($assoc as $parameter => $value)
+		{
+			$this->remove_value($parameter, $value);
+		}
+		
+		return $this;		
+	}
 }

@@ -63,6 +63,14 @@ abstract class RequestProxy
 	}
 	
 	
+	/**
+	 * Return the wrapped request
+	 */
+	public function request()
+	{
+		return $this->request;
+	}
+	
 	/***********************
 	 * Input helper methods
 	 ***********************/
