@@ -25,15 +25,15 @@ class IncludesDebugModule extends DebugModule
 			if (isset(self::$includes))
 				foreach(self::$includes as $include)
 				{
-					if (strpos($include,PATH_VIEW)===0)
+					if (strpos($include,PATH_APP.'view/')===0)
 						self::$grouped_includes['Views'][]=$include;
-					else if (strpos($include,PATH_CONTROL)===0)
+					else if (strpos($include,PATH_APP.'control/')===0)
 						self::$grouped_includes['Controls'][]=$include;
-					else if (strpos($include,PATH_CONTROLLER)===0)
+					else if (strpos($include,PATH_APP.'controller/')===0)
 						self::$grouped_includes['Controller'][]=$include;
-					else if (strpos($include,PATH_MODEL)===0)
+					else if (strpos($include,PATH_APP.'model/')===0)
 						self::$grouped_includes['Model'][]=$include;
-					else if (strpos($include,PATH_CONFIG)===0)
+					else if (strpos($include,PATH_APP.'conf/')===0)
 						self::$grouped_includes['Config'][]=$include;
 					else if (strpos($include,PATH_SYS)===0)
 						self::$grouped_includes['System'][]=$include;
