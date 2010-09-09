@@ -1,5 +1,4 @@
-<? if ((REQUEST_TYPE!='html') || (defined('DISABLE_TRACE'))) return; ?>
-
+<? if ((Dispatcher::RequestType()!='html') || (defined('DISABLE_TRACE'))) return; ?>
 <?
 	$finaltime=microtime(true)-Collector::$start_time;
 	$result=ob_get_clean();
@@ -10,7 +9,11 @@
 	$modules=array();
 	
 	foreach(Config::$environment_config->collector->modules->items as $key => $module)
-		$modules[$key]=instance($module,'DebugModule');
+	{
+		uses($module);
+		$class=$key.'DebugModule';
+		$modules[$key]=new $class();
+	}
 		
 	if ($finaltime<0.9)
 		$status='<span style="color:green">&#x2714;</span>';
@@ -20,7 +23,6 @@
 		$status='<span style="color:red">&#x2716;</span>';
 			
 ?>
-
 <style>
 	#heavymetal-inspector { position:absolute; left:0px; top:0px; right:0px; bottom: 0px; font-size:12px; padding:0px; margin:0px; }
 	#heavymetal-inspector-bug {  position:absolute; right:5px; top:5px; }
@@ -65,35 +67,34 @@
 <script>
 	function toggleInspector()
 	{
-		Effect.toggle('heavymetal-inspector-bug','appear', { duration: 0.25 });
-		Effect.toggle('heavymetal-inspector','appear', { duration: 0.25 });
+		$('#heavymetal-inspector-bug').toggle();
+		$('#heavymetal-inspector').toggle();
 	}
 
 	var lastModule='';
 	
 	function showModule(module)
 	{
-		Element.show('heavymetal-inspector-pane');
-		Element.addClassName('heavymetal-selector-'+module,'selected');
+		$('#heavymetal-inspector-pane').show();
+		$('#heavymetal-selector-'+module).addClass('selected');
 		
 		if (lastModule!='')
 		{
-			Element.removeClassName('heavymetal-selector-'+lastModule,'selected');
-			Element.hide('heavymetal-module-'+lastModule);
+			$('#heavymetal-selector-'+lastModule).removeClass('selected');
+			$('#heavymetal-module-'+lastModule).hide();
 		}
-
-		Element.show('heavymetal-module-'+module);
-
+		
+		$('#heavymetal-module-'+module).show();
 		lastModule=module;
 	}
 
 	function closeLastModule()
 	{
-		Element.hide('heavymetal-inspector-pane');
+		$('#heavymetal-inspector-pane').hide();
 		if (lastModule!='')
 		{
-			Element.removeClassName('heavymetal-selector-'+lastModule,'selected');
-			Element.hide('heavymetal-module-'+lastModule);
+			$('#heavymetal-selector-'+lastModule).removeClass('selected');
+			$('#heavymetal-module-'+lastModule).hide();
 		}
 
 		lastModule='';
