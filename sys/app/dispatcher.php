@@ -211,7 +211,7 @@ abstract class Dispatcher
 				$routes=Config::Get('routes');
 				$route=(isset($routes->items['default'])) ? $routes->items['default'] : '';
 				$found=false;
-				if ($route->routes)
+				if (($route) && ($route->routes))
 					foreach($route->routes->items as $key => $val)
 					{
 						if (preg_match('#^'.$key.'$#', $this->path))
@@ -224,7 +224,7 @@ abstract class Dispatcher
 						}
 					}
 				
-				if (($route->required==TRUE) && (!$found))
+				if ((($route) && ($route->required==TRUE)) && (!$found))
 					throw new NotFoundException();
 			}
 			catch(ConfigException $ex)

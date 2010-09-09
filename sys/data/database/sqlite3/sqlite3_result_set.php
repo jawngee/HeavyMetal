@@ -47,7 +47,13 @@ class SQLite3ResultSet implements Iterator
 	
 	public function __construct($result)
 	{
-		while($res=$result->fetchArray()) $this->result[]=$res;
+		if ($result)
+		{
+			while($res=$result->fetchArray()) $this->result[]=$res;	
+		}
+		else
+			$this->result=array();
+			
 		$this->count=count($this->result);
 	}
 	
@@ -93,7 +99,7 @@ class SQLite3ResultSet implements Iterator
 	 */
     public function valid()
     {
-    	return $this->result[$this->cindex]!=null;
+    	return ($this->cindex<$this->count);
     }	
     
     public function to_array()

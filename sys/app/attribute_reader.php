@@ -117,6 +117,9 @@ class AttributeReader extends DynamicObject
  		if (!$reader)
  		{
 			$yaml=AttributeReader::ParseDocComments($method->getDocComment());
+			if (trim($yaml)=='')
+				$reader=new AttributeReader();
+			else
 			$reader=new AttributeReader(yaml_parse($yaml));
 
 			$parent=$class->getParentClass();
@@ -156,6 +159,10 @@ class AttributeReader extends DynamicObject
  		if (!$reader)
  		{
 			$yaml=AttributeReader::ParseDocComments($class->getDocComment());
+			
+			if (trim($yaml)=='')
+				$reader=new AttributeReader();
+			else
 			$reader=new AttributeReader(yaml_parse($yaml));
 			
 			$parent=$class->getParentClass();
@@ -195,7 +202,9 @@ class AttributeReader extends DynamicObject
  		if (!$reader)
  		{
 			$yaml=AttributeReader::ParseDocComments($prop->getDocComment());
-			
+			if (trim($yaml)=='')
+				$reader=new AttributeReader();
+			else
 			$reader=new AttributeReader(yaml_parse($yaml));
 
 			

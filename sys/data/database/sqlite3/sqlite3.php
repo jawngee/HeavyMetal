@@ -57,7 +57,6 @@ class SQLite3Database extends Database
 		$this->config=parse_url($dsn);
 		if (!$this->config)
 		    throw new DatabaseException("Invalid dsn '$dsn'.");
-		
 		$this->connection=new SQLite3(PATH_ROOT.$this->config['path']);
 		if (!$this->connection)
 			throw new DatabaseException("Invalid database settings.");
@@ -69,7 +68,7 @@ class SQLite3Database extends Database
      *
      * @param string $feature
      */
-    public function supports($feature) { return ($feature!=FEATURE_TABLE_ALIAS); }
+    public function supports($feature) { return true; }
     
 
 
@@ -87,8 +86,8 @@ class SQLite3Database extends Database
     	$vals=array_values($fields);
     	
     	$sql="insert into $table_name (".implode(',',$keys).") values (";
-    	for($i=1; $i<=count($vals); $i++)
-    		$sql.="'".$vals[$i]."',";
+    	for($i=0; $i<count($vals); $i++)
+    		$sql.=(($vals[$i]==null) ? 'null' : "'{$vals[$i]}'").",";
     	$sql=trim($sql,',');
 
    		$sql.=");";
@@ -116,11 +115,12 @@ class SQLite3Database extends Database
     	
     	$sql="update $table_name set ";
     	
-    	for($i=1; $i<=count($keys); $i++)
-    		$sql.=$keys[$i-1]."='".$vals[$i]."',";
+    	for($i=0; $i<count($keys); $i++)
+    		if ($keys[$i]!=$key)
+    			$sql.=$keys[$i]."=".(($vals[$i]==null) ? 'null' : "'{$vals[$i]}'").",";
     	$sql=trim($sql,',');
 
-   		$sql.=" where $key=$id";
+   		$sql.=" where $key='$id'";
     	$res=$this->connection->query($sql);
     	if (!$res)
    			throw new DatabaseException($this->connection->lastErrorMsg());
@@ -136,7 +136,7 @@ class SQLite3Database extends Database
      */
     public function delete($table_name,$key,$id)
     {
-		return $this->connection->query("delete from $table_name where $key=$id");
+		return $this->connection->query("delete from $table_name where $key='$id'");
     }
 
     /**
@@ -210,7 +210,7 @@ class SQLite3Database extends Database
      */
     public function fetch_row($table_name,$key,$id)
     {
-		return $this->connection->querySingle("SELECT * FROM $table_name WHERE $key=$id",true);
+		return $this->connection->querySingle("SELECT * FROM $table_name WHERE $key='$id'",true);
     }
 
 
