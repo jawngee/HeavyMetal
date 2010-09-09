@@ -40,9 +40,9 @@
  * inherited from parent classes.
  */
 
-uses('system.app.request.standard_request_scheme');
+uses('system.app.request.proxy.search_request_proxy');
 
-class GenericSearchController extends Controller
+class SearchController extends Controller
 {
 	/*
 	 * Context for the config file
@@ -59,12 +59,7 @@ class GenericSearchController extends Controller
 	 * @var AttributeReader
 	 */
 	public $appmeta=null;
-	
-	/**
-	 * A class to help interrogate the Request object
-	 */
-	public $request_scheme = null;
-	
+		
 	/**
 	 * Constructor
 	 * 
@@ -85,7 +80,8 @@ class GenericSearchController extends Controller
  		else 
  			throw new Exception("No app metadata specified.");
 
- 		$this->request_scheme = new StandardRequestScheme($request);
+ 		// Wrap the controller's Request object in a simplified proxy for search 
+ 		$this->request = new SearchRequestProxy($this->request);
  	}
  	 		
  	
@@ -110,7 +106,7 @@ class GenericSearchController extends Controller
 	 */
 	public function get_text_query()
 	{
-		return $this->request_scheme->get_value('q');
+		return $this->request->get_value('q');
 	}
 	
 	public function get_text_query_description()
@@ -176,12 +172,17 @@ class GenericSearchController extends Controller
 				'remove_url'=>null);
 			
 		if ($this->location)
-			$tokens[] = array('field'=>'location', 'value'=>$this->location, 'description'=>$this->location, 'remove_url'=>$this->request->uri->build(null,array('location'=>$this->location)));
+		{
+			$remove_url = $this->request->uri->copy()
+				->query
+				->remove_value('location');
 			
+			$tokens[] = array('field'=>'location', 'value'=>$this->location, 'description'=>$this->location, 'remove_url'=>$remove_url->build());
+		}	
 		
 		foreach($this->appmeta->filter as $field=>$section)
 		{
-			$value=$this->request_scheme->get_value($field);
+			$value=$this->request->get_value($field);
 
 			if($section->description && $value)
 			{
@@ -235,8 +236,8 @@ class GenericSearchController extends Controller
  	{
  		$filter = $this->build_filter($filter);
  		
- 		$lim = $this->request_scheme->get_value('limit');
- 		$pg = $this->request_scheme->get_value('pg');
+ 		$lim = $this->request->get_value('limit');
+ 		$pg = $this->request->get_value('pg');
 		
  		$filter->limit = ($lim) ? $lim : $this->appmeta->page_size;
  		$filter->offset=($pg) ? ($pg * $filter->limit) : 0;
@@ -274,7 +275,7 @@ class GenericSearchController extends Controller
 
  	public function build_filter_field($filter, $key, $section)
  	{
- 		$value = trim($this->request_scheme->get_value($key));
+ 		$value = trim($this->request->get_value($key));
  		
  		// Add to the description string
  		if ($value && ($section->description) )
@@ -309,7 +310,7 @@ class GenericSearchController extends Controller
                 $sf=$section->filter;
  		        if ($value)
                 {
-                	$arr = $this->request_scheme->get_array($key);
+                	$arr = $this->request->get_array($key);
                 	
 					if ($section->join_model && $section->join_column && $section->join_foreign_column)
 					{
@@ -447,8 +448,8 @@ class GenericSearchController extends Controller
  		$filter->parse($filterstr);
 
  		
- 		$sb = strtolower($this->request_scheme->get_value('order_by'));
- 		$od = strtolower($this->request_scheme->get_value('direction'));
+ 		$sb = strtolower($this->request->get_value('order_by'));
+ 		$od = strtolower($this->request->get_value('direction'));
  
  		if ($sb)
  		{

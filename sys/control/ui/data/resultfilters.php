@@ -30,7 +30,7 @@ class ResultFiltersControl extends Control
 	 *         item: <path to template to display link icons depending on what's been selected>
 	 *
 	 *
-	 * TODO:  once this control is complete, retire searchfilters control and modularize generic_search_controller
+	 * TODO:  once this control is complete, retire searchfilters control and modularize search_controller
 	 * 
 	 */
 	

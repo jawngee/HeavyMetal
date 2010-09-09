@@ -67,7 +67,7 @@ class ResultFilterControl extends RepeaterControl
 	
 	function checkbox($parameter, $value, $removevalues=null)
 	{
-		$values=$this->controller->request_scheme->get_array($parameter);		
+		$values=$this->controller->request->get_array($parameter);		
 
 		$uri = $this->controller->request->uri->copy();
 		

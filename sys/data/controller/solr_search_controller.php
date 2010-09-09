@@ -42,10 +42,10 @@
  * inherited from parent classes.
  */
  
-uses('system.data.controller.generic_search_controller');
+uses('system.data.controller.search_controller');
 uses('system.data.search.solr.facet');
 
-class SOLRSearchController extends GenericSearchController
+class SOLRSearchController extends SearchController
 {		
 	
 	public function index($filter=null)

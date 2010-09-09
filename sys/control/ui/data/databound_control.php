@@ -145,7 +145,11 @@ abstract class DataboundControl extends Control
 	 */
 	function next_page_link()
  	{
- 		return $this->uri->build(null,null,array('pg' => $this->current_page+1));
+ 		$uri = $this->uri->copy()
+ 			->query
+ 			->set_value('pg',$this->current_page+1);
+ 		
+ 		return $uri->build();
  	}
 
  	/**
@@ -155,7 +159,11 @@ abstract class DataboundControl extends Control
  	 */
  	function prev_page_link()
  	{
-	 		return $this->uri->build(null,null,array('pg' => $this->current_page-1));
+ 		$uri = $this->uri->copy()
+ 			->query
+ 			->set_value('pg',$this->current_page-1);
+ 		
+ 		return $uri->build();
  	}
 	
  	/**
@@ -166,7 +174,11 @@ abstract class DataboundControl extends Control
  	 */
  	function page_link($page)
  	{
-		return $this->uri->build(null,null,array('pg' => $page));
+ 		$uri = $this->uri->copy()
+ 			->query
+ 			->set_value('pg',$page);
+ 		
+ 		return $uri->build();
  	}
 
 	/**
@@ -184,11 +196,17 @@ abstract class DataboundControl extends Control
 
 		$template=new Template($this->sorting->item_template);
 		
+		$uri = $this->uri->copy();
+		
 		foreach($this->sort_options as $field => $config_items)
 		{
 			$option = $config_items->items;
-			$link = $this->uri->build(null,null,array("sortby"=>$field),array('pg'));			
-			$rendered.=$template->render(array('sortby' => $this->sortby, 'field' => $field, 'option' => $option, 'control' => $this, 'link' => $link));				
+			
+			$uri->query
+				->remove_value('pg')
+				->set_value('sortby',$field);		
+			
+			$rendered.=$template->render(array('sortby' => $this->sortby, 'field' => $field, 'option' => $option, 'control' => $this, 'link' => $uri->build()));				
 		}
 		
 		if ($this->sorting->container_template!=null)
@@ -217,12 +235,14 @@ abstract class DataboundControl extends Control
 
 		$template=new Template($this->filtering->item_template);
 
-		$link = $this->uri->build(null,null,array('filter'));
+		$uri = $this->uri->copy()
+			->query
+			->set_value('filter');
 			
 		foreach($this->filters as $field => $config_items)
 		{
 			$option = $config_items->items;
-			$rendered.=$template->render(array('filter' => $this->filter, 'field' => $field, 'option' => $option, 'control' => $this, 'uri' => $link));				
+			$rendered.=$template->render(array('filter' => $this->filter, 'field' => $field, 'option' => $option, 'control' => $this, 'uri' => $uri));				
 		}
 		
 		if ($this->filtering->container_template!=null)
