@@ -355,6 +355,8 @@ abstract class Dispatcher
 			throw new ControllerMethodNotFoundException("Could not find an action to call.");
 		}
 		
+		$this->action=$found_action;
+		
 		// Handle the fact that some URIs contain extra segments that are not part of the controller/action root
 		$root = $this->controller_path . 
 			(($this->controller!='index') ? $this->controller . "/" : "") .

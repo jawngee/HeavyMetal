@@ -176,7 +176,9 @@ class HTTPDispatcher extends Dispatcher
 		if ($this->view)
 			$view_name=$this->view;
 		else
+		{
 			$view_name=strtolower($this->controller_path.$this->controller.'/'.$this->action);
+		}
 
 		$conf=$viewconf->engines->{$req_type};
 		if (!$conf)
@@ -187,7 +189,9 @@ class HTTPDispatcher extends Dispatcher
 		if ($conf->extension)
 			$extension=$conf->extension;
 			
+			
 		$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
+		
 		
 		// if we didn't find the view for the request type, try the default one
 		if ((!$view_found) && ($req_type!=$viewconf->default) && (file_exists($this->view_root.$view_name.'.'.$viewconf->default.EXT)))
