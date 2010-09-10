@@ -179,6 +179,7 @@ class HTTPDispatcher extends Dispatcher
 		{
 			$view_name=strtolower($this->controller_path.$this->controller.'/'.$this->action);
 		}
+		
 
 		$conf=$viewconf->engines->{$req_type};
 		if (!$conf)
@@ -192,6 +193,11 @@ class HTTPDispatcher extends Dispatcher
 			
 		$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
 		
+		if ((!$view_found) && (preg_match('#(post|put|get|delete)_.*#', $view_name)))
+		{
+			$view_name=preg_replace('#(?:post|put|get|delete)_(.*)#', '$1', $view_name);
+			$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
+		}
 		
 		// if we didn't find the view for the request type, try the default one
 		if ((!$view_found) && ($req_type!=$viewconf->default) && (file_exists($this->view_root.$view_name.'.'.$viewconf->default.EXT)))
