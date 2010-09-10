@@ -1,6 +1,6 @@
 <?
 /**
- * Prototype Ajax Renderer
+ * jQuery Ajax Renderer
  *  
  * @package		application
  * @subpackage	request
@@ -9,13 +9,16 @@
 class jQueryRenderer
 {
 
-	public function __construct(){}
+	public function __construct()
+	{
+		content_type('text/javascript');
+	}
 	
 	/**
 	 * Render
 	 * 
 	 * @param $id
-	 * @param $attr
+	 * @param $attrs
 	 * @param $content
 	 * @return string
 	 */
@@ -39,8 +42,16 @@ class jQueryRenderer
 				$result="$(\"".$selector."\").append(\"".$content."\");";
 			break;
 			
+			case 'before':
+				$result="$(\"".$selector."\").before(\"".$content."\");";
+			break;
+			
+			case 'after':
+				$result="$(\"".$selector."\").after(\"".$content."\");";
+			break;
+			
 			case 'replace':
-				$result="$(\"".$selector."\").replaceAll(\"".$content."\");";
+				$result="$(\"".$selector."\").replaceWith(\"".$content."\");";
 			break;
 			
 			case 'insert':
@@ -51,7 +62,7 @@ class jQueryRenderer
 			case 'remove':
 				$fade=(isset($attrs['fade'])) ? $attrs['fade'] : false;
 				if ($fade)
-			       $result='$("'.$selector.'".fadeOut("slow", function() { $(this).remove(); });';
+			       $result='$("'.$selector.'").fadeOut("' . $fade . '", function() { $(this).remove(); });';
 				else
 			       $result='$("'.$selector.'").remove();'; 
 			break;

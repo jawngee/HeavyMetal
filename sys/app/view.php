@@ -57,7 +57,7 @@ uses('system.app.layout');
  	 * The name of the view
  	 * @var string
  	 */
- 	private $view_name=null;
+ 	protected $view_name=null;
  	
  	/**
  	 * The data associated with the view.
@@ -666,6 +666,7 @@ uses('system.app.layout');
 		
 		$this->parse_subviews($result);		
 		$this->parse_other_tags($result);
+		
 		$this->parse_targets($result);
 		$this->parse_uses($result);
 		$this->parse_ports($result);
