@@ -164,7 +164,6 @@ class Model implements ArrayAccess
     {
 	// find by id
 	$result=$this->db->fetch_row($this->table_name, $this->primary_key, $this->primary_key_value);
-
 	// no result?  exit ...
 	if (!$result)
 	    throw new Exception("Result $result");
