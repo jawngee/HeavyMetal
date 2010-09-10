@@ -171,4 +171,3 @@ function clean_file_name($string)
 	// length requirement
 	return substr($string, 0, 255);
 }
-

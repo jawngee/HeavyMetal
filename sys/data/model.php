@@ -348,7 +348,7 @@ class Model implements ArrayAccess
    	{
    	}
    	
-   	protected function post_create()
+   	protected function post_create(&$new_fields)
    	{
    	}
     
@@ -427,7 +427,7 @@ class Model implements ArrayAccess
 	   			$this->model_state=Model::STATE_VALID;
 	 			
 	 			// CRUD:  post_create hook
-	 	        $this->post_create();
+	 	        $this->post_create($fields);
 	 	        
 	 			$this->post_save();
    			}
@@ -472,7 +472,7 @@ class Model implements ArrayAccess
 
     protected function do_insert($fields)
     {
-	return $this->db->insert($this->table_name, $this->primary_key, $fields);
+		return $this->db->insert($this->table_name, $this->primary_key, $fields);
     }
 	
 	protected function do_update($fields)
