@@ -79,8 +79,7 @@ class RepeaterControl extends DataboundControl
 
 		if ($this->container_template!=null)
 		{
-			$view=new View($this->container_template,$this->controller);
-			$result=$view->render(array('total_count'=>$this->total_count, 'count'=>$this->count, 'control' => $this, 'content' => $rendered));
+			$result = $this->render_container($this->container_template, $rendered);
 		}
 		else
 			$result=$rendered;
@@ -116,6 +115,14 @@ class RepeaterControl extends DataboundControl
         }
         
         return $rendered_template;
+	}
+	
+	
+	protected function render_container($template, $rendered)
+	{
+		$view=new View($template,$this->controller);
+		
+		return $view->render(array('total_count'=>$this->total_count, 'count'=>$this->count, 'control' => $this, 'content' => $rendered));
 	}
 	
 	/*

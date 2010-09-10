@@ -60,10 +60,6 @@ class ResultFilterControl extends RepeaterControl
 		}
 	}
 	
-	function radio_link($parameter, $value, $removevalues=null)
-	{ 
-		return $this->link($parameter,$value,$removevalues);
-	}
 	
 	function checkbox($parameter, $value, $removevalues=null)
 	{
@@ -127,7 +123,11 @@ class ResultFilterControl extends RepeaterControl
 		$rendered_template = '';
 		
 		$value  = trim($row['value']); // stub
-		$link   = $this->radio_link($this->field, $value); 
+		
+		$link   = ($this->filter_definition->select_multiple) 
+			? $this->checkbox($this->field, $value)
+			: $this->link($this->field, $value);
+		
 		$active = $this->controller->request->exists($this->field, $value);
 		
 		$fcount  = $row['count']; // stub
@@ -142,10 +142,7 @@ class ResultFilterControl extends RepeaterControl
 		if (!empty($value))
 			$rendered_template = $template->render(
 				array(
-					'item' => $row, 
 					'control' => $this, 
-					'count' => $this->count, 
-					'total_count' => $this->total_count,
 					
 					'value'  => $value,
 					'link'   => $link,
@@ -159,5 +156,38 @@ class ResultFilterControl extends RepeaterControl
 		
 		
 		return $rendered_template;
+	}
+	
+	protected function render_container($template, $rendered)
+	{
+		$container = new Template($template);
+		
+		// Is a value selected for this field
+		$active = $this->controller->request
+			->exists($this->field);
+
+		// The link to clear the current selection for this field
+		$offlink = $this->controller->request->uri
+			->remove_value($this->field, 
+					 $this->controller->request->get_value($this->field))
+			->build();
+
+		// The link to pop out the rest of any abbreviated facet list
+		$morelink = $this->controller->request->uri;
+		$morelink->root .= '/morefacet';
+		$morelink->query->set_value('facet', $this->field);
+		$morelink = $morelink->build();
+			
+		return $container->render(
+			array(
+				'control' => $this, 
+				'count'=>$this->count, 
+				'content' => $rendered,
+			
+				'field'   => $this->field,
+				'active'  => $active,
+				'offlink' => $offlink,
+				'morelink' => $morelink
+			));
 	}
 }
