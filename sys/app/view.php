@@ -665,14 +665,13 @@ uses('system.app.layout');
 		$this->parse_includes($result);
 		
 		$this->parse_subviews($result);
+		$this->parse_other_tags($result);
 		
 		$this->parse_targets($result);
 		$this->parse_uses($result);
 		$this->parse_ports($result);
 		$this->parse_controls($result);
 		$this->parse_nestedcontrols($result);
-		
-		$this->parse_other_tags($result);
 
 		if ($this->layout!=null)
  		{
