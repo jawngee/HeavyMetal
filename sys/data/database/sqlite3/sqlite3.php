@@ -92,7 +92,9 @@ class SQLite3Database extends Database
 
    		$sql.=");";
 
+   		Collector::StartQuery($sql);
     	$res=$this->connection->query($sql);
+    	Collector::EndQuery($sql);
     	if (!$res)
     		throw new DatabaseException($this->connection->lastErrorMsg());
     		
@@ -121,8 +123,10 @@ class SQLite3Database extends Database
     	$sql=trim($sql,',');
 
    		$sql.=" where $key='$id'";
+  		Collector::StartQuery($sql);
     	$res=$this->connection->query($sql);
-    	if (!$res)
+    	Collector::EndQuery($sql);
+       	if (!$res)
    			throw new DatabaseException($this->connection->lastErrorMsg());
     	return true;
     }
@@ -136,7 +140,13 @@ class SQLite3Database extends Database
      */
     public function delete($table_name,$key,$id)
     {
-		return $this->connection->query("delete from $table_name where $key='$id'");
+    	$sql="delete from $table_name where $key='$id'";
+
+    	Collector::StartQuery($sql);
+    	$res=$this->connection->query($sql);
+    	Collector::EndQuery($sql);
+    	
+		return $res;
     }
 
     /**
@@ -154,8 +164,10 @@ class SQLite3Database extends Database
     	if ($limit)
     		$query.=" LIMIT $limit";
 
-      	$res=$this->connection->query($query);
-    	
+    	Collector::StartQuery($query);
+    	$res=$this->connection->query($query);
+    	Collector::EndQuery($query);
+    		    	
     	if (!$res)
    			throw new DatabaseException($this->connection->lastErrorMsg());
     	
@@ -188,7 +200,9 @@ class SQLite3Database extends Database
      */
     public function get_one($query)
     {
-    	return $this->connection->querySingle($query);
+    	$res=$this->execute($query)->to_array();
+    	
+    	return $res[0][0];
     }
 
     /**
@@ -198,7 +212,11 @@ class SQLite3Database extends Database
      */
     public function get_row($query)
     {
-    	return $this->connection->querySingle($query,true);
+    	Collector::StartQuery($query);
+    	$res=$this->connection->querySingle($query,true);
+    	Collector::EndQuery($query);
+    	
+    	return $res;
     }
 
     /**
@@ -210,7 +228,12 @@ class SQLite3Database extends Database
      */
     public function fetch_row($table_name,$key,$id)
     {
-		return $this->connection->querySingle("SELECT * FROM $table_name WHERE $key='$id'",true);
+    	$query="SELECT * FROM $table_name WHERE $key='$id';";
+    	Collector::StartQuery($query);
+    	$res=$this->connection->querySingle($query,true);
+    	Collector::EndQuery($query);
+    	
+    	return $res;
     }
 
 
@@ -221,8 +244,10 @@ class SQLite3Database extends Database
      */
     public function get_rows($query)
     {
+   		Collector::StartQuery($query);
     	$res=$this->connection->query($query);
-    	
+    	Collector::EndQuery($query);
+    	    	
     	while ($r=$res->fetchArray()) $result[]=$r;
     	return $result;
     }
