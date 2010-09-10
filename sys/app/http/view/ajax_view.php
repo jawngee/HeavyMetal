@@ -46,6 +46,7 @@ uses('system.app.view');
  */
  class AjaxView extends View
  {
+ 	
  	/**
  	 * Parses out ajax tags 
  	 * 
@@ -53,6 +54,8 @@ uses('system.app.view');
  	 */
  	protected function parse_other_tags(&$rendered)
  	{
+ 		$this->parse_controls($rendered);
+ 		
  		// extract layout tags from rendered source
  		$tags=array();
 		$ajax_tags='@<[\s]*ajax[\s]*:[\s]*(\w+)([^>]*?)>(.*?)<[\s]*/[\s]*ajax:(?:\w+)[\s]*>@is';
@@ -99,4 +102,31 @@ uses('system.app.view');
  			$rendered=str_replace($full_tag,$result,$rendered)."\n";
  		}
   	}
+  	
+  	/**
+ 	 * Renders and displays the ajax view.
+ 	 */	
+ 	public function render($data=null, $subview=false)
+ 	{
+ 		if ($data!=null)
+ 			$this->data=$data;
+ 		else
+ 			$this->data=array();
+ 		
+ 		$result=get_view($this->base_path.$this->view_name);
+ 		
+ 		$result=render_fragment($result,$this->data);
+		
+		$this->parse_subviews($result);
+		
+		$this->parse_targets($result);
+		$this->parse_uses($result);
+		$this->parse_controls($result);
+		$this->parse_nestedcontrols($result);
+		
+		$this->parse_other_tags($result);
+ 		
+ 		return $result;
+ 	}
+ 	
  }

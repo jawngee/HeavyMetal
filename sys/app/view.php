@@ -57,7 +57,7 @@ uses('system.app.layout');
  	 * The name of the view
  	 * @var string
  	 */
- 	private $view_name=null;
+ 	protected $view_name=null;
  	
  	/**
  	 * The data associated with the view.
