@@ -116,7 +116,7 @@ class SearchController extends Controller
 	
 	public function get_no_text_query_url($query)
 	{
-		$uri = $this->controller->request->uri->copy();
+		$uri = $this->controller->request->uri;
 		$uri->query->remove_value('q');
 		
 		return $uri->build();
@@ -173,7 +173,7 @@ class SearchController extends Controller
 			
 		if ($this->location)
 		{
-			$remove_url = $this->request->uri->copy()
+			$remove_url = $this->request->uri
 				->query
 				->remove_value('location');
 			
@@ -216,7 +216,7 @@ class SearchController extends Controller
 	
 	public function remove_breadcrumb_url($field, $value)
 	{
-		$uri = $this->request->uri->copy()
+		$uri = $this->request->uri
 			->query
 			->remove_value($field, $value);
 			

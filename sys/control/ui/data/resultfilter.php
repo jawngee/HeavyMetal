@@ -17,7 +17,7 @@ uses('system.control.ui.data.repeater');
 
 class ResultFilterControl extends RepeaterControl
 {
-	public $field=null;			/** field name.  If null, then all fields */
+	public $field=null;
 	
 	public $filter_definition;
 	
@@ -122,4 +122,42 @@ class ResultFilterControl extends RepeaterControl
 		return $uri;
 	}
 	
+	protected function render_template($template, $key, $row)
+	{
+		$rendered_template = '';
+		
+		$value  = trim($row['value']); // stub
+		$link   = $this->radio_link($this->field, $value); 
+		$active = $this->controller->request->exists($this->field, $value);
+		
+		$fcount  = $row['count']; // stub
+		
+		$facet_count = null;
+
+		if (is_numeric($this->filter_definition->facet->count_ceiling) && $this->filter_definition->facet->count_ceiling < $fcount)
+	       	$facet_count = $this->filter_definition->facet->count_ceiling . '+';
+		else
+			$facet_count = $fcount;
+			
+		if (!empty($value))
+			$rendered_template = $template->render(
+				array(
+					'item' => $row, 
+					'control' => $this, 
+					'count' => $this->count, 
+					'total_count' => $this->total_count,
+					
+					'value'  => $value,
+					'link'   => $link,
+					'active' => $active,
+					'facet_count' => $facet_count
+				));
+		
+		$this->current=&$row;
+		$this->current_index++;
+		$this->count++;		
+		
+		
+		return $rendered_template;
+	}
 }
