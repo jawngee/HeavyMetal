@@ -31,7 +31,7 @@ class SOLRFilter extends Filter
 	
 	private $grouplevel=0;
 	
-	public $result_format = 'php';
+	public $result_format = 'phps';
 	
 	public $facet_search_ext = null;
 	
@@ -49,7 +49,7 @@ class SOLRFilter extends Filter
 		
 	public $boost_function=null;
 
-	public $query_parser=null;
+	public $query_parser='edismax';
 	
 	public $more_like_this=false;
 
@@ -75,16 +75,16 @@ class SOLRFilter extends Filter
 	
 	public static function Model($model)
 	{
-		$model=str_replace('.','/',$model);
+		//$model=str_replace('.','/',$model);
 		
-		uses_model($model);
-		
-		$parts=explode('/',$model);
+		uses('model.'.$model);
+
+		$parts=explode('.',$model);
 		
 		$class=str_replace('_','',$parts[1]);
 		$instance=new $class();
 		
-		return new SOLRFilter($instance,$class);
+		return new SOLRFilter($instance,$class, false);
 	}
 	
 	
@@ -411,7 +411,7 @@ class SOLRFilter extends Filter
 
    		$response = file_get_contents($this->build_query());
 
-		if ($this->result_format == 'php')
+   		if ($this->result_format == 'php')
 			eval("\$response_array = " . $response . ";");
 		else if ($this->result_format == 'phps')
 			$response_array = unserialize($response);
@@ -526,7 +526,6 @@ class SOLRFilter extends Filter
    		$results = $this->get_array($field);
 		
 		return ($results['total_count']) ? $results['total_count'] : '0';
-   	}
-
+   	}   	
 }
 

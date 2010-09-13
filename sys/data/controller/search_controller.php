@@ -71,7 +71,7 @@ class SearchController extends Controller
  	{
  		parent::__construct($request);
  		$filename=PATH_CONFIG.$this->context."/".$this->metadata->app.".conf";
-
+vomit($filename);
  		if (file_exists($filename))
  		{
  			$yaml=file_get_contents($filename);

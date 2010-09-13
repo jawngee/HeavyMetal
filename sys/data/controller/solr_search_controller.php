@@ -196,6 +196,7 @@ class SOLRSearchController extends SearchController
  		if ($section->facet)
  		{
  			$sf=($section->facet->field)?$section->facet->field:$section->filter;
+
  			$facet = $filter->facet->{$sf};
  			$facet->field_ext = $filter->facet_search_ext;
 			
@@ -209,7 +210,7 @@ class SOLRSearchController extends SearchController
  				$facet->limit = $section->show_max+1;
  				
  			// Handle count reducing tag/exclude for multi-choice filter fields
- 			if ($section->type == 'lookup_checkbox')
+ 			if ($section->select_multiple)
  			{
  				$facet->multi = true;
  			}

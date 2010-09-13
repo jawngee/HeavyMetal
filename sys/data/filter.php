@@ -834,5 +834,5 @@ class Filter
    	
 function filter($model)
 {
-	return Filter::Model($model);
+	return self::Model($model);
 }
