@@ -35,7 +35,7 @@
 uses('system.data.database');
 uses('system.data.database.pgsql.pgsql_result');
 uses("system.app.dynamic_object");
-
+uses('system.debug.collector');
 
 /**
  * Driver for PGSQL
@@ -103,9 +103,10 @@ class PGSQLDatabase extends Database
     	$sql=trim($sql,',');
 
    		$sql.=") returning $key";
-
+		Collector::StartQuery($sql, $vals);
     	$res=pg_query_params($this->connection,$sql,$vals);
     	$row=pg_fetch_array($res);
+    	Collector::EndQuery($sql);
     	
     	// return the id
     	return $row[0];
@@ -127,13 +128,17 @@ class PGSQLDatabase extends Database
     	
     	$sql="update $table_name set ";
     	
+    	$i=0;
     	for($i=1; $i<=count($keys); $i++)
     		$sql.=$keys[$i-1].'=$'.$i.',';
     	$sql=trim($sql,',');
 
-   		$sql.=" where $key=$id";
-    	$res=pg_query_params($this->connection,$sql,$vals);
-    	if (pg_affected_rows($res)<=0)
+   		$sql.=" where $key=\$$i";
+   		$vals[]=$id;
+   		Collector::StartQuery($sql, $vals);
+   		$res=pg_query_params($this->connection,$sql,$vals);
+   		Collector::EndQuery($sql);
+   		if (pg_affected_rows($res)<=0)
     		throw new DatabaseException("Could not update $table_name for $key=$id");
     		
     	return true;
@@ -148,7 +153,12 @@ class PGSQLDatabase extends Database
      */
     public function delete($table_name,$key,$id)
     {
-		$res=pg_query($this->connection,"delete from $table_name where $key=$id");
+    	$sql="delete from $table_name where $key=\$1";
+
+    	Collector::StartQuery($sql);
+		$res=pg_query_params($this->connection,$sql,array($id));
+		Collector::EndQuery($sql);
+		
     	return (pg_affected_rows($res)>0);
     }
 
@@ -166,7 +176,10 @@ class PGSQLDatabase extends Database
     		
     	if ($limit)
     		$query.=" LIMIT $limit";
+    	
+    	Collector::StartQuery($query);
     	$res=pg_query($this->connection,$query);
+    	Collector::EndQuery($query);
     	
     	if (!$res)
     		throw new DatabaseException(pg_last_error($this->connection));
@@ -200,8 +213,10 @@ class PGSQLDatabase extends Database
      */
     public function get_one($query)
     {
+    	Collector::StartQuery($query);
     	$res=pg_query($this->connection,$query);
     	$row=pg_fetch_array($res);
+    	Collector::EndQuery($query);
     	return $row[0];
     }
 
@@ -212,7 +227,10 @@ class PGSQLDatabase extends Database
      */
     public function get_row($query)
     {
+    	Collector::StartQuery($query);
     	$res=pg_query($this->connection,$query);
+    	Collector::EndQuery($query);
+    	
     	return pg_fetch_assoc($res);
     }
 
@@ -225,7 +243,12 @@ class PGSQLDatabase extends Database
      */
     public function fetch_row($table_name,$key,$id)
     {
-		$res=pg_query($this->connection,"SELECT * FROM $table_name WHERE $key=$id");
+    	$query="SELECT * FROM $table_name WHERE $key=\$1";
+    	  
+    	Collector::StartQuery($query);
+    	$res=pg_query_params($query,array($id));
+   		Collector::EndQuery($query);
+		
 		return pg_fetch_assoc($res);
     }
 
@@ -237,7 +260,9 @@ class PGSQLDatabase extends Database
      */
     public function get_rows($query)
     {
+    	Collector::StartQuery($query);
     	$res=pg_query($this->connection,$query);
+    	Collector::EndQuery($query);
     	return pg_fetch_all($res);
     }
 
