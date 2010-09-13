@@ -17,7 +17,7 @@ uses('system.control.ui.data.repeater');
 
 class ResultFilterControl extends RepeaterControl
 {
-	public $field=null;			/** field name.  If null, then all fields */
+	public $field=null;
 	
 	public $filter_definition;
 	
@@ -60,10 +60,6 @@ class ResultFilterControl extends RepeaterControl
 		}
 	}
 	
-	function radio_link($parameter, $value, $removevalues=null)
-	{ 
-		return $this->link($parameter,$value,$removevalues);
-	}
 	
 	function checkbox($parameter, $value, $removevalues=null)
 	{
@@ -122,4 +118,76 @@ class ResultFilterControl extends RepeaterControl
 		return $uri;
 	}
 	
+	protected function render_template($template, $key, $row)
+	{
+		$rendered_template = '';
+		
+		$value  = trim($row['value']); // stub
+		
+		$link   = ($this->filter_definition->select_multiple) 
+			? $this->checkbox($this->field, $value)
+			: $this->link($this->field, $value);
+		
+		$active = $this->controller->request->exists($this->field, $value);
+		
+		$fcount  = $row['count']; // stub
+		
+		$facet_count = null;
+
+		if (is_numeric($this->filter_definition->facet->count_ceiling) && $this->filter_definition->facet->count_ceiling < $fcount)
+	       	$facet_count = $this->filter_definition->facet->count_ceiling . '+';
+		else
+			$facet_count = $fcount;
+			
+		if (!empty($value))
+			$rendered_template = $template->render(
+				array(
+					'control' => $this, 
+					
+					'value'  => $value,
+					'link'   => $link,
+					'active' => $active,
+					'facet_count' => $facet_count
+				));
+		
+		$this->current=&$row;
+		$this->current_index++;
+		$this->count++;		
+		
+		
+		return $rendered_template;
+	}
+	
+	protected function render_container($template, $rendered)
+	{
+		$container = new Template($template);
+		
+		// Is a value selected for this field
+		$active = $this->controller->request
+			->exists($this->field);
+
+		// The link to clear the current selection for this field
+		$offlink = $this->controller->request->uri
+			->remove_value($this->field, 
+					 $this->controller->request->get_value($this->field))
+			->build();
+
+		// The link to pop out the rest of any abbreviated facet list
+		$morelink = $this->controller->request->uri;
+		$morelink->root .= '/morefacet';
+		$morelink->query->set_value('facet', $this->field);
+		$morelink = $morelink->build();
+			
+		return $container->render(
+			array(
+				'control' => $this, 
+				'count'=>$this->count, 
+				'content' => $rendered,
+			
+				'field'   => $this->field,
+				'active'  => $active,
+				'offlink' => $offlink,
+				'morelink' => $morelink
+			));
+	}
 }

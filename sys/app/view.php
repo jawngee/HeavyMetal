@@ -664,7 +664,7 @@ uses('system.app.layout');
 		
 		$this->parse_includes($result);
 		
-		$this->parse_subviews($result);
+		$this->parse_subviews($result);		
 		$this->parse_other_tags($result);
 		
 		$this->parse_targets($result);

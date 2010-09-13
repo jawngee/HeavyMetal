@@ -116,7 +116,7 @@ class SearchController extends Controller
 	
 	public function get_no_text_query_url($query)
 	{
-		$uri = $this->controller->request->uri->copy();
+		$uri = $this->controller->request->uri;
 		$uri->query->remove_value('q');
 		
 		return $uri->build();
@@ -173,7 +173,7 @@ class SearchController extends Controller
 			
 		if ($this->location)
 		{
-			$remove_url = $this->request->uri->copy()
+			$remove_url = $this->request->uri
 				->query
 				->remove_value('location');
 			
@@ -216,7 +216,7 @@ class SearchController extends Controller
 	
 	public function remove_breadcrumb_url($field, $value)
 	{
-		$uri = $this->request->uri->copy()
+		$uri = $this->request->uri
 			->query
 			->remove_value($field, $value);
 			
@@ -305,58 +305,55 @@ class SearchController extends Controller
                              }
                      }
                      break;
- 			case "lookup_checkbox":
- 			case "faceted_multi":
-                $sf=$section->filter;
- 		        if ($value)
-                {
-                	$arr = $this->request->get_array($key);
-                	
-					if ($section->join_model && $section->join_column && $section->join_foreign_column)
-					{
-						$join_filter = filter($section->join_model);
-                        if($section->case_insensitive)   
-                            $join_filter->{$sf}->is_in($arr, $section->allow_nulls, 'lower');
-						else
-	    					$join_filter->{$sf}->is_in($arr, $section->allow_nulls);
-                        $join_filter->select='';
-                            $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER');                          
-                    }
-                    else
-                    {
-                        if($section->case_insensitive)    
-        	                $filter->{$sf}->is_in($arr, $section->allow_nulls, 'lower');
-                        else
-            	            $filter->{$sf}->is_in($arr, $section->allow_nulls);
-                    }
-                }
- 				break;
-            case "lookup":
- 			case "lookup_select":
- 			case "faceted_single":
+ 			case "faceted":
  				$sf=$section->filter;
  				if ($value)
  				{
- 					if ($section->join_model && $section->join_column && $section->join_foreign_column)
+ 					if ($section->select_multiple) // multi-select
  					{
-                        $join_filter = filter($section->join_model);
-                        
-                        if ($section->case_insensitive)
-	                        $join_filter->{$sf}->equals($value, $section->allow_nulls, 'LIKE', 'lower');
-                        else
-	                        $join_filter->{$sf}->equals($value);
-	                    $join_filter->select='';
-                        $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER'); 							
+	                	$arr = $this->request->get_array($key);
+						if ($section->join_model && $section->join_column && $section->join_foreign_column)
+						{
+							$join_filter = filter($section->join_model);
+	                        if($section->case_insensitive)   
+	                            $join_filter->{$sf}->is_in($arr, $section->allow_nulls, 'lower');
+							else
+		    					$join_filter->{$sf}->is_in($arr, $section->allow_nulls);
+	                        $join_filter->select='';
+	                            $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER');                          
+	                    }
+	                    else
+	                    {
+	                        if($section->case_insensitive)    
+	        	                $filter->{$sf}->is_in($arr, $section->allow_nulls, 'lower');
+	                        else
+	            	            $filter->{$sf}->is_in($arr, $section->allow_nulls);
+	                    }
+	 						
  					}
- 					else
+ 					else // single select
  					{
-						if ($section->case_insensitive)
- 							$filter->{$sf}->equals($value, $section->allow_nulls, 'LIKE', 'lower');
- 						else
- 							$filter->{$sf}->equals(array($value), $section->allow_nulls);
+ 						if ($section->join_model && $section->join_column && $section->join_foreign_column)
+	 					{
+	                        $join_filter = filter($section->join_model);
+	                        
+	                        if ($section->case_insensitive)
+		                        $join_filter->{$sf}->equals($value, $section->allow_nulls, 'LIKE', 'lower');
+	                        else
+		                        $join_filter->{$sf}->equals($value);
+		                    $join_filter->select='';
+	                        $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER'); 							
+	 					}
+	 					else
+	 					{
+							if ($section->case_insensitive)
+	 							$filter->{$sf}->equals($value, $section->allow_nulls, 'LIKE', 'lower');
+	 						else
+	 							$filter->{$sf}->equals(array($value), $section->allow_nulls);
+	 					}
  					}
  				}
- 			    break;
+ 				break;
  			case "text":
  				$sf=$section->filter;
  				if ($value)

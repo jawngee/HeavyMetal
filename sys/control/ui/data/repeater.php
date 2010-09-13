@@ -73,30 +73,56 @@ class RepeaterControl extends DataboundControl
 
 			foreach($this->rows as $key => $row)
 			{
-				if (is_numeric($key)) // With SOLR, some meta info gets added to the rows which repeater should ignore
-			        {
-				      $id = ($row instanceof Model) ? $row->id: $row['id'];
-				      if (!array_key_exists($id,$this->similar_ids))
-				      {
-				           $rendered.=$template->render(array('item' => $row, 'control' => $this, 'count' => $this->count, 'total_count'=>$this->total_count));
-				      }
-				
-				      $this->current=&$row;
-				      $this->current_index++;
-				      $this->count++;
-			        }
-		        }
+				$rendered .= $this->render_template($template, $key, $row);
+		    }
 		}
 
 		if ($this->container_template!=null)
 		{
-			$view=new View($this->container_template,$this->controller);
-			$result=$view->render(array('total_count'=>$this->total_count, 'count'=>$this->count, 'control' => $this, 'content' => $rendered));
+			$result = $this->render_container($this->container_template, $rendered);
 		}
 		else
 			$result=$rendered;
 
 		return $result;
+	}
+	
+	
+	/**
+	 * Factored out of build to allow subclasses to override this behavior
+	 *
+	 * @param $template Template
+	 * @param $key
+	 * @param $row
+	 * 
+	 * @return string
+	 */
+	protected function render_template($template, $key, $row)
+	{
+		$rendered_template = '';
+		
+		if (is_numeric($key)) // With SOLR, some meta info gets added to the rows which repeater should ignore
+        {
+			$id = ($row instanceof Model) ? $row->id: $row['id'];
+			if (!array_key_exists($id,$this->similar_ids))
+			{
+				$rendered_template=$template->render(array('item' => $row, 'control' => $this, 'count' => $this->count, 'total_count'=>$this->total_count));
+			}
+			
+			$this->current=&$row;
+			$this->current_index++;
+			$this->count++;
+        }
+        
+        return $rendered_template;
+	}
+	
+	
+	protected function render_container($template, $rendered)
+	{
+		$view=new View($template,$this->controller);
+		
+		return $view->render(array('total_count'=>$this->total_count, 'count'=>$this->count, 'control' => $this, 'content' => $rendered));
 	}
 	
 	/*
