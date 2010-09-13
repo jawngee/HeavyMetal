@@ -19,7 +19,6 @@ class SQLDebugModule extends DebugModule
 	public function render()
 	{
 ?>
-	<script src="/js/cookiejar.js"></script>
 	<table cellspacing="0" cellpadding="5">
 		<thead>
 			<th>Time</th>
