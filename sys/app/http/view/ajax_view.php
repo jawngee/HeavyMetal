@@ -115,6 +115,8 @@ uses('system.app.view');
  		
  		$result=get_view($this->base_path.$this->view_name);
  		
+ 		$this->parse_helpers($result);
+ 		
  		$result=render_fragment($result,$this->data);
 		
 		$this->parse_subviews($result);
