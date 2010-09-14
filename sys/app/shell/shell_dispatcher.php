@@ -67,9 +67,9 @@ class ShellDispatcher extends Dispatcher
 		$controller_root=($controller_root) ? $controller_root : PATH_APP.'shell/controller/';
 		$view_root=($view_root) ? $view_root : PATH_APP.'shell/view/';
 		
-		$this->segments=$args;
-		
 		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
+
+		$this->segments=$args;
 	}
 
 	/**

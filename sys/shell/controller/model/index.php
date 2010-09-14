@@ -15,7 +15,7 @@ class ModelIndexController extends Controller
 		foreach($names as $n)
 				$rel_classname.=ucfirst($n);
 		
-		$view=new View('index.html',$this,PATH_APP.'shell/view/model/');
+		$view=new View('index.html',$this,PATH_SYS.'shell/view/model/');
 		$model=$view->render(array(
 			'classname'=>$rel_classname,
 			'schema' => $schema,
@@ -47,6 +47,5 @@ class ModelIndexController extends Controller
 			file_put_contents($path.'/'.$table->tablename.EXT, $model);
 		}
 		die;
-		vomit($schema);
 	}
 }
