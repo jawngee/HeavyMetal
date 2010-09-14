@@ -163,12 +163,20 @@ uses('sys.app.request.query');
 	{
 		// sets the request method.  By setting X-Ajax-Real-Method header, you can override since some XMLHTTPRequest don't allow PUT, DELETE or other custom verbs.
 		if (isset($_SERVER['HTTP_REAL_METHOD']))
-			$method=$_SERVER['HTTP_REAL_METHOD'] ;
+			$method=$_SERVER['HTTP_REAL_METHOD'];
 		else if (isset($_SERVER['REQUEST_METHOD']))
 			$method=$_SERVER['REQUEST_METHOD'];
 		else
 			$method="POST";		
 	
 		return $method;
+	}
+	
+	public static function is_ajax()
+	{
+		if (isset($_SERVER['HTTP_X_REQUESTED_WITH']))
+			return true;
+		
+		return false;
 	}
  }
