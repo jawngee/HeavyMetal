@@ -131,7 +131,6 @@ class FilterField
 		return $this->filter;
 	}
 
-
 	/**
 	 * Equals any value in the supplied list.
 	 *

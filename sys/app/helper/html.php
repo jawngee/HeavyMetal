@@ -142,7 +142,7 @@ function sort_link($sort_id,$dir_id,$sort_val,$title,$default=false)
 	
 	$qstring.="{$sort_id}={$sort_val}&{$dir_id}={$sort_dir}";
 	
-	return "<a href='?{$qstring}'>{$title} {$sort_arrow}</a>";
+	return "<a href='?{$qstring}'>{$title} <span class='hm-sort-arrow'>{$sort_arrow}</span></a>";
 }
 
 
