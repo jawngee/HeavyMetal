@@ -157,4 +157,18 @@ uses('sys.app.request.query');
  		
  		return $this->dispatcher->new_instance($where,null,null,true,false)->dispatch();
  	} 	
+ 
+ 
+ 	public static function get_request_method()
+	{
+		// sets the request method.  By setting X-Ajax-Real-Method header, you can override since some XMLHTTPRequest don't allow PUT, DELETE or other custom verbs.
+		if (isset($_SERVER['HTTP_REAL_METHOD']))
+			$method=$_SERVER['HTTP_REAL_METHOD'] ;
+		else if (isset($_SERVER['REQUEST_METHOD']))
+			$method=$_SERVER['REQUEST_METHOD'];
+		else
+			$method="POST";		
+	
+		return $method;
+	}
  }
