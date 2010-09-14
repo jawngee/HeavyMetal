@@ -43,9 +43,16 @@ class ProjectIndexController extends Controller
 		echo "Done.\n";
 			
 		echo "Linking HeavyMetal system. ";
+		
 		$sys=PATH_ROOT.'sys';
 		$nsys=$path.'/sys';
 		`ln -s $sys $nsys`;
+		
+		$mpath=$path.'/metal';
+		$mtarget='/usr/local/bin/'.$app;
+		`sudo ln -s $mpath $mtarget`;
+		`sudo chmod a+x $mtarget`;
+		
 		echo "Done.\n";
 		
 		if ($this->request->input->server)
@@ -78,5 +85,9 @@ class ProjectIndexController extends Controller
 					break;
 			}
 		}
+	
+		echo "\n";
+		echo "Your application has been created.  You can access it via the shell by typing '$app' followed by a command, or '$app commands/show' to display a list! \n";
+
 	}
 }
