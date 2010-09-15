@@ -49,7 +49,6 @@ uses('system.app.http.http_request');
 class HTTPDispatcher extends Dispatcher
 {
 	
-	private $query=null;  // Need this when dispatching internally for portlets (no $_GET present)
 	
 	/**
 	 * Constructor 

@@ -81,6 +81,8 @@ class IgnoredMethodCalledException extends DispatcherException {}
  */
 abstract class Dispatcher
 {
+	protected $query=null;  // Need this when dispatching internally for portlets (no $_GET present)
+	
 	/**
 	 * Root path to application's controller directory.
 	 * @var string
@@ -341,7 +343,7 @@ abstract class Dispatcher
 		if (!class_exists($classname))
 			throw new ControllerNotFoundException("'$classname' can not be found in '".$this->controller."'.");
 
-		$request_method = HTTPRequest::get_request_method();
+		$request_method = Request::get_request_method();
 		$found_action=find_methods($classname, $request_method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
 
 		if (!$found_action)
@@ -376,7 +378,6 @@ abstract class Dispatcher
 		$screen_data=array();
 		$method_args=$this->segments;
 		Screen::Run('before',$class,$meta,$screen_data,$method_args);
-			
 		// call the method and pass the segments (add returned data to any initially returned by screens)
 		$data = call_user_func_array(array(&$class, $found_action), $method_args);
 		if (is_array($data))

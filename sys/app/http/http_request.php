@@ -54,21 +54,8 @@ class HTTPRequest extends Request
 	public function __construct($dispatcher,$method,$root,&$segments,$query=null)
 	{	
 		if (!$method)
-			$method = self::get_request_method();
+			$method = Request::get_request_method();
 		
 		parent::__construct($dispatcher,strtoupper($method),$root,$segments,$query);
-	}
-	
-	public static function get_request_method()
-	{
-		// sets the request method.  By setting X-Ajax-Real-Method header, you can override since some XMLHTTPRequest don't allow PUT, DELETE or other custom verbs.
-		if (isset($_SERVER['HTTP_REAL_METHOD']))
-			$method=$_SERVER['HTTP_REAL_METHOD'] ;
-		else if (isset($_SERVER['REQUEST_METHOD']))
-			$method=$_SERVER['REQUEST_METHOD'];
-		else
-			$method="POST";		
-	
-		return $method;
 	}
 }
