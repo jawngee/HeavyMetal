@@ -236,9 +236,9 @@ class SearchController extends Controller
  	{
  		$filter = $this->build_filter($filter);
  		
- 		$lim = $this->request->get_value('limit');
- 		$pg = $this->request->get_value('pg');
-		
+ 		$lim = $this->request->uri->query->get_value('limit');
+ 		$pg = $this->request->uri->query->get_value('pg');
+
  		$filter->limit = ($lim) ? $lim : $this->appmeta->page_size;
  		$filter->offset=($pg) ? ($pg * $filter->limit) : 0;
 
