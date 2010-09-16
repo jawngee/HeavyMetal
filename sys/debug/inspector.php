@@ -27,13 +27,13 @@
 <link rel="stylesheet" href="<?php echo Config::$environment_config->inspector->stylesheet; ?>" type="text/css" />
 <script type="text/javascript" src="<?php echo Config::$environment_config->inspector->javascript; ?>"></script>
 
-<div id="heavymetal-inspector-bug">
-	<a href="#" onclick="toggleInspector();"><?=$status?></a>
+<div id="heavymetal-inspector-bug" style="display:none">
+	<a href="#/debug/"><?=$status?></a>
 </div>
 
 <div id="heavymetal-inspector" style="display:none">
 	<div id="heavymetal-inspector-panel">
-		<a class="heavymetal-inspector-close-button" href="#" onclick="toggleInspector();">&#x2716;</a>
+		<a class="heavymetal-inspector-close-button" href="#/bug">&#x2716;</a>
 		<h1>Heavy Metal</h1>
 		<div id="heavymetal-stats">
 			<h2>Total Time</h2>
@@ -47,7 +47,7 @@
 		</div>
 		<ul>
 	<?php foreach($modules as $key => $module): ?>
-			<li id="heavymetal-selector-<?=$key?>" onclick="showModule('<?=$key?>');">
+			<li id="heavymetal-selector-<?=$key?>" onclick="document.location='#/debug/<?=$key?>';">
 				<h2><?=$module->title?></h2>
 				<p><?=$module->description?></p>
 			</li>
@@ -57,7 +57,7 @@
 	
 	<div id="heavymetal-inspector-pane" style="display:none">
 	<?php foreach($modules as $key => $module): ?>
-		<a class="heavymetal-inspector-close-button" href="#" onclick="closeLastModule();">&#x2716;</a>
+		<a class="heavymetal-inspector-close-button" href="#/debug/">&#x2716;</a>
 		<div id="heavymetal-module-<?=$key?>" style="display:none">
 			<h1><?=$module->title?><span><?=$module->description?></span></h1>
 			<?= $module->render(); ?>
