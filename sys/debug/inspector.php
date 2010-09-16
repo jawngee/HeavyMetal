@@ -23,84 +23,9 @@
 		$status='<span style="color:red">&#x2716;</span>';
 			
 ?>
-<style>
-	#heavymetal-inspector { position:absolute; left:0px; top:0px; right:0px; bottom: 0px; font-size:12px; padding:0px; margin:0px; }
-	#heavymetal-inspector-bug {  position:absolute; right:5px; top:5px; }
-	#heavymetal-inspector-bug a { -webkit-border-radius:10px; border:1px solid black; text-align:center; width:17px; height:17px; font-size:14px; text-align:center; text-decoration:none; display:block; color:#000; }
 
-	.heavymetal-inspector-close-button 
-	{ 
-		background: white;
-		position:absolute; top:5px; right:5px;
-		height: 12px; width:12px;
-		-webkit-border-radius:8px; 
-		font-size:10px; color:black; 
-		border:1px solid #cacaca; 
-		text-align:center; 
-		text-decoration:none; 
-		display:block; 
-	}
-
-	#heavymetal-inspector-panel { position:absolute; top:0px; right:0px; width:200px; color:white; background:rgba(32,32,32,0.75);  }
-	#heavymetal-inspector-panel h1 { display:block; color:white; background:#111; padding:5px; font-size:12px;  }
-	#heavymetal-inspector-panel h2 { font-size:12px; padding:0px; margin:0px; }
-	#heavymetal-inspector-panel p { font-size:12px; padding:0px; margin:0px; color:#CCC; }
-	#heavymetal-inspector-panel ul { padding:0px; margin:0px;  }
-	#heavymetal-inspector-panel ul li { margin-top:10px; padding:5px; padding-left:10px; cursor:pointer;  }
-	#heavymetal-inspector-panel ul li:hover { color:white; background:#333;  }
-	#heavymetal-inspector-panel ul li.selected { background: #000; color:#9A9A9A;  }
-
-	
-	#heavymetal-inspector-pane { -webkit-box-shadow: rgba(0, 0, 0, 0.496094) 5px -5px 5px; position:absolute; left:0px; top:0px; right:200px; bottom:0px; background:white; font-size:12px; overflow:auto;  }
-	
-	#heavymetal-inspector-pane h1 { background: #CCC; padding:5px; font-size:16px; margin-bottom:10px; }
-	#heavymetal-inspector-pane h1 span { padding-left:10px; font-size:14px; }
-
-	#heavymetal-inspector-pane code { display:block; border:1px dotted #CCC; background :#EAEAEA; padding:5px; margin-bottom:15px; }
-	#heavymetal-inspector-pane code.sql { font-size:14px; line-height:18px; }
-	
-	#heavymetal-stats { color:#000; margin:5px; background:#FAFAFA; padding:5px 0px 5px 5px; }
-	#heavymetal-stats h2 { padding:0px; font-size:9px; text-transform:uppercase; color:#666; margin-top:5px; }
-	#heavymetal-stats p { color:#111; }
-</style> 
-
-<script>
-	function toggleInspector()
-	{
-		$('#heavymetal-inspector-bug').toggle();
-		$('#heavymetal-inspector').toggle();
-	}
-
-	var lastModule='';
-	
-	function showModule(module)
-	{
-		$('#heavymetal-inspector-pane').show();
-		$('#heavymetal-selector-'+module).addClass('selected');
-		
-		if (lastModule!='')
-		{
-			$('#heavymetal-selector-'+lastModule).removeClass('selected');
-			$('#heavymetal-module-'+lastModule).hide();
-		}
-		
-		$('#heavymetal-module-'+module).show();
-		lastModule=module;
-	}
-
-	function closeLastModule()
-	{
-		$('#heavymetal-inspector-pane').hide();
-		if (lastModule!='')
-		{
-			$('#heavymetal-selector-'+lastModule).removeClass('selected');
-			$('#heavymetal-module-'+lastModule).hide();
-		}
-
-		lastModule='';
-		
-	}
-</script>
+<link rel="stylesheet" href="<?php echo Config::$environment_config->inspector->stylesheet; ?>" type="text/css" />
+<script type="text/javascript" src="<?php echo Config::$environment_config->inspector->javascript; ?>"></script>
 
 <div id="heavymetal-inspector-bug">
 	<a href="#" onclick="toggleInspector();"><?=$status?></a>

@@ -15,24 +15,27 @@ class ViewsDebugModule extends IncludesDebugModule
 	public function render()
 	{
 ?>
-		<style>div.codesample code { font-size:11px; }</style>
-		<div style="padding:5px;">
+		<table cellspacing="0" cellpadding="5">
+		<tbody>
 <?
 			$count=0;
 			foreach (Collector::$views as $include):
 				$count++;
 ?>
-					<div style="margin-bottom:10px; font-size:14px;">
-						<a href="txmt://open?url=file://<?=str_replace(PATH_ROOT,DEV_MACHINE_PATH,$include['view'])?>"><?=str_replace(PATH_ROOT,"",$include['view'])?></a>
-						<a href="javascript:void(0)" onclick="$('heavymetal-view-code-<?=$count?>').toggle()">[View Source]</a>
-						<div id='heavymetal-view-code-<?=$count?>' class="codesample" style="display:none; margin-top:10px;">
-						<?=highlight_string($include['content'])?>
-						</div>
+			<tr>
+				<td>
+					<a href="txmt://open?url=file://<?=str_replace(PATH_ROOT,DEV_MACHINE_PATH,$include['view'].EXT)?>"><?=str_replace(PATH_ROOT,"",$include['view'])?></a>
+					<a href="javascript:void(0)" onclick="toggleCode('#heavymetal-view-code-<?=$count?>');">[View Source]</a>
+					<div id='heavymetal-view-code-<?=$count?>' class="codesample" style="display:none; margin-top:10px;">
+					<?=highlight_string($include['content'])?>
 					</div>
+				</td>
+			</tr>
 <?
 			endforeach;
 ?>
-		</div>
+		</tbody>
+		</table>
 <?	
 	}
 }
