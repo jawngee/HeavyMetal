@@ -682,7 +682,7 @@ uses('system.debug.collector');
  			$result=$this->layout->render($data);
  			
  		}
- 		
+
  		return $result;
  	}
  }
