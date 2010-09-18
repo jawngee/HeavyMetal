@@ -121,7 +121,6 @@ uses('system.app.view');
 		
 		$this->parse_subviews($result);
 		
-		$this->parse_targets($result);
 		$this->parse_uses($result);
 		$this->parse_controls($result);
 		$this->parse_nestedcontrols($result);

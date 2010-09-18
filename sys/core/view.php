@@ -64,7 +64,7 @@ function render_fragment($fragment, &$data)
 		extract($data);
 
 	ob_start();		
-	eval("?>".$fragment);
+	eval("?>".trim($fragment));
 	$result=ob_get_contents();
 	ob_end_clean();
 	

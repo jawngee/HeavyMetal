@@ -38,7 +38,7 @@ abstract class DataboundControl extends Control
 	 *
 	 * @var int
 	 */
-	public $current_page=0;
+	public $current_page=1;
 
 	/**
 	 * This can either be the uri query or a variable bound in the view.
@@ -124,11 +124,11 @@ abstract class DataboundControl extends Control
 
 		if ($this->allowpaging)
 		{		
-			if ($this->uri->query->get_number('pg'))
-				$this->current_page=$this->uri->query->get_number('pg');
+			if ($this->uri->query->get_number('page'))
+				$this->current_page=$this->uri->query->get_number('page');
 	
-			if ($this->current_page==0)
-				$this->uri->query->remove_value('pg');
+			if ($this->current_page <= 1)
+				$this->uri->query->remove_value('page');
 	    }
 	    else
 	    {
@@ -147,7 +147,7 @@ abstract class DataboundControl extends Control
  	{
  		$uri = $this->uri->copy()
  			->query
- 			->set_value('pg',$this->current_page+1);
+ 			->set_value('page',$this->current_page+1);
  		
  		return $uri->build();
  	}
@@ -161,7 +161,7 @@ abstract class DataboundControl extends Control
  	{
  		$uri = $this->uri->copy()
  			->query
- 			->set_value('pg',$this->current_page-1);
+ 			->set_value('page',$this->current_page-1);
  		
  		return $uri->build();
  	}
@@ -176,7 +176,7 @@ abstract class DataboundControl extends Control
  	{
  		$uri = $this->uri->copy()
  			->query
- 			->set_value('pg',$page);
+ 			->set_value('page',$page);
  		
  		return $uri->build();
  	}
@@ -203,7 +203,7 @@ abstract class DataboundControl extends Control
 			$option = $config_items->items;
 			
 			$uri->query
-				->remove_value('pg')
+				->remove_value('page')
 				->set_value('sortby',$field);		
 			
 			$rendered.=$template->render(array('sortby' => $this->sortby, 'field' => $field, 'option' => $option, 'control' => $this, 'link' => $uri->build()));				
@@ -258,15 +258,15 @@ abstract class DataboundControl extends Control
     
     protected function set_boundaries()
     {
-    	$this->lowerBound = ($this->current_page * $this->page_size) + 1;
+    	$this->lowerBound = (($this->current_page-1) * $this->page_size) + 1;
 		$tempvar = ($this->lowerBound + $this->page_size - 1);
 		$this->upperBound = ($tempvar <= $this->total_count) ? $tempvar : $this->total_count;
 
-		$this->pageno = $this->current_page+1;
+		$this->pageno = $this->current_page;
 		$this->lastpage = ceil($this->total_count / $this->page_size);
 
 		$this->firstpage  = $_SERVER['REQUEST_URI'];
-		$this->firstpage  = explode("pg", $this->firstpage);
+		$this->firstpage  = explode("page", $this->firstpage);
 		$this->firstpage  = $this->firstpage[0].'results_pg=0';
 
 		if ($this->pageno < 1)

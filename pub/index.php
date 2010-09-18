@@ -52,7 +52,7 @@ ob_start();
 try
 {
 	$dispatcher=new HTTPDispatcher();
-	print $dispatcher->dispatch();
+	print trim($dispatcher->dispatch());
 }
 catch (DispatcherException $ex)
 {

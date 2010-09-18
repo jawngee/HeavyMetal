@@ -72,7 +72,7 @@ class Template
 	{
 		extract($data);
 		ob_start();
-		eval("?>".$this->view_contents);
+		eval("?>".trim($this->view_contents));
 		$result=ob_get_contents();
 		@ob_end_clean();
 		

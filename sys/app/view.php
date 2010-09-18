@@ -37,6 +37,7 @@
 
 
 uses('system.app.layout');
+uses('system.debug.collector');
 
 /**
  * View
@@ -651,6 +652,8 @@ uses('system.app.layout');
  		$this->data['layout']=$this;
  		
  		$result=get_view($this->base_path.$this->view_name);
+ 		
+ 		Collector::View($this->base_path.$this->view_name, $result);
          
 		$this->parse_nestedcontrols_cdata($result);
 		
@@ -679,7 +682,7 @@ uses('system.app.layout');
  			$result=$this->layout->render($data);
  			
  		}
- 		
+
  		return $result;
  	}
  }
