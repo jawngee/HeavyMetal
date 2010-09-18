@@ -3,6 +3,14 @@ uses('system.app.view');
 
 class ProjectIndexController extends Controller
 {
+	/**
+	 * Creates a new HeavyMetal application.
+	 * 
+	 * @usage ./metal project/create yourappid --server=apache2 --domain=your.domain.com
+	 * @param $app An application identifier
+	 * @switch server The type of HTTP server to generate configuration for.  Optional.
+	 * @switch domain The domain name for this application.  Not optional if you specify an HTTP server.
+	 */
 	public function create($app)
 	{
 		// force them to enter their password

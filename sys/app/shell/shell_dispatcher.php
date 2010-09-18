@@ -62,7 +62,8 @@ class ShellDispatcher extends Dispatcher
 		$args=parse_args();
 		$switches=parse_switches();
 		
-		$path=array_shift($args);
+		$path=($path) ? $path : $args[0];
+		array_shift($args);
 
 		$controller_root=($controller_root) ? $controller_root : PATH_APP.'shell/controller/';
 		$view_root=($view_root) ? $view_root : PATH_APP.'shell/view/';

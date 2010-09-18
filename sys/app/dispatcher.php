@@ -325,6 +325,47 @@ abstract class Dispatcher
 	 */
 	abstract function new_instance($path=null,$controller_root=null,$view_root=null,$use_routes=true,$force_routes=false);
 	
+	public function find()
+	{
+		if (!file_exists($this->controller_root.$this->controller_path.$this->controller.EXT))
+			throw new ControllerNotFoundException("Could not find a suitable controller: ".$this->controller_root.$this->controller_path.$this->controller.EXT);
+			
+		require_once($this->controller_root.$this->controller_path.$this->controller.EXT);
+		$classname=str_replace('/','',$this->controller_path).$this->controller.'Controller';
+		
+		if (!class_exists($classname))
+			throw new ControllerNotFoundException("'$classname' can not be found in '".$this->controller."'.");
+
+		$request_method = Request::get_request_method();
+		$found_action=find_methods($classname, $request_method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
+
+		if (!$found_action)
+		{
+			$found_action=find_methods($classname, $request_method."_index", 'index');
+   			array_unshift($this->segments,$this->action);  // so here we put that mistakenly stripped parameter back on.
+		}
+		
+		if (!$found_action)
+		{
+			throw new ControllerMethodNotFoundException("Could not find an action to call.");
+		}
+		
+		
+		// Handle the fact that some URIs contain extra segments that are not part of the controller/action root
+		$root = $this->controller_path . 
+			(($this->controller!='index') ? $this->controller . "/" : "") .
+			(($found_action!='index' && $found_action!='index') ? $found_action : "");
+
+		$root = rtrim($root,'/');			
+
+		return array(
+			'request_method' => $request_method,
+			'classname' => $classname,
+			'found_action' => $found_action,
+			'root' => $root
+		);
+	}
+	
 	/**
 	 * Executes a controller, returning the data
 	 *
@@ -333,6 +374,14 @@ abstract class Dispatcher
 	public function call()
 	{
 		$data = array(); // any data to return to the view from the controller
+		
+		$cfound=$this->find();
+		$request_method=$cfound['request_method'];
+		$classname=$cfound['classname'];
+		$found_action=$cfound['found_action'];
+		$root=$cfound['root'];
+		
+		$this->action=$found_action;
 		
 		if (!file_exists($this->controller_root.$this->controller_path.$this->controller.EXT))
 			throw new ControllerNotFoundException("Could not find a suitable controller: ".$this->controller_root.$this->controller_path.$this->controller.EXT);
