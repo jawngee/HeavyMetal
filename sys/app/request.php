@@ -84,6 +84,12 @@ uses('sys.app.request.query');
  	 */
  	public $method=null;
  	
+ 	/**
+ 	 * Is the request secure, eg https://
+ 	 * @var bool
+ 	 */
+ 	public $is_secure=false;
+ 	
  	
 	/**
 	 * Constructor
@@ -157,6 +163,17 @@ uses('sys.app.request.query');
  		
  		return $this->dispatcher->new_instance($where,null,null,true,false)->dispatch();
  	} 	
+ 	
+ 	public function inputs()
+ 	{
+ 		$vals=array();
+ 		
+ 		$args=func_get_args();
+ 		foreach($args as $arg)
+ 			$vals[]=$this->input->{$arg};
+ 			
+ 		return $vals;
+ 	}
  
  
  	public static function get_request_method()

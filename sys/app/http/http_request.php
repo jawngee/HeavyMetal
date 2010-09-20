@@ -57,5 +57,7 @@ class HTTPRequest extends Request
 			$method = Request::get_request_method();
 		
 		parent::__construct($dispatcher,strtoupper($method),$root,$segments,$query);
+ 		
+ 		$this->is_secure=($_SERVER['HTTPS'] == "on");
 	}
 }

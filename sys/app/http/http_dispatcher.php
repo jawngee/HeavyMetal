@@ -216,6 +216,7 @@ class HTTPDispatcher extends Dispatcher
 			uses($conf->uses);
 			$view=new $viewclass($view_name.'.'.$req_type,$data['controller'],$this->view_root);
 			
+			$data['input']=$data['controller']->request->input;
 			return $view->render($data);
 		}		
 	}
