@@ -1,4 +1,8 @@
 <?
+uses('sys.data.validator');
+	
+
+
 /**
  * View helpers for html related business.
  */
@@ -457,4 +461,17 @@ function even_odd($count, $existing="", $even="even", $odd="odd")
 	return $existing . ((++$count % 2 == 0) ? $even : $odd);
 }
 
+/**
+ * Displays an error string for a ValidationError.  If the $error is a string, it simply returns the $error.
+ * @param mixed $error
+ */
+function error($error)
+{
+	if ($error instanceOf ValidationError)
+	{
+		return ucfirst(strtolower($error->field.' '.$error->error));
+	}
+	
+	return $error;
+}
 
