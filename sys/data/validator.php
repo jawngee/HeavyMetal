@@ -268,7 +268,7 @@ class DBFieldValidator extends Validator
 	function validate(&$obj,&$field,&$fields)
 	{
 		if ($obj->model_state==Model::STATE_NEW)
-			return ($obj->db->get_one("SELECT count($field) FROM $obj->table_name WHERE $field='".$fields[$field]->value."'")==0);
+			return ($obj->db->get_one("SELECT count($field) FROM {$obj->table_name} WHERE $field='".$fields[$field]->value."'")==0);
 		else
 		{
 			$sql="SELECT count($field) FROM $obj->table_name WHERE $field='".$fields[$field]->value."' AND $obj->primary_key<>$obj->primary_key_value";
