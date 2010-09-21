@@ -427,8 +427,18 @@ class SOLRFilter extends Filter
 		$result['count'] = $result_count;
 		$result['total_count'] = $response_array['response']['numFound'];
 		$result['facet_counts'] = $response_array['facet_counts']['facet_fields'];
-		$result['interesting_terms'] = $response_array['interestingTerms'];
-
+		$result['match'] = $response_array['match'];
+		
+		foreach ($response_array['interestingTerms'] as $tt => $rel)
+		{
+			$term_type = explode(':',$tt);
+			$term['term'] = $term_type[1];
+			$term['type'] = $term_type[0];
+			$term['relevance'] = $rel;
+			
+			$result['interesting_terms'][$term_type[1]] = $term;
+		}
+		
 		//  weave clusters in as a facet (replace cluster facet)
 		if ($response_array['clusters'])
 		{
