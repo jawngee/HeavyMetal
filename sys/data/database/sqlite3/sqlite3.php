@@ -384,4 +384,22 @@ class SQLite3Database extends Database
 		throw new Exception("Not implemented.");
 	}
 	
+	
+	/**
+	 * Generates the null ordering for an order by in a select.  
+	 * 
+	 * Some databases don't support this, some do it differently.
+	 * 
+	 * @param $column the column being ordered on
+	 * @param $nulls The null ordering, 'first' or 'last'
+	 */
+	function order_by($order)
+	{
+		$result=parent::order_by($order);
+		
+		if ($order->nulls)
+			$result=" case when {$order->filter->table_alias}.{$order->field} is null then 1 else 0 end, $result";
+		
+		return $result;
+	}
 }

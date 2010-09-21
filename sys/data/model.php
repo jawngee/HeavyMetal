@@ -114,34 +114,34 @@ class Model implements ArrayAccess
      */
     public function __construct($id=null,$fields=null,$db=null,$row=null)
     {
-	// If a db object has been passed in, assign it.
-	if (isset($db))
-		$this->db=$db;
-	else if (isset($this->database))
-		$this->db=$this->get_db();
-
-	// give the class a chance to describe itself for special case
-	// or business rule setup
-	$this->describe();
-		
-		// CRUD:  pre_read hook
-        if (isset($id) || isset($fields) || isset($row))
-
-	$this->pre_read();
-        
-	if (isset($id))
-	{
-		$this->primary_key_value=$id;
-		$this->reload();
-	}
-	else if (isset($fields))  // someone passed in fields to assign
-	{
-		// loop through and assign values
-		foreach($fields as $key=>$value)
-		$this->fields[$key]=$value;
-	}
-	else if (isset($row))	// someone passsed in a db row for us to bind to.
-		$this->bind($row);
+		// If a db object has been passed in, assign it.
+		if (isset($db))
+			$this->db=$db;
+		else if (isset($this->database))
+			$this->db=$this->get_db();
+	
+		// give the class a chance to describe itself for special case
+		// or business rule setup
+		$this->describe();
+			
+			// CRUD:  pre_read hook
+	        if (isset($id) || isset($fields) || isset($row))
+	
+		$this->pre_read();
+	        
+		if (isset($id))
+		{
+			$this->primary_key_value=$id;
+			$this->reload();
+		}
+		else if (isset($fields))  // someone passed in fields to assign
+		{
+			// loop through and assign values
+			foreach($fields as $key=>$value)
+			$this->fields[$key]=$value;
+		}
+		else if (isset($row))	// someone passsed in a db row for us to bind to.
+			$this->bind($row);
         
 		// CRUD:  post_read hook
         if (isset($id) || isset($fields) || isset($row))
@@ -162,33 +162,33 @@ class Model implements ArrayAccess
      */
     public function reload()
     {
-	// find by id
-	$result=$this->db->fetch_row($this->table_name, $this->primary_key, $this->primary_key_value);
-	// no result?  exit ...
-	if (!$result)
-	    throw new Exception("Result $result");
-
-	// create our fields array if it doesn't yet exist.
-	//$this->fields=array();
-
-	// loop through the results and assign the values
-	foreach($result as $key=>$value)
-	    if (!is_numeric($key))
-	    {
-		if (isset($this->fields[$key]))
-		{
-		    if ($this->fields[$key]->type==Field::MULTI)
-			$this->fields[$key]->value=$this->db->parse_array($value);
-		    else if ($this->fields[$key]->type==Field::BOOLEAN)
-			$this->fields[$key]->value=($value=='t') ? true : ($value===true) ? true : false;
-		    else
-			$this->fields[$key]->value=$value;
-		}
-		else
-		    $this->fields[$key]=new Field($key,Field::STRING,1000,'Undocumented column',true,$value);
-	    }
-
-	$this->model_state=Model::STATE_VALID;
+		// find by id
+		$result=$this->db->fetch_row($this->table_name, $this->primary_key, $this->primary_key_value);
+		// no result?  exit ...
+		if (!$result)
+		    throw new Exception("Result $result");
+	
+		// create our fields array if it doesn't yet exist.
+		//$this->fields=array();
+	
+		// loop through the results and assign the values
+		foreach($result as $key=>$value)
+		    if (!is_numeric($key))
+		    {
+			if (isset($this->fields[$key]))
+			{
+			    if ($this->fields[$key]->type==Field::MULTI)
+				$this->fields[$key]->value=$this->db->parse_array($value);
+			    else if ($this->fields[$key]->type==Field::BOOLEAN)
+				$this->fields[$key]->value=($value=='t') ? true : ($value===true) ? true : false;
+			    else
+				$this->fields[$key]->value=$value;
+			}
+			else
+			    $this->fields[$key]=new Field($key,Field::STRING,1000,'Undocumented column',true,$value);
+		    }
+	
+		$this->model_state=Model::STATE_VALID;
     }
 	
 	
@@ -270,7 +270,16 @@ class Model implements ArrayAccess
 		{
    			if ($this->model_state!=Model::STATE_NEW)
 	   			$this->model_state=Model::STATE_DIRTY;
-       		$this->fields[$prop_name]->value = $prop_value;
+	   		
+	   		if ($this->fields[$prop_name]->type==Field::EPOCH)
+	   		{
+	   			if (!is_numeric($prop_value))
+	   				$prop_value=strtotime($prop_value);
+	   			else if (!$prop_value)
+	   				$prop_value=null;
+	   		}
+       			
+	   		$this->fields[$prop_name]->value = $prop_value;
        		$this->fields[$prop_name]->dirty = true;
 		}
        	else

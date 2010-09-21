@@ -33,6 +33,7 @@
 */
 
 uses('system.app.config');
+uses('system.data.order');
 
 /**
  * Database Exception
@@ -254,4 +255,22 @@ abstract class Database
 	 * @return unknown_type
 	 */
 	abstract function table($schema, $tablename, $related=false, $restricted_to_schema=false);
+	
+	/**
+	 * Generates the null ordering for an order by in a select.  
+	 * 
+	 * Some databases don't support this, some do it differently.
+	 * 
+	 * @param $column the column being ordered on
+	 * @param $nulls The null ordering, 'first' or 'last'
+	 */
+	function order_by($order)
+	{
+		if ($order->computed)
+ 				$result.=$order->field.(($order->is_not_null)?' is not null ':'')." $order->direction";
+   			else
+ 				$result.=$order->filter->table_alias.".$order->field ".(($order->is_not_null)?' is not null ':'')." $order->direction";
+   			
+		return $result;
+	}
 }

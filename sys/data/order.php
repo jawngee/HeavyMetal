@@ -43,6 +43,7 @@ class Order
 	public $is_not_null=false;		/** Determines if this column is sorted when not null, used to flip null ordering in postgresql */
 	public $computed=false;
 	public $filter=null;
+	public $nulls=null;		/** Order nulls are sorted */
 	
 	/**
 	 * Constructor
@@ -62,6 +63,18 @@ class Order
 	 */
    	function __get($prop_name)
    	{
+   	   	if ($prop_name=='nulls_first')
+   		{
+   			$this->nulls='first';
+   			return $this;
+   		}
+   		
+   		if ($prop_name=='nulls_last')
+   		{
+   			$this->nulls='last';
+   			return $this;
+   		}		
+   		
    		if ($prop_name=='not_null')
    		{
    			$this->is_not_null=true;

@@ -42,6 +42,7 @@ class OrderBy
 	public $orders=array();	/** List of sort orders */	
 	private $model=null;		/** Reference to the filter's model */
 	private $filter=null;		/** Reference to filter object */
+	
 	/**
 	 * Constructor
 	 * 
@@ -125,10 +126,7 @@ class OrderBy
    		$result=' ORDER BY ';
    		
    		foreach($this->orders as $order)
-   			if ($order->computed)
- 				$result.=$order->field.(($order->is_not_null)?' is not null ':'')." $order->direction,";
-   			else
- 				$result.=$order->filter->table_alias.".$order->field ".(($order->is_not_null)?' is not null ':'')." $order->direction,";
+   			$result.=$this->model->db->order_by($order).',';
    			
    		return rtrim($result,',');	
    	}

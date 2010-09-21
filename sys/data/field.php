@@ -47,6 +47,7 @@ class Field
 	const BLOB=6;			/** blob, binary **/
 	const MULTI=7;			/** array **/
 	const OBJECT=8;			/** Dynamic object that is serialized to a text field **/
+	const EPOCH=9;			/** Seconds since 1970.  This is for supporting SQLite -> Postgresql.  On sqlite this field is a float, on postgresql it is a timestamp. */
 
 	const COMPARE_EQUALS=1;				/** equals **/
 	const COMPARE_STARTS_WITH=2;		/** starts with **/

@@ -94,7 +94,7 @@ class PGSQLDatabase extends Database
     {
     	// extract the keys and values so we can build a prepared statement.
 
-	$keys=array_keys($fields);
+		$keys=array_keys($fields);
     	$vals=array_values($fields);
     	
     	$sql="insert into $table_name (".implode(',',$keys).") values (";
@@ -103,8 +103,16 @@ class PGSQLDatabase extends Database
     	$sql=trim($sql,',');
 
    		$sql.=") returning $key";
+   		
 		Collector::StartQuery($sql, $vals);
     	$res=pg_query_params($this->connection,$sql,$vals);
+    	if (!$res)
+    	{
+    		foreach($vals as $val)
+    			dump('val:'.$val.' => '.gettype($val));
+    		throw new DatabaseException(pg_last_error($this->connection));
+    	}
+    		
     	$row=pg_fetch_array($res);
     	Collector::EndQuery($sql);
     	
@@ -299,6 +307,8 @@ class PGSQLDatabase extends Database
 				return "'$value'";
 			case Field::BOOLEAN:
 				return ($value) ? "true" : "false";
+			case Field::EPOCH:
+				return ($value) ? $value : NULL;
 			case Field::OBJECT:
 				return "'".(($value instanceof DynamicObject) ? $value->to_string() : serialize($value))."'";
 			default:
@@ -394,4 +404,21 @@ class PGSQLDatabase extends Database
 		return $fuck;
 	}
 	
+	/**
+	 * Generates the null ordering for an order by in a select.  
+	 * 
+	 * Some databases don't support this, some do it differently.
+	 * 
+	 * @param $column the column being ordered on
+	 * @param $nulls The null ordering, 'first' or 'last'
+	 */
+	function order_by($order)
+	{
+		$result=parent::order_by($order);
+		
+		if ($order->nulls)
+			$result.=" nulls {$order->nulls}";
+		
+		return $result;
+	}
 }
