@@ -54,7 +54,11 @@ function content_type($type)
  */
 function redirect($where)
 {
+	ob_end_clean();
+	@header("HTTP/1.0 307 Temporary Redirect");
 	@header("Location:$where");
+	@header("Refresh: 0; url=$where");
+	echo "<script>window.location.href='$where';</script>";
 	die;
 }
 
