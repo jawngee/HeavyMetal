@@ -202,14 +202,14 @@ class PGSQLDatabase extends Database
 	 * @param string $table_name
 	 * @param string $where
 	 */
-	public function count($key,$table_name,$where=null,$distinct=false)
+	public function count($key,$table_name,$where=null,$distinct=false,$table_alias='')
 	{
 		$d=($distinct) ? 'distinct' : '';
 		
-		$sql="select $d count($table_name.$key) from $table_name";
+		$sql="select $d count($key) from $table_name $table_alias";
 		if ($where)
 			$sql.=" $where;";
-   		
+			
 		return $this->get_one($sql);
 	}
 

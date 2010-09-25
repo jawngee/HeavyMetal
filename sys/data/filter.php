@@ -43,7 +43,7 @@ uses('system.data.join');
 class Filter
 {
 	private $joins=array();			/** List of joins */
-	protected $fields=array();		/** List of filtered fields */
+	public $fields=array();		/** List of filtered fields */
 
 	public  $model=null;			/** Reference to the Model being filtered */
 	public $class=null;
@@ -829,6 +829,14 @@ class Filter
         	// not supported, so we'll just use tablename, e.g.  "select profiles.gender from ... "
         	$this->table_alias = $tablename;
 		}
+	}
+	
+	/**
+	 * Returns the number of fields being searched on.
+	 */
+	public function num_fields()
+	{
+		return count($this->fields);
 	}
 }
    	
