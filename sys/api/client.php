@@ -29,7 +29,7 @@ class APIClient
 
 		if ($req->getResponseCode()!=200)
 			throw new BadRequestException($req->getResponseBody());
-		
+
 		return json_decode($req->getResponseBody());
 	}
 }
