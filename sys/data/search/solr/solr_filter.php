@@ -16,7 +16,7 @@ uses('system.data.search.solr.spellcheck');
 
 class SOLRFilter extends Filter
 {
-	protected $fields=array();		/** List of filtered fields */
+	public $fields=array();		/** List of filtered fields */
 	public $q_value=null;
 
 	public  $model=null;			/** Reference to the Model being filtered */

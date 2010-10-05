@@ -210,6 +210,7 @@ class MSSQLDatabase extends Database
      */
     public function get_one($query)
     {
+    	mssql_query( "SET TEXTSIZE 1024000", $this->connection);
     	$res=mssql_query($query,$this->connection);
     	$row=mssql_fetch_array($res);
     	return $row[0];
@@ -222,6 +223,7 @@ class MSSQLDatabase extends Database
      */
     public function get_row($query)
     {
+    	mssql_query( "SET TEXTSIZE 1024000", $this->connection);
     	$res=mssql_query($query,$this->connection);
     	return mssql_fetch_assoc($res);
     }
@@ -235,6 +237,7 @@ class MSSQLDatabase extends Database
      */
     public function fetch_row($table_name,$key,$id)
     {
+    	mssql_query( "SET TEXTSIZE 1024000", $this->connection);
 		$res=mssql_query("SELECT * FROM $table_name WHERE $key=$id",$this->connection);
 		return mssql_fetch_assoc($res);
     }
@@ -247,12 +250,9 @@ class MSSQLDatabase extends Database
      */
     public function get_rows($query)
     {
-    	$result=array();
-    	$res=$this->execute($query);
-    	foreach($res as $r)
-    		$result[]=$r;
-    	
-    	return $result;
+    	mssql_query( "SET TEXTSIZE 1024000", $this->connection);
+    	$res=mssql_query($query,$this->connection);
+    	return mssql_fetch_array($res,MSSQL_NUM);
     }
 
     /**

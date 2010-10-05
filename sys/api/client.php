@@ -24,12 +24,12 @@ class APIClient
 		$sig=sign($args,$this->conf->key);
 		$req->addPostData('signature',$sig['signature']);
 		$req->addPostData('time',$sig['time']);
-
-		$req->sendRequest();
 		
+		$req->sendRequest();
+
 		if ($req->getResponseCode()!=200)
 			throw new BadRequestException($req->getResponseBody());
-		
+
 		return json_decode($req->getResponseBody());
 	}
 }
