@@ -108,8 +108,6 @@ class PGSQLDatabase extends Database
     	$res=pg_query_params($this->connection,$sql,$vals);
     	if (!$res)
     	{
-    		foreach($vals as $val)
-    			dump('val:'.$val.' => '.gettype($val));
     		throw new DatabaseException(pg_last_error($this->connection));
     	}
     		

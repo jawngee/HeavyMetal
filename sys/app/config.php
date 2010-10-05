@@ -205,7 +205,19 @@ class ConfigInvalidFormatException extends ConfigException {}
  		
  		if ($env==null)
  			$env=$config->environment;
-		
+ 			
+ 		if($config->environment instanceof Config)
+ 		{
+ 			foreach($config->environment->items as $key=>$item)
+ 			{	
+ 				if (strtolower($_SERVER['SERVER_NAME'])==strtolower($key))
+ 				{
+ 					$env=$item;
+ 					break;
+ 				}
+ 			}
+ 		}
+ 		
 		self::$environment=$env;
 		
  		if ($config->{$env}!=null)

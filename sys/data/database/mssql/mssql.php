@@ -247,8 +247,12 @@ class MSSQLDatabase extends Database
      */
     public function get_rows($query)
     {
-    	$res=mssql_query($query,$this->connection);
-    	return mssql_fetch_array($res,MSSQL_NUM);
+    	$result=array();
+    	$res=$this->execute($query);
+    	foreach($res as $r)
+    		$result[]=$r;
+    	
+    	return $result;
     }
 
     /**

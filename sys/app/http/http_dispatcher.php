@@ -183,6 +183,7 @@ class HTTPDispatcher extends Dispatcher
 		$conf=$viewconf->engines->{$req_type};
 		if (!$conf)
 			$conf=$viewconf->engines->{$default_engine};
+			
 		if (!$conf)
 			throw new Exception("Your view.conf file is invalid.  Missing default engine.");
 			
