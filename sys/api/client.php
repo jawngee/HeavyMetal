@@ -32,4 +32,13 @@ class APIClient
 
 		return json_decode($req->getResponseBody());
 	}
+	
+}
+
+function flatten($array_value)
+{
+	if ($array_value instanceof stdClass)
+		return (array) $array_value;
+	else
+		return $array_value;
 }

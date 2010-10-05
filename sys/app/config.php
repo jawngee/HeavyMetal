@@ -168,7 +168,9 @@ class ConfigInvalidFormatException extends ConfigException {}
 			else if (file_exists($filename.'.conf'))
  			{
  				$format="yaml";
-				$data=yaml_parse(file_get_contents($filename.'.conf'));
+ 				$yml = file_get_contents($filename.'.conf');
+ 				if (!empty($yml))
+					$data=yaml_parse($yml);
  			}
 			else if (file_exists($filename.'.php'))
 			{

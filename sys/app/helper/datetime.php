@@ -240,3 +240,9 @@ function deadline_date($timestamp, $format="F j, Y")
 	return date($format,strtotime($timestamp));
 }
 
+function strip_seconds($timestamp)
+{
+	$sec_pattern = '/:[0-9]{1,2}:[0-9]{3}/';
+	return preg_replace($sec_pattern,'',$timestamp);
+}
+

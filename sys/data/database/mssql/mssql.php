@@ -56,7 +56,6 @@ class MSSQLDatabase extends Database
 		if (!$this->config)
 		    throw new DatabaseException("Invalid dsn '$dsn'.");
 		
-		
 		$database=trim($this->config['path'],'/');
 		
 		if (isset($this->config['host']))
@@ -67,13 +66,14 @@ class MSSQLDatabase extends Database
 			$port=$this->config['port'];
 		if (isset($this->config['pass']))
 			$pass=$this->config['pass'];
-			
+
 		$this->connection=mssql_connect($host,$user,$pass);
+
 		if (!$this->connection)
 			throw new DatabaseException("Invalid database settings.");
 			
 		if (!mssql_select_db($database,$this->connection))
-			throw new DatabaseException("Database does not exits");
+			throw new DatabaseException("Database does not exist");
     }
 
 
@@ -251,8 +251,14 @@ class MSSQLDatabase extends Database
     public function get_rows($query)
     {
     	mssql_query( "SET TEXTSIZE 1024000", $this->connection);
-    	$res=mssql_query($query,$this->connection);
-    	return mssql_fetch_array($res,MSSQL_NUM);
+
+        $result=array();
+        $res=$this->execute($query);
+        
+        foreach($res as $r)
+            $result[]=$r;
+
+        return $result;
     }
 
     /**
