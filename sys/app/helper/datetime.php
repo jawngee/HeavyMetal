@@ -1,14 +1,13 @@
 <?
 function date_fromstamp($timestamp, $format="n/j/o")
 {
-	if($timestamp==null)return;
-		return date($format,strtotime($timestamp));
+	return datetime_fromstamp($timestamp, $format);
 }
 
 function datetime_fromstamp($timestamp, $format="n/j/o g:i A")
 {
 	if($timestamp==null)return;
-	if(!is_numeric($timestamp))
+	if(is_string($timestamp))
 		$timestamp=strtotime($timestamp);
 	return date($format,$timestamp);
 }
@@ -245,4 +244,59 @@ function strip_seconds($timestamp)
 	$sec_pattern = '/:[0-9]{1,2}:[0-9]{3}/';
 	return preg_replace($sec_pattern,'',$timestamp);
 }
+
+function datetime_to_season($date, $append_year=false, $custom_limits=null)
+{
+	$date = (is_string($date) ? strtotime($date) : $date);
+	
+	if ($custom_limits)
+		$limits = $custom_limits;
+	else
+	 	$limits=array(
+	 		'12/21/'.date("Y",$date)=>'Winter',
+	 		'09/21/'.date("Y",$date)=>'Fall', 
+	 		'06/21/'.date("Y",$date)=>'Summer',
+	 		'03/21/'.date("Y",$date)=>'Spring',
+	 		'12/31/'.date("Y",$date)-1=>'Winter'
+	 	);  
+
+	foreach ($limits AS $key => $value) 
+ 	{  
+ 		$limit=$key;
+ 		if ($date>strtotime($limit)) 
+ 		{  
+ 			$ret = $value;  
+ 			break;
+ 		}
+	}
+	
+	if ($append_year)
+		return $ret . ', ' . date("Y",$date);
+	else
+		return $ret;
+}
+
+function date_diff($d1, $d2){
+	$d1 = (is_string($d1) ? strtotime($d1) : $d1);
+	$d2 = (is_string($d2) ? strtotime($d2) : $d2);
+
+	$diff_secs = abs($d1 - $d2);
+	$base_year = min(date("Y", $d1), date("Y", $d2));
+
+	$diff = mktime(0, 0, $diff_secs, 1, 1, $base_year);
+	return array(
+		"years" => date("Y", $diff) - $base_year,
+		"months_total" => (date("Y", $diff) - $base_year) * 12 + date("n", $diff) - 1,
+		"months" => date("n", $diff) - 1,
+		"days_total" => floor($diff_secs / (3600 * 24)),
+		"days" => date("j", $diff) - 1,
+		"hours_total" => floor($diff_secs / 3600),
+		"hours" => date("G", $diff),
+		"minutes_total" => floor($diff_secs / 60),
+		"minutes" => (int) date("i", $diff),
+		"seconds_total" => $diff_secs,
+		"seconds" => (int) date("s", $diff)
+	);
+}
+
 
