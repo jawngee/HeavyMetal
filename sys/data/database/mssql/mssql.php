@@ -238,7 +238,7 @@ class MSSQLDatabase extends Database
     public function fetch_row($table_name,$key,$id)
     {
     	mssql_query( "SET TEXTSIZE 1024000", $this->connection);
-    	$res=mssql_query("SELECT * FROM $table_name WHERE $key=$id",$this->connection);
+		$res=mssql_query("SELECT * FROM $table_name WHERE $key=$id",$this->connection);
 		return mssql_fetch_assoc($res);
     }
 

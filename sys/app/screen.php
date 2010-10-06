@@ -94,11 +94,11 @@ abstract class Screen
 	public function before($controller,$metadata,&$data,&$args) {  }
 	
 	/**
-	 * Called before a controller's method is called.
+	 * Called after a controller's method is called.
 	 * 
 	 * @param Controller $controller The controller
 	 * @param AttributeReader $method_meta The method metadata
 	 * @param Array $data Array of data that the screen(s) can add to.
 	 */
-	public function after($controller,$metadata,&$data) {  }
+	public function after($controller,$metadata,&$data,&$args) {  }
 }
