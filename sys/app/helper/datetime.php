@@ -276,7 +276,7 @@ function datetime_to_season($date, $append_year=false, $custom_limits=null)
 		return $ret;
 }
 
-function date_diff($d1, $d2){
+function date_difference($d1, $d2){
 	$d1 = (is_string($d1) ? strtotime($d1) : $d1);
 	$d2 = (is_string($d2) ? strtotime($d2) : $d2);
 
