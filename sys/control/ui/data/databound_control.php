@@ -145,9 +145,8 @@ abstract class DataboundControl extends Control
 	 */
 	function next_page_link()
  	{
- 		$uri = $this->uri->copy()
- 			->query
- 			->set_value('page',$this->current_page+1);
+ 		$uri = $this->uri->copy();
+ 		$uri->query->set_value('page',$this->current_page+1);
  		
  		return $uri->build();
  	}
@@ -159,9 +158,8 @@ abstract class DataboundControl extends Control
  	 */
  	function prev_page_link()
  	{
- 		$uri = $this->uri->copy()
- 			->query
- 			->set_value('page',$this->current_page-1);
+ 		$uri = $this->uri->copy();
+ 		$uri->query->set_value('page',$this->current_page-1);
  		
  		return $uri->build();
  	}
@@ -174,10 +172,9 @@ abstract class DataboundControl extends Control
  	 */
  	function page_link($page)
  	{
- 		$uri = $this->uri->copy()
- 			->query
- 			->set_value('page',$page);
- 		
+ 		$uri = $this->uri->copy();
+ 		$uri->query->set_value('page',$page);
+		
  		return $uri->build();
  	}
 
@@ -235,9 +232,8 @@ abstract class DataboundControl extends Control
 
 		$template=new Template($this->filtering->item_template);
 
-		$uri = $this->uri->copy()
-			->query
-			->set_value('filter');
+		$uri = $this->uri->copy();
+		$uri->query->set_value('filter');
 			
 		foreach($this->filters as $field => $config_items)
 		{
