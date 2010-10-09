@@ -199,7 +199,7 @@ class Session
 	{
 		$ticket=$this->build_session();
 		// auth ticket is good for 20 minutes to prevent spoofing.
-		set_cookie($this->name,$ticket,$this->duration,$this->domain);
+		set_cookie($this->name,$ticket,$this->duration,($this->domain) ? $this->domain : $_SERVER['SERVER_NAME']);
 	}
 	
 	/**
