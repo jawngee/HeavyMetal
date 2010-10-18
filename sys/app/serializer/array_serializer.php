@@ -81,6 +81,11 @@ abstract class ArraySerializer extends Serializer
 							$cc=self::GetNodeConf($child->contains);
 							$ele[$child->name]=$this->serialize_array($v,$child,$cc);
 							break;
+						case 'date':
+							if(is_string($v))
+								$v=strtotime($v);
+							$ele[$child->name]=date($child->format,$v);
+							break;
 						default:
 							$cc=self::GetNodeConf($child->type);
 							$serializer=$this->get_serializer($cc);

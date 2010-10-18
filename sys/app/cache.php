@@ -83,7 +83,7 @@ abstract class Cache
 		{
 			trigger_error("Could not find cache '$name' in configuration file.",E_USER_WARNING);
 			uses('system.app.caches.null');
-			$cache=NullCache();
+			$cache=new NullCache();
 		}
 
 		self::$_caches[$name]=$cache;

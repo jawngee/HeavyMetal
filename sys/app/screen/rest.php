@@ -44,6 +44,7 @@ class RestScreen extends Screen
 					break;
 				case 'application/json':
 				case 'text/json':
+				case '*/*, application/json':
 					content_type('text/json');
 					$response=Serializer::SerializeObject($data[$metadata->item],Serializer::FORMAT_JSON,null,$metadata->map);
 					header("X-JSON:$response");
