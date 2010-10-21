@@ -77,6 +77,68 @@ class HTTPDispatcher extends Dispatcher
 			}
 		}
 		
+		
+		// fetch the view conf
+		$viewconf=Config::Get('request_types');
+		
+		$default_engine=$viewconf->default;
+		
+		// set the default extension
+		$extension=EXT;
+		
+		// if request type hasn't been specified
+		// run it through the map to see if we get a hit.
+		$req_type=$default_engine;
+			
+		try
+		{
+			foreach($viewconf->map as $item)
+			{
+				switch($item->test)
+				{
+					case 'server':
+						$array=&$_SERVER;
+						break;
+					case 'get':
+						$array=&$_GET;
+						break;
+					case 'post':
+						$array=&$_POST;
+						break;
+					case 'env':
+						$array=&$_ENV;
+						break;
+				}
+				
+				if (isset($array[$item->key]))
+				{
+					if ($item->matches)
+					{
+						if (preg_match("#{$item->matches}#",$array[$item->key]))
+						{
+							$req_type=$item->type;
+							break;
+						}
+					}
+					else
+					{
+						$req_type=$item->type;
+						break;
+					}
+				}
+			}
+		}
+		catch (ConfigInvalidFormatException $fex)
+		{
+			throw $fex;
+		}
+		catch (ConfigException $ex)
+		{
+			
+		}
+		
+		self::$req_type=$req_type;
+		
 		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
 	}
 
@@ -105,73 +167,6 @@ class HTTPDispatcher extends Dispatcher
 	 */
 	public function transform(&$data, $req_type=null)
 	{
-		
-		// fetch the view conf
-		$viewconf=Config::Get('view');
-		
-		$default_engine=$viewconf->default;
-		
-		// set the default extension
-		$extension=EXT;
-		
-		// if request type hasn't been specified
-		// run it through the map to see if we get a hit.
-		if ($req_type==null)
-		{
-			// default
-			$req_type=$default_engine;
-			
-			try
-			{
-				foreach($viewconf->map as $item)
-				{
-					switch($item->test)
-					{
-						case 'server':
-							$array=&$_SERVER;
-							break;
-						case 'get':
-							$array=&$_GET;
-							break;
-						case 'post':
-							$array=&$_POST;
-							break;
-						case 'env':
-							$array=&$_ENV;
-							break;
-					}
-					
-					if (isset($array[$item->key]))
-					{
-						if ($item->matches)
-						{
-							if (preg_match("#{$item->matches}#",$array[$item->key]))
-							{
-								$req_type=$item->type;
-								break;
-							}
-						}
-						else
-						{
-							$req_type=$item->type;
-							break;
-						}
-					}
-				}
-			}
-			catch (ConfigInvalidFormatException $fex)
-			{
-				throw $fex;
-			}
-			catch (ConfigException $ex)
-			{
-				
-			}
-		}
-		
-		self::$req_type=$req_type;
-		
-		
 		if ($this->view)
 			$view_name=$this->view;
 		else
@@ -179,17 +174,18 @@ class HTTPDispatcher extends Dispatcher
 			$view_name=strtolower($this->controller_path.$this->controller.'/'.$this->action);
 		}
 		
-
-		$conf=$viewconf->engines->{$req_type};
-		if (!$conf)
-			$conf=$viewconf->engines->{$default_engine};
+		if (!$req_type)
+			$req_type=Dispatcher::$req_type;
 			
+		
+		$viewconf=Config::Get('view');
+			
+		$conf=$viewconf->engines->{$req_type};
+		
 		if (!$conf)
 			throw new Exception("Your view.conf file is invalid.  Missing default engine.");
-			
-		if ($conf->extension)
-			$extension=$conf->extension;
-			
+
+		$extension=($conf->extension) ? $conf->extension : '.php';
 			
 		$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
 		

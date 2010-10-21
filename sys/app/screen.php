@@ -66,7 +66,6 @@ abstract class Screen
 		if (!$m) $m=new AttributeReader();
 		
 		$screens=$c->merge($m);
-		
 		foreach($screens as $name=>$screen)
 		if (!$screen->ignore)
 		{

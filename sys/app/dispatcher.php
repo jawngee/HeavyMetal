@@ -433,7 +433,6 @@ abstract class Dispatcher
 			$data=array_merge($screen_data,$data);
 		else
 			$data=$screen_data;
-		
 		// Call the after screens
 		Screen::Run('after',$class,$meta,$data,$method_args);
 				
