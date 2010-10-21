@@ -196,9 +196,9 @@ class HTTPDispatcher extends Dispatcher
 		}
 		
 		// if we didn't find the view for the request type, try the default one
-		if ((!$view_found) && ($req_type!=$viewconf->default) && (file_exists($this->view_root.$view_name.'.'.$viewconf->default.EXT)))
+		if ((!$view_found) && ($req_type!='html') && (file_exists($this->view_root.$view_name.'.html'.EXT)))
 		{
-			$req_type=$viewconf->default;
+			$req_type='html';
 			$extension=EXT;
 			$view_found=true;
 		}

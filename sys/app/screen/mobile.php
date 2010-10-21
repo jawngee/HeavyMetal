@@ -14,10 +14,15 @@ class MobileScreen extends Screen
 	
 	public function after($controller,$metadata,&$data)
 	{
-		if (Dispatcher::RequestType()=='mobile')
+		if ($metadata->or_ajax=='true')
+			$ismobile=Request::is_ajax();
+		else 
+			$ismobile=((Dispatcher::RequestType()=='mobile') && (Request::is_ajax()));
+			
+		if ($ismobile)
 		{
-			if ($metadata->field)
-				$data=$data[$metadata->field];
+			if ($metadata->key)
+				$data=$data[$metadata->key];
 				
 			$this->flatten_models($data);
 			echo json_encode($data);
