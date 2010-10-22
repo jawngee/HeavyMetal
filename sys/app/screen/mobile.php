@@ -1,17 +1,8 @@
 <?php
+uses('system.data.model');
+
 class MobileScreen extends Screen
 {
-	private function flatten_models(&$data)
-	{
-		foreach($data as $key => $value)
-			if ($value instanceof Model)
-			{
-				$data[$key]=$value->to_array();
-			}
-			else if (is_array($value))
-				$this->flatten_models($value);	
-	}
-	
 	public function after($controller,$metadata,&$data)
 	{
 		if ($metadata->or_ajax=='true')
@@ -24,7 +15,7 @@ class MobileScreen extends Screen
 			if ($metadata->key)
 				$data=$data[$metadata->key];
 				
-			$this->flatten_models($data);
+			$data=Model::Flatten($data);
 			echo json_encode($data);
 			die;
 		}

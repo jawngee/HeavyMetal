@@ -678,5 +678,24 @@ class Model implements ArrayAccess
 	}
 	
 
-	
+	static function Flatten(&$data)
+	{
+		if (is_array($data))
+		{
+			foreach($data as $key => $value)
+			{
+				if ($value instanceof Model)
+				{
+					$data[$key]=$value->to_array();
+					return $data;
+				}
+				else if (is_array($value))
+				{
+					$data[$key]=Model::Flatten($value);
+				}
+			}	
+		}
+		
+		return $data;
+	}
 }
