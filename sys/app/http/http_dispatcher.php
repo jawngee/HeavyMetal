@@ -77,7 +77,6 @@ class HTTPDispatcher extends Dispatcher
 			}
 		}
 		
-		
 		// fetch the view conf
 		$viewconf=Config::Get('request_types');
 		
@@ -138,7 +137,7 @@ class HTTPDispatcher extends Dispatcher
 		}
 		
 		self::$req_type=$req_type;
-		
+
 		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
 	}
 

@@ -51,6 +51,8 @@ class SOLRFilter extends Filter
 
 	public $query_parser='edismax';
 	
+	public $mm=null;  // a result only needs to match a single query term  
+	
 	public $more_like_this=false;
 
 
@@ -189,7 +191,6 @@ class SOLRFilter extends Filter
 		$fq = array();
 		$q = array($this->q_value);
 		$loc = array();
-
 		
 		// Need this phrase query (which looks like a quoted mirror of the main query:  ?q=new york "new york"&...)
 		// in special cases where the edismax/dismax parsers currently crap out when matching multi-word terms.
@@ -329,6 +330,10 @@ class SOLRFilter extends Filter
 		if (!empty($this->query_parser))
 			$query[] = 'qt='.$this->query_parser;
 
+		// pass through must-match function
+		if (!empty($this->mm))
+			$query[] = 'mm='.$this->mm;
+			
 		// handle boost function
 		if (!empty($this->boost_function))
 			$query[] = 'bf='.$this->boost_function;
@@ -408,7 +413,6 @@ class SOLRFilter extends Filter
    		if ($limit)
    			$this->limit=$limit;
 //dump('solr_filter->execute(): ' . $this->build_query());   			
-
    		$response = file_get_contents($this->build_query());
 
    		if ($this->result_format == 'php')

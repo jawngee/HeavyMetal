@@ -74,6 +74,8 @@ class URI
  	
  	public function __construct($root=null, $segments=null)
  	{
+ 		
+ 		
  		if (($root==null) && ($segments==null))
  		{
  		 	$path=(isset ($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : @ getenv('PATH_INFO');
@@ -82,12 +84,11 @@ class URI
 			$root=array_shift($segments);
 			
 			for($i=0;$i<count($segments);$i++)
-				$segments[$i] = strtolower($segments[$i]);
+				$segments[$i] = mb_strtolower($segments[$i], mb_detect_encoding($segments[$i]));
  		}
- 		
  		if ((strlen($root)==0) || ($root[0]!='/'))
  			$root='/'.$root;
- 		
+
  		$this->root=$root;
  		$this->segments=$segments;
  		$this->query=new Query();

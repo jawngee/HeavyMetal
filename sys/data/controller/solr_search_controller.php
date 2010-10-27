@@ -145,6 +145,10 @@ class SOLRSearchController extends SearchController
         // Set query parser if specified
         $query_parser = $this->appmeta->query_parser;
         $filter->query_parser = $query_parser;
+        
+        // Set the Much Match criteria if specified
+        $mm = $this->appmeta->mm;
+        $filter->mm = urlencode($mm);
 
         // Set result format if specified
         $result_format = $this->appmeta->result_format;

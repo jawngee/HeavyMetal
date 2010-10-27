@@ -81,6 +81,15 @@ class IgnoredMethodCalledException extends DispatcherException {}
  */
 abstract class Dispatcher
 {
+	protected $latin_normalizer = array(
+    'Š'=>'S', 'š'=>'s', 'Ð'=>'Dj','Ž'=>'Z', 'ž'=>'z', 'À'=>'A', 'Á'=>'A', 'Â'=>'A', 'Ã'=>'A', 'Ä'=>'A',
+    'Å'=>'A', 'Æ'=>'A', 'Ç'=>'C', 'È'=>'E', 'É'=>'E', 'Ê'=>'E', 'Ë'=>'E', 'Ì'=>'I', 'Í'=>'I', 'Î'=>'I',
+    'Ï'=>'I', 'Ñ'=>'N', 'Ò'=>'O', 'Ó'=>'O', 'Ô'=>'O', 'Õ'=>'O', 'Ö'=>'O', 'Ø'=>'O', 'Ù'=>'U', 'Ú'=>'U',
+    'Û'=>'U', 'Ü'=>'U', 'Ý'=>'Y', 'Þ'=>'B', 'ß'=>'Ss','à'=>'a', 'á'=>'a', 'â'=>'a', 'ã'=>'a', 'ä'=>'a',
+    'å'=>'a', 'æ'=>'a', 'ç'=>'c', 'è'=>'e', 'é'=>'e', 'ê'=>'e', 'ë'=>'e', 'ì'=>'i', 'í'=>'i', 'î'=>'i',
+    'ï'=>'i', 'ð'=>'o', 'ñ'=>'n', 'ò'=>'o', 'ó'=>'o', 'ô'=>'o', 'õ'=>'o', 'ö'=>'o', 'ø'=>'o', 'ù'=>'u',
+    'ú'=>'u', 'ü'=>'u', 'û'=>'u', 'ý'=>'y', 'ý'=>'y', 'þ'=>'b', 'ÿ'=>'y', 'ƒ'=>'f');
+	
 	protected $query=null;  // Need this when dispatching internally for portlets (no $_GET present)
 	
 	/**
@@ -160,7 +169,7 @@ abstract class Dispatcher
 		
 		$this->use_routes=$use_routes;
 		$this->force_routes=$force_routes;
-		
+					
 		$this->parse_path();
 		
 		// preload helpers
@@ -239,11 +248,9 @@ abstract class Dispatcher
 			{
 				
 			}
-			
 		// explode it's segments
 		$path_array = explode('/', preg_replace('|/*(.+?)/*$|', '\\1', $this->path));
 		$segments = array();
-		
 		$this->path_array=$path_array;
 		// If it's the root uri, this is easy fo sheezy.
 		if ($this->path == '/' || $this->path == '')
@@ -260,6 +267,8 @@ abstract class Dispatcher
 			// parse the segments out for security
 			foreach ($path_array as $val)
 			{
+				$val = strtr($val, $this->latin_normalizer);
+
 				if (!preg_match('|^[a-z 0-9~%".:_\-\+\(\);&]+$|i', $val))
 					$val=preg_replace('|[^a-z 0-9~%".:_\-\+\(\);&]*|i','',$val);
 
@@ -269,7 +278,6 @@ abstract class Dispatcher
 					$segments[] = $val;
 			}			
 		}
-		
 		// setup the parsed uri result
 		$this->controller_path = '';
 		$this->controller = 'index';
@@ -380,7 +388,6 @@ abstract class Dispatcher
 		$classname=$cfound['classname'];
 		$found_action=$cfound['found_action'];
 		$root=$cfound['root'];
-		
 		$this->action=$found_action;
 		
 		if (!file_exists($this->controller_root.$this->controller_path.$this->controller.EXT))
@@ -427,7 +434,7 @@ abstract class Dispatcher
 		$screen_data=array();
 		$method_args=$this->segments;
 		Screen::Run('before',$class,$meta,$screen_data,$method_args);
-		// call the method and pass the segments (add returned data to any initially returned by screens)
+		// call the method and pass the segments (add returned data to any initially returned by screens)	
 		$data = call_user_func_array(array(&$class, $found_action), $method_args);
 		if (is_array($data))
 			$data=array_merge($screen_data,$data);

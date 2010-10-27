@@ -170,7 +170,7 @@ class SearchController extends Controller
 				'value'=>null, 
 				'description'=>$this->no_query_text, 
 				'remove_url'=>null);
-			
+
 		if ($this->location)
 		{
 			$remove_url = $this->request->uri
@@ -235,7 +235,7 @@ class SearchController extends Controller
     public function index($filter=null)
  	{
  		$filter = $this->build_filter($filter);
- 		
+
  		$lim = $this->request->uri->query->get_value('limit');
  		$pg = $this->request->uri->query->get_value('page');
  		
@@ -426,8 +426,9 @@ class SearchController extends Controller
  		$filter_attributes = $this->get_attributes();
 
  		// process the q parameter
- 		$this->handle_text_query($filter);
- 		
+ 		if (!$filter->q_value) // q_value can be manually set in $filter if desired (e.g. re-searching based on spelling suggs)
+ 			$this->handle_text_query($filter);
+
  		// process the rest
  		foreach($filter_attributes as $key=>$section)
  		{
