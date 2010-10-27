@@ -687,7 +687,7 @@ class Model implements ArrayAccess
 				if ($value instanceof Model)
 				{
 					$data[$key]=$value->to_array();
-					return $data;
+					
 				}
 				else if (is_array($value))
 				{
