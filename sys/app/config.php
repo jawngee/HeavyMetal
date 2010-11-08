@@ -202,17 +202,19 @@ class ConfigInvalidFormatException extends ConfigException {}
  	 * @param string $env The environment to load
  	 */
  	public static function LoadEnvironment($env=null)
- 	{
+ 	{	
  		$config=Config::Get('environment');
  		
  		if ($env==null)
  			$env=$config->environment;
  			
+ 		$server_name=(isset($_SERVER['SERVER_NAME'])) ? strtolower($_SERVER['SERVER_NAME']) : trim(`hostname`);
+ 			
  		if($config->environment instanceof Config)
  		{
  			foreach($config->environment->items as $key=>$item)
  			{	
- 				if (strtolower($_SERVER['SERVER_NAME'])==strtolower($key))
+ 				if ($server_name==strtolower($key))
  				{
  					$env=$item;
  					break;

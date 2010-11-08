@@ -102,90 +102,39 @@ class ShellDispatcher extends Dispatcher
 	public function transform(&$data, $req_type=null)
 	{
 		
-		// fetch the view conf
-		$viewconf=Config::Get('view');
-		
-		$default_engine=$viewconf->default;
-		
-		// set the default extension
-		$extension=EXT;
-		
-		// if request type hasn't been specified
-		// run it through the map to see if we get a hit.
-		if ($req_type==null)
-		{
-			// default
-			$req_type=$default_engine;
-			
-			try
-			{
-				foreach($viewconf->map as $item)
-				{
-					switch($item->test)
-					{
-						case 'server':
-							$array=&$_SERVER;
-							break;
-						case 'get':
-							$array=&$_GET;
-							break;
-						case 'post':
-							$array=&$_POST;
-							break;
-						case 'env':
-							$array=&$_ENV;
-							break;
-					}
-					
-					if (isset($array[$item->key]))
-					{
-						if ($item->matches)
-						{
-							if (preg_match("#{$item->matches}#",$array[$item->key]))
-							{
-								$req_type=$item->type;
-								break;
-							}
-						}
-						else
-						{
-							$req_type=$item->type;
-							break;
-						}
-					}
-				}
-			}
-			catch (ConfigInvalidFormatException $fex)
-			{
-				throw $fex;
-			}
-			catch (ConfigException $ex)
-			{
-				
-			}
-		}
-		
-		
 		if ($this->view)
 			$view_name=$this->view;
 		else
+		{
 			$view_name=strtolower($this->controller_path.$this->controller.'/'.$this->action);
-
+		}
+		
+		if (!$req_type)
+			$req_type='html';
+			
+		
+		$viewconf=Config::Get('view');
+			
 		$conf=$viewconf->engines->{$req_type};
-		if (!$conf)
-			$conf=$viewconf->engines->{$default_engine};
+		
+		
 		if (!$conf)
 			throw new Exception("Your view.conf file is invalid.  Missing default engine.");
-			
-		if ($conf->extension)
-			$extension=$conf->extension;
+
+		$extension=($conf->extension) ? $conf->extension : '.php';
 			
 		$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
 		
-		// if we didn't find the view for the request type, try the default one
-		if ((!$view_found) && ($req_type!=$viewconf->default) && (file_exists($this->view_root.$view_name.'.'.$viewconf->default.EXT)))
+		if ((!$view_found) && (preg_match('#(post|put|get|delete)_.*#', $view_name)))
 		{
-			$req_type=$viewconf->default;
+			$view_name=preg_replace('#(?:post|put|get|delete)_(.*)#', '$1', $view_name);
+			$view_found=file_exists($this->view_root.$view_name.'.'.$req_type.$extension);
+		}
+		
+		// if we didn't find the view for the request type, try the default one
+		if ((!$view_found) && ($req_type!='html') && (file_exists($this->view_root.$view_name.'.html'.EXT)))
+		{
+			$req_type='html';
 			$extension=EXT;
 			$view_found=true;
 		}
@@ -200,6 +149,7 @@ class ShellDispatcher extends Dispatcher
 			uses($conf->uses);
 			$view=new $viewclass($view_name.'.'.$req_type,$data['controller'],$this->view_root);
 			
+			$data['input']=$data['controller']->request->input;
 			return $view->render($data);
 		}		
 	}

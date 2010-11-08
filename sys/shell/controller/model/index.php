@@ -36,6 +36,7 @@ class ModelIndexController extends Controller
 			mkdir($path);
 		file_put_contents($path.'/'.$schema->tablename.EXT, $model);
 		
+		
 		foreach($schema->related as $table)
 		{
 			$rel_classname='';
@@ -55,6 +56,7 @@ class ModelIndexController extends Controller
 
 			file_put_contents($path.'/'.$table->tablename.EXT, $model);
 		}
+		
 		die;
 	}
 }
