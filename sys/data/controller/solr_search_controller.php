@@ -106,10 +106,10 @@ class SOLRSearchController extends SearchController
  	
  	
  	
- 	public function morelike()
+ 	public function morelike($filter=null)
  	{
  		// build filter with a flag for mlt
- 		$filter = $this->build_filter();
+ 		$filter = $this->build_filter($filter);
  		
  		$filter->more_like_this = true;
  		$filter->clustering=false;

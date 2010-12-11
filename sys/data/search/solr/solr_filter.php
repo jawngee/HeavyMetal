@@ -180,15 +180,13 @@ class SOLRFilter extends Filter
 		// joins ignored -- SOLR is one big table
    	}
     
-    /**
-     * Builds solr query string
-     *
-     * @return string The solr query string
-     */
-   	function build_query($select=null /*defaults to everything*/)
+   	
+   	/**
+   	 * Builds the search query part of the query string
+   	 */
+   	private function build_search_query()
    	{
    		$query = array();
-		$fq = array();
 		$q = array($this->q_value);
 		$loc = array();
 		
@@ -239,12 +237,47 @@ class SOLRFilter extends Filter
 
    		}
 	
-   		$query[] = 'q=' . rawurlencode(implode($q, ' '));
-   		$query = array_merge($query, $loc);
-   		
    		if (count($fq) > 0)
 			foreach($fq as $filter_query)
 				$query[] = 'fq='.urlencode(str_replace('+',' ', $filter_query));
+
+		$query[] = 'q=' . rawurlencode(implode($q, ' '));
+   		$query = array_merge($query, $loc);
+   		
+   		
+   		
+   		// specify query parser
+		if (!empty($this->query_parser))
+			$query[] = 'qt='.$this->query_parser;
+
+		// pass through must-match function
+		if (!empty($this->mm))
+			$query[] = 'mm='.$this->mm;
+			
+		// handle boost function
+		if (!empty($this->boost_function))
+			$query[] = 'bf='.$this->boost_function;
+			
+   		// tack on the result_format
+   		$query[] = 'wt='.$this->result_format;			
+
+   		// don't need the header
+   		$query[] = 'omitHeader=true';
+
+   		return $query;
+   	}
+   	
+   	
+    /**
+     * Builds solr query string
+     *
+     * @return string The solr query string
+     */
+   	function build_query($select=null /*defaults to everything*/)
+   	{
+   		$query = $this->build_search_query();
+   		
+		$fq = array();
 				
    		// handle specific fields requested
    		if ($select)
@@ -324,26 +357,7 @@ class SOLRFilter extends Filter
    		
    		foreach ($this->highlight->config as $key => $value)
 			$query[] = 'hl.' . $key .'='. $value;
-   		
-		
-		// specify query parser
-		if (!empty($this->query_parser))
-			$query[] = 'qt='.$this->query_parser;
 
-		// pass through must-match function
-		if (!empty($this->mm))
-			$query[] = 'mm='.$this->mm;
-			
-		// handle boost function
-		if (!empty($this->boost_function))
-			$query[] = 'bf='.$this->boost_function;
-			
-   		// tack on the result_format
-   		$query[] = 'wt='.$this->result_format;			
-
-   		// don't need the header
-   		$query[] = 'omitHeader=true';
-   		
    		
    		$handler = ($this->more_like_this) ? 'mlt' : 'select';
    		
@@ -504,7 +518,7 @@ class SOLRFilter extends Filter
    	}
 
    	/**
-   	 * Builds the filter and executes the sql, returning a single row
+   	 * Builds the filter and executes the solr request, returning a single row
    	 */
    	function get_one($field)
    	{
@@ -514,7 +528,7 @@ class SOLRFilter extends Filter
    	}
    	
    	/**
-   	 * Builds the filter and executes the sql returning a single dimensional array of the specified result field
+   	 * Builds the filter and executes the solr request returning a single dimensional array of the specified result field
    	 */
    	function get_array($field)
    	{
@@ -530,8 +544,8 @@ class SOLRFilter extends Filter
    	
 
    	/**
-   	 * Builds the filter and executes the sql, returning the total count of items.
-   	 */
+   	 * Builds the filter and executes the solr request, returning the total count of items.
+   	 *
    	function get_count($field=null, $distinct=false)
    	{
    		if (!$field)
@@ -540,6 +554,25 @@ class SOLRFilter extends Filter
    		$results = $this->get_array($field);
 		
 		return ($results['total_count']) ? $results['total_count'] : '0';
-   	}   	
+   	}
+*/
+   	function get_count($field=null, $distinct=false)
+   	{
+   		if($field || $distinct)
+   			throw new Exception ("SolrFilter doesn't support distinct operation.");
+   			
+   		$count_query = SOLR_SERVER . '/select'  . '?' . implode($this->build_search_query(), '&') . '&rows=0';
+   			
+   		$response = file_get_contents($count_query);
+
+   		if ($this->result_format == 'php')
+			eval("\$response_array = " . $response . ";");
+		else if ($this->result_format == 'phps')
+			$response_array = unserialize($response);
+		else 
+			throw new Exception ("HeavyMetal does not support SOLR result format: wt=".$this->response_type);
+
+		return $response_array['response']['numFound'];
+   	}
 }
 

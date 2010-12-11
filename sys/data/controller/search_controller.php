@@ -275,6 +275,11 @@ class SearchController extends Controller
 
  	public function build_filter_field($filter, $key, $section)
  	{
+ 		// Check to see if this filter field was already overridden in a passed-in filter
+ 		// (e.g. search restrictions based on user permissions)
+ 		if (isset($filter->{$section->filter}->value))
+	 		return; // don't override the previous value
+ 		
  		$value = trim($this->request->get_value($key));
  		
  		// Add to the description string
