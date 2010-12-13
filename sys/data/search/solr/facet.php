@@ -19,7 +19,8 @@ class Facet
 	// Used by SOLR (mincount and limit)
 	public $min_count = null;
 	public $limit = null;
-	
+
+	public $sort = null;
 	
 	/**
 	 * Constructor

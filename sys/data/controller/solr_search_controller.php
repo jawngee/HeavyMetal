@@ -58,17 +58,17 @@ class SOLRSearchController extends SearchController
  		return $data;
  	}
  	
- 	public function morefacet()
+ 	public function morefacet($alphabetize=false)
  	{
- 		return $this->morefacet_common($morelike=false);
+ 		return $this->morefacet_common($morelike=false,$alphabetize);
  	}
  	
- 	public function morelikefacet()
+ 	public function morelikefacet($alphabetize=false)
  	{
- 		return $this->morefacet_common($morelike=true);
+ 		return $this->morefacet_common($morelike=true,$alphabetize);
  	}
  	
- 	private function morefacet_common($morelike=false)
+ 	private function morefacet_common($morelike=false, $alphabetize=false)
  	{ 		
  		// Run just a facet query given the current selection
  		// ... don't return any search results, just all values for this facet
@@ -80,6 +80,7 @@ class SOLRSearchController extends SearchController
  		$filter->clustering=false;
  		$filter->spellcheck=false;
  		$filter->tv=false;
+
  		
  		if ($morelike && $morelike=='morelike')
  		{
@@ -93,7 +94,11 @@ class SOLRSearchController extends SearchController
  			if ($facet_name != $facet_field)
  				unset($filter->facet->fields[$facet_name]);
  			else
+ 			{
  				$filter->facet->fields[$facet_name]->limit = null;
+ 				if ($alphabetize)
+ 					$filter->facet->fields[$facet_name]->sort=false;
+ 			}
  		}
  		
  		$results = $filter->get_rows();
