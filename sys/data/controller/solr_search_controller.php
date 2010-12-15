@@ -58,22 +58,23 @@ class SOLRSearchController extends SearchController
  		return $data;
  	}
  	
- 	public function morefacet($alphabetize=false)
+ 	public function morefacet()
  	{
- 		return $this->morefacet_common($morelike=false,$alphabetize);
+ 		return $this->morefacet_common($morelike=false);
  	}
  	
- 	public function morelikefacet($alphabetize=false)
+ 	public function morelikefacet()
  	{
- 		return $this->morefacet_common($morelike=true,$alphabetize);
+ 		return $this->morefacet_common($morelike=true);
  	}
  	
- 	private function morefacet_common($morelike=false, $alphabetize=false)
+ 	private function morefacet_common($morelike=false)
  	{ 		
  		// Run just a facet query given the current selection
  		// ... don't return any search results, just all values for this facet
  		$field = $this->request->input->facet;
- 		$facet_field = $this->appmeta->filter->{$field}->facet->field;
+ 		$facet_section = $this->appmeta->filter->{$field};
+ 		$facet_field = $facet_section->filter;
  		$filter = $this->build_filter();
  		$filter->limit="0";
  		$filter->offset=200;
@@ -87,20 +88,23 @@ class SOLRSearchController extends SearchController
  			$filter->more_like_this=true;
  		 	$filter->q_value = $this->appmeta->unique_key . ':' . $filter->q_value;	
  		}
- 		
+
  		
  		foreach(array_keys($filter->facet->fields) as $facet_name)
- 		{
+ 		{	
  			if ($facet_name != $facet_field)
  				unset($filter->facet->fields[$facet_name]);
- 			else
- 			{
- 				$filter->facet->fields[$facet_name]->limit = null;
- 				if ($alphabetize)
- 					$filter->facet->fields[$facet_name]->sort=false;
- 			}
  		}
+ 			
+ 		$facet_settings = ($facet_section->more_facet)
+ 			? $facet_section->more_facet
+ 			: $facet_section->facet;
  		
+ 		foreach ($facet_settings as $key=>$value)
+ 		{
+ 			$filter->facet->fields[$facet_field]->{$key} = $value;
+ 		}
+ 		 		
  		$results = $filter->get_rows();
 
  		return array(
@@ -189,8 +193,10 @@ class SOLRSearchController extends SearchController
         // Load facet config if present
         $facet_configs = $this->appmeta->facets;
 		foreach ($facet_configs as $key => $value)
+		{
 	        $filter->facet->{$key} = $value;
-            
+		}
+		   
         if ($initial_filter_string)
             $vars = $filter->parse($initial_filter_string);
 		else if ($this->init_filter())
@@ -204,12 +210,12 @@ class SOLRSearchController extends SearchController
  	 	// set up the faceting params
  		if ($section->facet)
  		{
- 			$sf=($section->facet->field)?$section->facet->field:$section->filter;
+ 			$sf=$section->filter;
 
  			$facet = $filter->facet->{$sf};
  			$facet->field_ext = $filter->facet_search_ext;
 			
- 			$facet->filter_name = $section->filter;
+ 			$facet->filter_name = $sf; //$section->filter;
  			
  			foreach($section->facet as $attr=>$value)
  				$facet->{$attr} = $value;

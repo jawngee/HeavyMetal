@@ -21,6 +21,15 @@ class ResultFilterControl extends RepeaterControl
 	
 	public $filter_definition;
 	
+	
+	public $select_multiple=null;
+	
+	public $more_facet=false;
+	
+	private $facet_definition;
+
+	private $lookback=null;
+	
 	public function clear()
 	{
 		$this->field = null;
@@ -38,6 +47,9 @@ class ResultFilterControl extends RepeaterControl
 		if (!$this->field)
 			throw new Exception("field must be specified in resultfilter control");
 		$this->filter_definition = $this->controller->appmeta->filter->{$this->field};
+		$this->facet_definition = ($this->more_facet) 
+			? $this->filter_definition->more_facet
+			: $this->filter_definition->facet;
 		
 		if (!$this->datasource) /* Default to the datasource definition in the config file */
 			$this->datasource = $this->filter_definition->datasource;
@@ -49,15 +61,22 @@ class ResultFilterControl extends RepeaterControl
 			
 		if (!$this->container_template)
 			$this->container_template = $this->controller->appmeta->renderer_map->{$filter_type}->container;
-				
+
+		// radio or checkbox (default radio)?
+		if (!$this->select_multiple)
+			$this->select_multiple = $this->filter_definition->select_multiple;
+			
+			
 		// dig specific facet counts out of facets
 		if (is_assoc($this->datasource))
 		{
-			$facet = $this->datasource[$this->filter_definition->facet->field];
+			$facet = $this->datasource[$this->filter_definition->filter];
 			$this->datasource = array();
 			foreach($facet as $value => $count)
 				$this->datasource[] = array('value' => $value, 'count' => $count); 
 		}
+		
+		// dig 
 	}
 	
 	
@@ -120,9 +139,19 @@ class ResultFilterControl extends RepeaterControl
 	
 	protected function render_template($template, $key, $row)
 	{
+		
 		$rendered_template = '';
 		
 		$value  = trim($row['value']); // stub
+		
+		if ($this->facet_definition->divider)
+		{
+			if (!$this->lookback || strtolower($this->lookback[0]) != strtolower($value[0]))
+			{
+				$rendered_template = $this->render_divider($value[0]);	
+				$this->lookback = $value;
+			}
+		}
 		
 		$link   = ($this->filter_definition->select_multiple) 
 			? $this->checkbox($this->field, $value)
@@ -134,13 +163,13 @@ class ResultFilterControl extends RepeaterControl
 		
 		$facet_count = null;
 
-		if (is_numeric($this->filter_definition->facet->count_ceiling) && $this->filter_definition->facet->count_ceiling < $fcount)
-	       	$facet_count = $this->filter_definition->facet->count_ceiling . '+';
+		if (is_numeric($this->facet_definition->count_ceiling) && $this->facet_definition->count_ceiling < $fcount)
+	       	$facet_count = $this->facet_definition->count_ceiling . '+';
 		else
 			$facet_count = $fcount;
 			
 		if (!empty($value))
-			$rendered_template = $template->render(
+			$rendered_template .= $template->render(
 				array(
 					'control' => $this, 
 					
@@ -156,6 +185,17 @@ class ResultFilterControl extends RepeaterControl
 		
 		
 		return $rendered_template;
+	}
+	
+	private function render_divider($divider_text)
+	{
+		$divider = $this->get_template($this->facet_definition->divider);
+		
+		return $divider->render(
+			array(
+				'control' => $this,
+				'divider_text' => $divider_text
+			));
 	}
 	
 	protected function render_container($template, $rendered)

@@ -331,10 +331,10 @@ class SOLRFilter extends Filter
    			if ($facet->limit)
    				$query[] = 'f.'.$facet->field_name.'.facet.limit='.$facet->limit; 
 
-   			if ($facet->sort && $facet->sort==true)
+   			if ($facet->sort && $facet->sort=="top")
    				$query[] = 'f.'.$facet->field_name.'.facet.sort=true';  
    			else
-   				$query[] = 'f.'.$facet->field_name.'.facet.sort=false';  
+   				$query[] = 'f.'.$facet->field_name.'.facet.sort=false'; // alpha 
    				
    			
    		}
