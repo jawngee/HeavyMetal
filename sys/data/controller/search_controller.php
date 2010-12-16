@@ -314,8 +314,6 @@ class SearchController extends Controller
  				$sf=$section->filter;
  				if ($value)
  				{
- 					if ($section->select_multiple) // multi-select
- 					{
 	                	$arr = $this->request->get_array($key);
 						if ($section->join_model && $section->join_column && $section->join_foreign_column)
 						{
@@ -335,28 +333,6 @@ class SearchController extends Controller
 	            	            $filter->{$sf}->is_in($arr, $section->allow_nulls);
 	                    }
 	 						
- 					}
- 					else // single select
- 					{
- 						if ($section->join_model && $section->join_column && $section->join_foreign_column)
-	 					{
-	                        $join_filter = filter($section->join_model);
-	                        
-	                        if ($section->case_insensitive)
-		                        $join_filter->{$sf}->equals($value, $section->allow_nulls, 'LIKE', 'lower');
-	                        else
-		                        $join_filter->{$sf}->equals($value);
-		                    $join_filter->select='';
-	                        $filter->join($section->join_column, $join_filter, $section->join_foreign_column, ($section->allow_nulls)?'LEFT':'INNER'); 							
-	 					}
-	 					else
-	 					{
-							if ($section->case_insensitive)
-	 							$filter->{$sf}->equals($value, $section->allow_nulls, 'LIKE', 'lower');
-	 						else
-	 							$filter->{$sf}->equals(array($value), $section->allow_nulls);
-	 					}
- 					}
  				}
  				break;
  			case "text":

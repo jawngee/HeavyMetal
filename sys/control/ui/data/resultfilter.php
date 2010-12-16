@@ -26,7 +26,7 @@ class ResultFilterControl extends RepeaterControl
 	
 	public $more_facet=false;
 	
-	private $facet_definition;
+	public $facet_definition;
 
 	private $lookback=null;
 	
