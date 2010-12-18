@@ -61,10 +61,6 @@ class ResultFilterControl extends RepeaterControl
 			
 		if (!$this->container_template)
 			$this->container_template = $this->controller->appmeta->renderer_map->{$filter_type}->container;
-
-		// radio or checkbox (default radio)?
-		if (!$this->select_multiple)
-			$this->select_multiple = $this->filter_definition->select_multiple;
 			
 			
 		// dig specific facet counts out of facets
@@ -153,7 +149,7 @@ class ResultFilterControl extends RepeaterControl
 			}
 		}
 		
-		$link   = ($this->filter_definition->select_multiple) 
+		$link   = ($this->facet_definition->select == "multiple") 
 			? $this->checkbox($this->field, $value)
 			: $this->link($this->field, $value);
 		

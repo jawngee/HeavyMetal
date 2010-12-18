@@ -221,11 +221,11 @@ class SOLRSearchController extends SearchController
  				$facet->{$attr} = $value;
 
  			// automatically populate facet limit if show_max is sepecified
- 			if ($section->show_max && !$facet->limit)
- 				$facet->limit = $section->show_max+1;
+ 			if ($section->facet->show_max && !$facet->limit)
+ 				$facet->limit = $section->facet->show_max+1;
  				
  			// Handle count reducing tag/exclude for multi-choice filter fields
- 			if ($section->select_multiple)
+ 			if ($section->facet->select == "multiple")
  			{
  				$facet->multi = true;
  			}
