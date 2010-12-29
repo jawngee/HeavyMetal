@@ -284,6 +284,6 @@ class SOLRSearchController extends SearchController
 	 			else
 	 				$filter->highlight->{$key} = urlencode($value); 
 	 		}	
- 		} 	 		
+ 		}
  	}
 }

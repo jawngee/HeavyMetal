@@ -36,7 +36,25 @@ class ResultFiltersControl extends Control
 	
 	public $container_template=null;
 	public $datasource=null;   // usually facetcounts
+	public $fields=null; // comma-delimited list of fields to render (if omitted, then every non-"hidden:true" field in the conf is rendered)
+	
 	protected $filter_class = 'ResultFilterControl';
+	
+	function init()
+	{
+		// Convert the comma-delimited fields list (if any) to an array.
+		if ($this->fields)
+		{
+			$flds = array();
+			foreach(split(',',$this->fields) as $fld)
+			{
+				if (trim($fld)!=null)
+    				$flds[] = trim($fld);
+			}
+			
+			$this->fields = $flds;
+		}
+	}
 	
 	function build()
 	{
@@ -46,15 +64,18 @@ class ResultFiltersControl extends Control
 		$resultfilter = new $this->filter_class();
 		$resultfilter->controller = $this->controller;
 		$resultfilter->datasource = $this->datasource;
-		
+
 		foreach($this->controller->appmeta->filter as $field => $filter) {
-			if ($filter->hidden != 'true') {
-				$resultfilter->clear();
-				$resultfilter->field = $field;
-				$resultfilter->datasource = $this->datasource;
-				$resultfilter->init();
-	
-				$rendered .= $resultfilter->build();
+			if (!$this->fields || in_array($field, $this->fields))
+			{
+				if ($filter->hidden != 'true') {
+					$resultfilter->clear();
+					$resultfilter->field = $field;
+					$resultfilter->datasource = $this->datasource;
+					$resultfilter->init();
+		
+					$rendered .= $resultfilter->build();
+				}
 			}
 		}
 			
