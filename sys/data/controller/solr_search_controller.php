@@ -51,9 +51,27 @@ class SOLRSearchController extends SearchController
 	public function index($filter=null)
  	{
  		$data = parent::index($filter);
-
- 		$data['facet_counts'] = $data['results']['facet_counts'];
  		$data['spellcheck'] = $data['results']['spellcheck'];
+
+        // (No results?) Re-search for suggested spellcheck terms
+        if( $this->appmeta->spellcheck_researcher &&
+            $data['count']==0 &&
+            $data['spellcheck'] &&
+            count($data['spellcheck']->suggestions)>0)
+        { 		
+            $query = $this->get_text_query();
+
+            $suggestions = $data['spellcheck']->suggestions;
+            
+            $filter = $this->add_suggestions_to_filter($suggestions);
+            $filter->mm = '1';  // results can match any single term
+            $data = parent::index($filter); 
+
+            $data['original_suggestions'] = $suggestions;
+            $data['original_query'] = $query; 
+        } 		
+ 		
+ 		$data['facet_counts'] = $data['results']['facet_counts'];
  		
  		return $data;
  	}
@@ -79,7 +97,7 @@ class SOLRSearchController extends SearchController
  		$filter->limit="0";
  		$filter->offset=200;
  		$filter->clustering=false;
- 		$filter->spellcheck=false;
+ 		$filter->spellcheck=true;
  		$filter->tv=false;
 
  		
@@ -106,6 +124,19 @@ class SOLRSearchController extends SearchController
  		}
  		 		
  		$results = $filter->get_rows();
+ 		
+ 		// No results?  Re-search facets using sugested spellcheck terms
+ 		if ( $this->appmeta->spellcheck_researcher &&
+ 		     $results['count']==0 &&
+ 		     $results['spellcheck'] &&
+ 		     count($results['spellcheck']->suggestions)>0)
+ 		{
+ 			$suggestions = $results['spellcheck']->suggestions;
+            $filter = $this->add_suggestions_to_filter($suggestions, $filter); 	
+            $filter->mm = '1';
+
+            $results = $filter->get_rows();
+        }
 
  		return array(
  			'field' => $field,
@@ -286,4 +317,19 @@ class SOLRSearchController extends SearchController
 	 		}	
  		}
  	}
+ 	
+ 	
+ 	
+    protected function add_suggestions_to_filter($suggestions, $filter=null)
+    {
+    	if (!$filter)
+           $filter = $this->build_filter();
+   
+        $re_query = implode(' ', array_keys($suggestions));
+        $filter->q_value = $re_query;
+        
+        return $filter;
+    }
+ 	
+ 	
 }
