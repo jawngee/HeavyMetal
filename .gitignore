@@ -3,4 +3,6 @@
 .project
 .settings
 .DS_Store
-app/conf/._helpers.conf
+._*
+.idea
+
