@@ -154,6 +154,9 @@ function uses($namespace)
 		case 'model':
 			$path=PATH_APP.'model/';
 			break;
+		case 'document':
+			$path=PATH_APP.'document/';
+			break;
 		case 'channel':
 			$path=PATH_APP.'channel/';
 			break;

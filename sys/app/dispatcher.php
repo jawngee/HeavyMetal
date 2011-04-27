@@ -337,13 +337,13 @@ abstract class Dispatcher
 	{
 		if (!file_exists($this->controller_root.$this->controller_path.$this->controller.EXT))
 			throw new ControllerNotFoundException("Could not find a suitable controller: ".$this->controller_root.$this->controller_path.$this->controller.EXT);
-			
+
 		require_once($this->controller_root.$this->controller_path.$this->controller.EXT);
 		$classname=str_replace('/','',$this->controller_path).$this->controller.'Controller';
 		
 		if (!class_exists($classname))
 			throw new ControllerNotFoundException("'$classname' can not be found in '".$this->controller."'.");
-
+			
 		$request_method = Request::get_request_method();
 		$found_action=find_methods($classname, $request_method."_".str_replace('-','_',$this->action), str_replace('-','_',$this->action));
 
@@ -365,7 +365,7 @@ abstract class Dispatcher
 			(($found_action!='index' && $found_action!='index') ? $found_action : "");
 
 		$root = rtrim($root,'/');			
-
+		
 		return array(
 			'request_method' => $request_method,
 			'classname' => $classname,
@@ -435,6 +435,7 @@ abstract class Dispatcher
 		$method_args=$this->segments;
 		Screen::Run('before',$class,$meta,$screen_data,$method_args);
 		// call the method and pass the segments (add returned data to any initially returned by screens)	
+		
 		$data = call_user_func_array(array(&$class, $found_action), $method_args);
 		if (is_array($data))
 			$data=array_merge($screen_data,$data);

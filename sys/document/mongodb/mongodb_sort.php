@@ -1,10 +1,6 @@
 <?
 /**
- * The main request dispatcher.
- * 
- * @copyright     Copyright 2009-2012 Jon Gilkison and Trunk Archive Inc
- * @package       application
- * 
+ *
  * Copyright (c) 2009, Jon Gilkison and Trunk Archive Inc.
  * All rights reserved.
  *
@@ -31,57 +27,20 @@
  *
  * This is a modified BSD license (the third clause has been removed).
  * The BSD license may be found here:
- * 
+ *
  * http://www.opensource.org/licenses/bsd-license.php
- */
+ *
+**/
 
-
-uses('system.app.dispatcher');
-uses('system.app.shell.shell_request');
+uses('sys.document.sort');
 
 /**
- * System Shell Dispatcher
- * 
- * @package		application
- * @subpackage	dispatcher
- * @link          http://wiki.getheavy.info/index.php/Dispatcher
+ * Contains a sort order for a finder
  */
-class SysShellDispatcher extends ShellDispatcher
+class MongdbSort extends Sort
 {
-	/**
-	 * Constructor 
-	 * 
-	 * @param $path
-	 * @param $controller_root
-	 * @param $view_root
-	 * @param $use_routes
-	 * @param $force_routes
-	 */
-	public function __construct($path=null,$controller_root=null,$view_root=null,$use_routes=true,$force_routes=false)
-	{
-		$args=parse_args();
-		$switches=parse_switches();
-		
-		
-		$path=($path) ? $path : $args[0];
-		array_shift($args);
-
-		$controller_root=($controller_root) ? $controller_root : PATH_SYS.'shell/controller/';
-		$view_root=($view_root) ? $view_root : PATH_SYS.'shell/view/';
-		
-		$this->segments=$args;
-		
-		parent::__construct($path,$controller_root,$view_root,$use_routes,$force_routes);
-	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @see sys/app/Dispatcher#new_instance($path, $controller_root, $view_root, $use_routes, $force_routes)
-	 */
-	public function new_instance($path=null,$controller_root=null,$view_root=null,$use_routes=true,$force_routes=false)
-	{
-		$controller_root=($controller_root) ? $controller_root : $this->controller_root;
-		$view_root=($view_root) ? $view_root : $this->view_root;
-		return new SysShellDispatcher($path,$controller_root,$view_root,$use_routes,$force_routes);
-	}
+    protected $asc_value='1';
+    protected $desc_value='-1';
 }
+
+ 

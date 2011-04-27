@@ -1,9 +1,18 @@
 <?php
 uses('sys.external.PEAR.HTTP.Request');
 
+/**
+ * @throws BadRequestException
+ * 
+ */
 class APIClient
 {
 	var $conf;
+
+    /**
+     * @throws BadRequestException
+     *
+     */
 	public function __construct()
 	{
 		$meta=AttributeReader::ClassAttributes($this);
@@ -12,7 +21,13 @@ class APIClient
 		if (!$this->conf)
 			throw new BadRequestException('Missing api info');
 	}
-	
+
+    /**
+     * @throws BadRequestException
+     * @param  $method
+     * @param  $args
+     * @return mixed
+     */
 	public function call($method,$args)
 	{
 		$req=new HTTP_Request($this->conf->endpoint.$method);
@@ -35,6 +50,10 @@ class APIClient
 	
 }
 
+/**
+ * @param  $array_value
+ * @return array
+ */
 function flatten($array_value)
 {
 	if ($array_value instanceof stdClass)

@@ -11,7 +11,7 @@ $pgsql=function_exists('pg_query') ? 'Installed' : 'Missing';
 $apc=function_exists('apc_store') ? 'Installed' : 'Missing';
 $sqlite=function_exists('sqlite_exec') ? 'Installed' : 'Missing';
 $sqlite3=class_exists('SQLite3') ? 'Installed' : 'Missing';
-
+$mongo=class_exists('Mongo') ? 'Installed' : 'Missing';
 
 ?>
 
@@ -43,4 +43,6 @@ APC		<?php echo $apc; ?>
 SQLite		<?php echo $sqlite; ?>
 
 SQLite3		<?php echo $sqlite3; ?>
+
+Mongo		<?php echo $mongo; ?>
 
