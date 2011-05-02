@@ -1,11 +1,11 @@
 <?
 
-uses('system.cloud.amazon.ec2_request');
+uses('system.cloud.provider.amazon.ec2_request');
 
 /**
  * Message queue driver for SQS
  */
-class EC2Driver extends GridManager 
+class EC2GridManager extends GridManager
 {
 	private $id=null;
 	private $secret=null;

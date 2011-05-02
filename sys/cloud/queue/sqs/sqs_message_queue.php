@@ -1,10 +1,10 @@
 <?
-uses('system.cloud.amazon.sqs_request');
+uses('system.cloud.provider.amazon.sqs_request');
 
 /**
  * Message queue driver for SQS
  */
-class SQSDriver extends MessageQueue 
+class SQSMessageQueue extends MessageQueue
 {
 	private $id=null;
 	private $secret=null;
@@ -15,10 +15,20 @@ class SQSDriver extends MessageQueue
 	 * @param string $id Amazon ID
 	 * @param string $secret Amazon Secret
 	 */
-	public function __construct($id,$secret)
+	public function __construct($dsn)
 	{
-		$this->id=$id;
-		$this->secret=$secret;
+        $matches=array();
+        if (preg_match_all('#([a-z]*)://([^@]*)@(.*)#',$dsn,$matches))
+		{
+			$auth=$matches[2][0];
+			$secret=$matches[3][0];
+
+            $this->id=$auth;
+            $this->secret=$secret;
+        }
+        else
+            throw new Exception("DSN: '$dsn' is in wrong format.");
+
 	}
 	
 	/**

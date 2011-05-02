@@ -1,16 +1,16 @@
 <?
 /**
- * EC2 Request wrapper
- * Very simple wrapper around the EC2 API.  Other PHP implementations were grossly
+ * SQS Request wrapper
+ * Very simple wrapper around the SQS API.  Other PHP implementations were grossly
  * lacking or java engineered.
  */
 
-uses('system.cloud.amazon.aws_request');
+uses('system.cloud.provider.amazon.aws_request');
 
 /**
  * Represents a sqs api request.
  */
-class EC2Request extends AWSRequest 
+class SNSRequest extends AWSRequest
 {
 	/**
 	 * Constructor
@@ -24,9 +24,9 @@ class EC2Request extends AWSRequest
 	{
 		parent::__construct($action,$id,$secret,$endpoint);
 		
-		if (!$this->endpoint)
-			$this->endpoint='https://ec2.amazonaws.com/';
+		$this->endpoint='http://sns.us-east-1.amazonaws.com/';
 
-		$this->parameters['Version'] = '2008-08-08';      
+		$this->parameters['Version'] = '2010-03-31';
 	}
+
 }

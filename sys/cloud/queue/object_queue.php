@@ -1,7 +1,7 @@
 <?
 uses('system.data.keyvalue_db');
 uses('system.data.simple_model');
-uses('system.cloud.message_queue');
+uses('system.cloud.queue.message_queue');
 
 class ObjectQueue 
 {

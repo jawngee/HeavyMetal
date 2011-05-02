@@ -5,7 +5,7 @@
  * lacking or java engineered.
  */
 
-uses('system.cloud.amazon.aws_request');
+uses('system.cloud.provider.amazon.aws_request');
 
 /**
  * Represents a sqs api request.

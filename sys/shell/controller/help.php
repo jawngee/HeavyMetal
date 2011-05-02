@@ -24,6 +24,7 @@ class HelpController extends Controller
 		}
 		catch (Exception $ex)
 		{
+                vomit($ex->getTrace());
 			echo "Could not find a suitable controller for $uri - are you sure you got it right?";
 		}
 		
@@ -120,9 +121,9 @@ class HelpController extends Controller
 		foreach($controllers as $class => $info)
 		{
 			require_once $info['file'];
-			$r=new ReflectionClass($class);
+            $r=new ReflectionClass($class);
 			$ms=$r->getMethods(ReflectionMethod::IS_PUBLIC);
-			foreach($ms as $m)
+            foreach($ms as $m)
 			{
 				$name=$m->getShortName();
 				if (strpos($name,'__')!==0)
@@ -138,7 +139,7 @@ class HelpController extends Controller
 				}
 			}
 		}
-		
+
 		return array('methods'=>$methods);
 	}
 }

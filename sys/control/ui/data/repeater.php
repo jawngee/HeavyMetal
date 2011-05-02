@@ -103,7 +103,7 @@ class RepeaterControl extends DataboundControl
 		
 		if (is_numeric($key)) // With SOLR, some meta info gets added to the rows which repeater should ignore
         {
-			$id = ($row instanceof Model) ? $row->id: $row['id'];
+			$id = (($row instanceof Model)||($row instanceof Document)) ? $row->id: $row['id'];
 			if (!array_key_exists($id,$this->similar_ids))
 			{
 				$rendered_template=$template->render(array('item' => $row, 'control' => $this, 'count' => $this->count, 'total_count'=>$this->total_count));

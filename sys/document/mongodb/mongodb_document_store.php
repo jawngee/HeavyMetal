@@ -90,9 +90,14 @@ class MongodbDocumentStore extends DocumentStore
      */
     private function _update($document)
     {
+        if (!$document->pre_save(true))
+            return;
+
         $c=$this->collection($document->doc_collection);
         $c->update(array('id'=>$document->id),$document->to_array());
         $document->doc_state=Document::DOCUMENT_LIVE;
+        
+        $document->post_save(true);
     }
 
     /**
@@ -102,6 +107,9 @@ class MongodbDocumentStore extends DocumentStore
      */
     private function _save($document)
     {
+        if (!$document->pre_save(false))
+            return;
+
         $c=$this->collection($document->doc_collection);
         
         try
@@ -114,6 +122,7 @@ class MongodbDocumentStore extends DocumentStore
         }
 
         $document->doc_state=Document::DOCUMENT_LIVE;
+        $document->post_save(false);
     }
 
     /**
@@ -134,9 +143,14 @@ class MongodbDocumentStore extends DocumentStore
      */
     function remove($document)
     {
+        if (!$document->pre_delete())
+            return;
+
         $c=$this->collection($document->doc_collection);
         $c->remove(array('id'=>$document->id));
         $document->doc_state=Document::DOCUMENT_DELETED;
+
+        $document->post_delete();
     }
 
     /**

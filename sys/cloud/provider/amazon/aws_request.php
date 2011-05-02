@@ -6,7 +6,7 @@
  */
 
 uses('system.external.PEAR.HTTP.Request');
-uses('system.cloud.amazon.aws_exception');
+uses('system.cloud.provider.amazon.aws_exception');
 
 /**
  * Represents a simple db api request.
@@ -159,6 +159,8 @@ class AWSRequest
 			//@TODO: Add handling for different status codes
 			if ($request->getResponseCode()==200)
 				break;
+
+            vomit($request->getResponseBody());
 				
 			$misses++;
 			sleep($misses);

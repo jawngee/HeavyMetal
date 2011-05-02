@@ -1,5 +1,5 @@
 <?
-uses('system.data.message_queue');
+uses('system.cloud.queue.message_queue');
 uses('system.util.encrypt');
 
 class Message

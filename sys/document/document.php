@@ -97,7 +97,14 @@ class Document
      */
     public function __construct($id=null,$fields=null)
     {
-        $this->doc_db=DocumentStore::Get($this->doc_database);
+        try
+        {
+            $this->doc_db=DocumentStore::Get($this->doc_database);
+        }
+        catch(Exception $ex)
+        {
+            
+        }
         
         $props=get_object_vars($this);
         $props['_id']=($id) ? $id : uuid();
@@ -186,6 +193,44 @@ class Document
 
         if ($this->doc_state==Document::DOCUMENT_LIVE)
             $this->doc_state=Document::DOCUMENT_DIRTY;
+    }
+
+    /**
+     * Pre-save hook
+     * @param bool $updated Is this an update or a new save?
+     * @return bool
+     */
+    public function pre_save($updated=false)
+    {
+        return true;
+    }
+
+    /**
+     * Post-save hook
+     * @param bool $updated Is this an update or a new save?
+     * @return void
+     */
+    public function post_save($updated=false)
+    {
+
+    }
+
+    /**
+     * Pre-delete hook.
+     * @return bool
+     */
+    public function pre_delete()
+    {
+        return true;
+    }
+
+    /**
+     * Post-delete hook.
+     * @return void
+     */
+    public function post_delete()
+    {
+
     }
 
     /**

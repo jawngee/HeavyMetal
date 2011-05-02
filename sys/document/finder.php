@@ -198,7 +198,7 @@ abstract class Finder
      */
     public function first()
     {
-        $res=$this->find(0,1);
+        $res=$this->find();
         if (count($res)==0)
             return null;
 

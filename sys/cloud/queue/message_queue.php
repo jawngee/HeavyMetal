@@ -7,7 +7,7 @@ abstract class MessageQueue
 	 * Fetches a named database from the connection pool.
 	 *
 	 * @param string $name Name of the database to fetch from the connection pool.
-	 * @return Database The named database.
+	 * @return MessageQueue The named database.
 	 */
 	public static function GetQueue($name)
 	{
@@ -17,21 +17,19 @@ abstract class MessageQueue
 		{
 			$conf=Config::Get('cloud');
 
-			if (isset($conf->dsn->items[$name]))
+			if ($conf->queue->{$name}->dsn)
 			{
-				$dsn=$conf->dsn->items[$name]->queue;
+				$dsn=$conf->queue->{$name}->dsn;
 				
 				$matches=array();
 				if (preg_match_all('#([a-z]*)://([^@]*)@(.*)#',$dsn,$matches))
 				{
 					$driver=$matches[1][0];
-					$auth=$matches[2][0];
-					$secret=$matches[3][0];
 					
-					uses('system.cloud.driver.queue.'.$driver);
+					uses('sys.cloud.queue.'.$driver.'.'.$driver.'_message_queue');
 					
-					$class=$driver."Driver";
-					$mqueue=new $class($auth,$secret);
+					$class=$driver."MessageQueue";
+					$mqueue=new $class($dsn);
 					
 					self::$_mqueues[$name]=$mqueue;
 					return $mqueue;

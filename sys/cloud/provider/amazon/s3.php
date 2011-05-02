@@ -32,8 +32,8 @@
 * Amazon S3 is a trademark of Amazon.com, Inc. or its affiliates.
 */
 
-uses('system.cloud.amazon.aws_exception');
-uses('system.cloud.amazon.s3_request');
+uses('system.cloud.provider.amazon.aws_exception');
+uses('system.cloud.provider.amazon.s3_request');
 
 /**
 * Amazon S3 PHP class

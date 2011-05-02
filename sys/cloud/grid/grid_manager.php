@@ -28,9 +28,9 @@ abstract class GridManager
 					$auth=$matches[2][0];
 					$secret=$matches[3][0];
 					
-					uses('system.cloud.driver.grid.'.$driver);
+					uses('system.cloud.grid.'.$driver.'.'.$driver.'_grid_manager');
 					
-					$class=$driver."Driver";
+					$class=$driver."GridManager";
 					$mgr=new $class($auth,$secret);
 					
 					self::$_managers[$name]=$mgr;

@@ -31,9 +31,9 @@ abstract class StorageManager
 					$auth=$matches[2][0];
 					$secret=$matches[3][0];
 					
-					uses('system.cloud.driver.storage.'.$driver);
+					uses('system.cloud.storage.'.$driver.'.'.$driver.'_storage_manager');
 					
-					$class=$driver."Driver";
+					$class=$driver."StorageManager";
 					$storage=new $class($auth,$secret);
 					
 					self::$_managers[$name]=$storage;
