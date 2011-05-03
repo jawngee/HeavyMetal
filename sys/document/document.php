@@ -128,6 +128,9 @@ class Document
 
         if ($id!=null)
         {
+            if (is_numeric($id))
+                $id=(int)$id;
+            
             $res=$this->doc_db->query($this,array('_id'=>$id),null,0,0,false);
             if (count($res)==0)
                 throw new DocumentNotFoundException("Invalid document identifier: $id");
