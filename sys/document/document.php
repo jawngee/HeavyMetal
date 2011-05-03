@@ -35,6 +35,11 @@
 uses('sys.document.document_store');
 
 /**
+ * Exception for when a document cannot be found.
+ */
+class DocumentNotFoundException extends Exception {}
+
+/**
  * Represents a document within a document store such as MongoDB, etc.
  */
 class Document
@@ -121,6 +126,15 @@ class Document
             }
         }
 
+        if ($id!=null)
+        {
+            $res=$this->doc_db->query($this,array('_id'=>$id),null,0,0,false);
+            if (count($res)==0)
+                throw new DocumentNotFoundException("Invalid document identifier: $id");
+
+            $fields=$res[0];
+        }
+
         if ($fields!=null)
         {
             foreach($fields as $key=>$val)
@@ -140,11 +154,6 @@ class Document
                 }
             }
         }
-        else if ($id!=null)
-        {
-            
-        }
-
     }
     
 

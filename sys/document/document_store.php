@@ -96,6 +96,6 @@ abstract class DocumentStore
 
     abstract function save($document);
     abstract function remove($document);
-    abstract function query($document,$query,$sorts=null,$offset=0,$limit=0);
+    abstract function query($document,$query,$sorts=null,$offset=0,$limit=0,$reconstitute=false);
     abstract function count($document,$query);
 }

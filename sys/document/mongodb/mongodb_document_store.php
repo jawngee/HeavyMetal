@@ -147,7 +147,7 @@ class MongodbDocumentStore extends DocumentStore
             return;
 
         $c=$this->collection($document->doc_collection);
-        $c->remove(array('id'=>$document->id));
+        $c->remove(array('_id'=>$document->id));
         $document->doc_state=Document::DOCUMENT_DELETED;
 
         $document->post_delete();
@@ -184,16 +184,17 @@ class MongodbDocumentStore extends DocumentStore
      * @param null $sorts
      * @param int $offset
      * @param int $limit
+     * @param bool $reconstitute
      * @return array
      */
-    function query($document,$query,$sorts=null,$offset=0,$limit=0)
+    function query($document,$query,$sorts=null,$offset=0,$limit=0,$reconstitute=true)
     {
         $result=array();
         $res=$this->_query($document,$query,$sorts,$offset,$limit);
 
         foreach($res as $r)
         {
-            if (isset($r['__class']))
+            if (($reconstitute) && (isset($r['__class'])))
             {
                 $class=$r['__class'];
                 if (class_exists($class))
