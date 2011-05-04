@@ -61,11 +61,11 @@ abstract class Screen
 	{
 		$c=$controller->metadata->{$which};
 		$m=$method_meta->{$which};
-		
 		if (!$c) $c=new AttributeReader();
 		if (!$m) $m=new AttributeReader();
 		
 		$screens=$c->merge($m);
+
 		foreach($screens as $name=>$screen)
 		if (!$screen->ignore)
 		{

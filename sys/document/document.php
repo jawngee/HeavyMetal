@@ -280,7 +280,7 @@ class Document
 			else if ($value instanceof Document)
                 $result[$key]=$value->to_array();
             else if ($value instanceof ArrayObject)
-            	$result[$key]=$value->getArrayCopy();
+            	$result[$key]=Document::Flatten($value->getArrayCopy());
             else if (is_array($value))
             {
                 $result[$key]=Document::Flatten($value);
