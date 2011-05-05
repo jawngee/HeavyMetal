@@ -108,7 +108,6 @@ class Document
         }
         catch(Exception $ex)
         {
-            
         }
         
         $props=get_object_vars($this);

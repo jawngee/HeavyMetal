@@ -114,7 +114,6 @@ class MongodbDocumentStore extends DocumentStore
         
         try
         {
-            vomit($document->to_array());
         	$c->insert($document->to_array());
         } 
         catch (Exception $ex)
