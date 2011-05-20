@@ -3,4 +3,4 @@
 ./php5-mods.sh
 ./sqlite3.sh
 ./yaml.sh
-./mongo.sh
+./mongodb.sh
