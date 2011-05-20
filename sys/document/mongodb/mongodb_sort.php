@@ -37,7 +37,7 @@ uses('sys.document.sort');
 /**
  * Contains a sort order for a finder
  */
-class MongdbSort extends Sort
+class MongodbSort extends Sort
 {
     protected $asc_value='1';
     protected $desc_value='-1';

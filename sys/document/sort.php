@@ -77,7 +77,7 @@ class Sort
    			$this->direction=$this->desc_value;
    		else
    			throw new ModelException("Field '$prop_name' is an unknown sort order.");
-   		
+
    		return $this->finder;
    	}
 }

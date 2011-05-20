@@ -268,7 +268,7 @@ class Document
      * @param  $data
      * @return array
      */
-    private static function Flatten($data)
+    public static function Flatten($data)
     {
         $result=$data;
         
