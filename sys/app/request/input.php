@@ -112,7 +112,11 @@ final class Input extends DynamicObject
 	function exists()
 	{
 		$args=func_get_args();
-		
+
+        if ($args[0] instanceof ArrayAccess)
+            $args=$args[0];
+
+
 		foreach($args as $arg)
 			if (!isset($this->props[$arg]))
 				return false;
