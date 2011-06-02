@@ -185,4 +185,15 @@ class MongodbFinderField extends FinderField
 
         return $this->finder;
     }
+
+    public function near($loc,$distance=5)
+    {
+        $this->expr=array(
+            '$near' => $loc,
+            '$distance' => $distance
+        );
+
+        return $this->finder;
+    }
+
 }

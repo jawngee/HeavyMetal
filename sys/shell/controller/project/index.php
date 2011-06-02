@@ -57,9 +57,9 @@ class ProjectIndexController extends Controller
 		`ln -s $sys $nsys`;
 		
 		$mpath=$path.'/metal';
-		$mtarget='/usr/local/bin/'.$app;
+		$mtarget='/usr/local/bin/'.$app.'-cmd';
 		`sudo ln -s $mpath $mtarget`;
-		`sudo chmod a+x $mtarget`;
+		`sudo chmod g+x $mtarget`;
 		
 		echo "Done.\n";
 		
@@ -95,7 +95,7 @@ class ProjectIndexController extends Controller
 		}
 	
 		echo "\n";
-		echo "Your application has been created.  You can access it via the shell by typing '$app' followed by a command, or '$app commands/show' to display a list! \n";
+		echo "Your application has been created.  You can access it via the shell by typing '$app-cmd' followed by a command, or '$app-cmd commands/show' to display a list! \n";
 
 	}
 }

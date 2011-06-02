@@ -204,4 +204,13 @@ abstract class FinderField
      * @return Finder
      */
     abstract function not_exists();
+
+    /**
+     * Finds documents near location.
+     * 
+     * @param array $loc The location to search
+     * @param int $distance The distance in miles
+     * @return void
+     */
+    abstract function near($loc,$distance=5);
 }
