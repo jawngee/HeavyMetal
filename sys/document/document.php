@@ -135,6 +135,8 @@ class Document
                 throw new DocumentNotFoundException("Invalid document identifier: $id");
 
             $fields=$res[0];
+            $this->id=$id;
+            $this->doc_state=Document::DOCUMENT_LIVE;
         }
 
         if ($fields!=null)
@@ -155,6 +157,9 @@ class Document
                     $this->doc_fields[$key]=$val;
                 }
             }
+
+
+            $this->doc_state=Document::DOCUMENT_LIVE;
         }
     }
     

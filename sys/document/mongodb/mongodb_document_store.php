@@ -94,9 +94,9 @@ class MongodbDocumentStore extends DocumentStore
             return;
 
         $c=$this->collection($document->doc_collection);
-        $c->update(array('id'=>$document->id),$document->to_array());
+        $c->update(array('_id'=>$document->id),$document->to_array());
         $document->doc_state=Document::DOCUMENT_LIVE;
-        
+
         $document->post_save(true);
     }
 
