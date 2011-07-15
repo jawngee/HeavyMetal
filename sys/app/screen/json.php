@@ -24,7 +24,25 @@ class JSONScreen extends Screen
 	public function after($controller,$metadata,&$data)
 	{
 		$data=Model::Flatten($data);
-        echo json_encode($data);
-		die;
+        $res=json_encode($data);
+		
+        if ($metadata->hash)
+        {
+        	$salt='';
+        	
+        	if ($metadata->salt)
+        		$salt=$metadata->salt;
+        	else if ($metadata->app_id)
+        	{
+        		$app=Config::Get('apps');
+        		if ($app->{$metadata->app_id})
+        			$salt=$app->{$metadata->app_id}->key;
+        	}
+        	
+        	header('X-Hash: '.md5($res.$salt));
+        }
+        
+        echo $res;
+        die;
 	}
 }
