@@ -42,6 +42,7 @@ class JSONScreen extends Screen
         	header('X-Hash: '.md5($res.$salt));
         }
         
+        header('Content-Type: text/json');
         echo $res;
         die;
 	}
